@@ -3,7 +3,9 @@
 node_modules/
 .env
 
-
+#seeder
+modules/database/seeder/CSV
 
 # IDEs
 .vscode/
+.fleet/
