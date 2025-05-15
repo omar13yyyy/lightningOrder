@@ -1,0 +1,13 @@
+usage
+
+
+import { ServiceClient } from '../../../modules/http-client';
+
+const userService = new ServiceClient('http://user-service:4001');
+
+export async function getUserProfile(userId: string) {
+  return await userService.request({
+    method: 'GET',
+    url: `/users/${userId}`
+  });
+}

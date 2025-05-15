@@ -1,0 +1,30 @@
+{
+  "name": "backend",
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {},
+  "dependencies": {
+    "@faker-js/faker": "^9.7.0",
+    "@paralleldrive/cuid2": "^2.2.2",
+    "amqplib": "^0.10.8",
+    "axios": "^1.9.0",
+    "bcrypt": "^5.1.1",
+    "cors": "^2.8.5",
+    "csv-writer": "^1.6.0",
+    "cuid": "^3.0.0",
+    "dotenv": "^16.5.0",
+    "env": "^0.0.2",
+    "express": "^5.1.0",
+    "generic": "^0.1.1",
+    "generic-pool": "^3.9.0",
+    "geolib": "^3.3.4",
+    "jsonwebtoken": "^9.0.2",
+    "pg": "^8.15.6",
+    "redis": "^5.0.1",
+    "uuid": "^11.1.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.15.17",
+    "tsx": "^4.19.4"
+  }
+}
