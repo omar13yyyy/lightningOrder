@@ -7,10 +7,10 @@ import { storesController } from "./modules/stores/stores.controler";
 import express from 'express';
 export const visitorStoreRouter= express.Router()
 
-visitorStoreRouter.route('/getCategoryTags').post(storesController.getCategoryTag)
-visitorStoreRouter.route('/getStoreCategories').post(storesController.getStoreCategories)
-visitorStoreRouter.route('/getStoreProducts').post(storesController.getStoreProducts)
-visitorStoreRouter.route('/getCouponDetails').post(storesController.getCouponDetails)
+visitorStoreRouter.route('/getCategoryTags').get(storesController.getCategoryTag)
+visitorStoreRouter.route('/getStoreCategories').get(storesController.getStoreCategories)
+visitorStoreRouter.route('/getStoreProducts').get(storesController.getStoreProducts)
+visitorStoreRouter.route('/getCouponDetails').get(storesController.getCouponDetails)
 
 
 

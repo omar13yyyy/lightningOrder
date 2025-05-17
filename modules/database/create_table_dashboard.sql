@@ -136,7 +136,7 @@ CREATE TABLE store_transactions (
     store_id text,
     internal_store_id bigint ,
     transaction_type enum_store_transaction_type NOT NULL DEFAULT 'NULL',
-     --previous day without platform_commission
+     --without platform_commission
     amount DOUBLE PRECISION,
     transaction_date timestamp with time zone,
     notes text,
@@ -199,6 +199,8 @@ CREATE TABLE tags (
     tag_id bigserial,
     tag_name_ar text,
     tag_name_en text,
+    category_id text,
+
     PRIMARY KEY(tag_id)
 
 );

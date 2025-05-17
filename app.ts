@@ -11,10 +11,10 @@ dotenv.config()
   
   server()
 
-/*
+
 await seederGenerateCSV()
 
 await createDatabases()
 await seeder()
-*/
+/**/
 

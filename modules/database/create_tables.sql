@@ -379,6 +379,7 @@ CREATE TABLE store_tags (
     tag_id bigserial,
     store_id bigint,
     internal_store_id text,
+    category_id text
     PRIMARY KEY(tag_id)
 
 );
