@@ -14,6 +14,11 @@ getStoreCategories: async   (req, res)=>{
     res.send(result)
 }
 ,
+getWorkShifts: async   (req, res)=>{
+    const storeId = req.query.storeId; 
+    const result = await storesServices.getWorkingHoursServie(storeId);
+    res.send(result)
+},
 getStoreProducts: async   (req, res)=>{
     const ln = req.query.ln; 
     const storeId = req.query.storeId; 

@@ -61,6 +61,7 @@ export const customersServices = {
   confirmedCodeIsValidService: async (phoneNumber, code) => {
     return await userRepository.isValidCode(phoneNumber, code);
   },
+
   addRestConfirmationCodeService: async (phoneNumber) => {
     if ((await userRepository.isCustomerNumberUsed(phoneNumber))) {
       const codeString = Math.floor(1000 + Math.random() * 9000);

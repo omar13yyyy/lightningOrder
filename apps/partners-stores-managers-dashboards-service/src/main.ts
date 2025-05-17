@@ -9,6 +9,7 @@ export const visitorStoreRouter= express.Router()
 
 visitorStoreRouter.route('/getCategoryTags').get(storesController.getCategoryTag)
 visitorStoreRouter.route('/getStoreCategories').get(storesController.getStoreCategories)
+visitorStoreRouter.route('/getWorkShifts').get(storesController.getWorkShifts)
 visitorStoreRouter.route('/getStoreProducts').get(storesController.getStoreProducts)
 visitorStoreRouter.route('/getCouponDetails').get(storesController.getCouponDetails)
 

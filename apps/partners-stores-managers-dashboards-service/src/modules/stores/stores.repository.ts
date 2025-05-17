@@ -58,12 +58,35 @@ export const storesRepository = {
     //TODO : check order coupon if end
     //TODO : get round from setting
     const { rows, rowCount } = await query(
-      `select discount_value_percentage as products,min_order_value from coupons where code =$1 AND store_id = $2 AND expiration_date > now() AND
+      `select discount_value_percentage as discount_percentage,min_order_value from coupons where code =$1 AND store_id = $2 AND expiration_date > now() AND
          real_usage IS NULL OR max_usage IS NULL OR real_usage < max_usage `,
       [couponCode, storeId]
     );
     if (rowCount > 0) {
       return rows[0];
-    } else return {};
+    } 
   },
+  fetchWorkingHours : async (store_id) =>{
+    //TODO after login or first reques save token in redis
+    
+     const {rows} =await query(`SELECT 
+  json_object_agg(day_of_week, shifts) AS working_time
+FROM (
+  SELECT 
+    day_of_week,
+    json_agg(
+      json_build_object(
+        'opening_time', opening_time,
+        'closing_time', closing_time
+      )
+    ) AS shifts
+  FROM working_hours where store_id =$1
+  GROUP BY day_of_week
+) AS grouped;`,[
+    store_id
+
+     ])
+
+     return rows[0] 
+    }
 };
