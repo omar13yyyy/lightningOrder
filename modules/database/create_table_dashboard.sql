@@ -24,20 +24,14 @@ CREATE TYPE enum_user_type AS ENUM ( 'customer', 'store','partner', 'store_Payme
 CREATE TYPE enum_on_expense AS ENUM ( 'partner', 'our_company','both','NULL');
 CREATE TYPE enum_coupon_type AS ENUM ( 'personal', 'public','NULL');
 CREATE TYPE enum_partner_status AS ENUM ( 'available','blocked','NULL');
+CREATE TYPE enum_withdrawal_status AS ENUM ( 'new','wait','done','NULL');
 
+CREATE TYPE enum_withdrawal_user AS ENUM ( 'driver','partner','NULL');
 
 
 
 --For STORES and Partner
-CREATE TABLE statistics_previous_day (
-    store_id  bigint,
-    total_orders text,
-    total_revenue text,
-    average_delivery_time timestamp with time zone,
-    customers_visited integer,
-    last_updated_at timestamp with time zone,
-    UNIQUE("store_id")
-);
+
 CREATE TABLE customers_visited (
     visit_id bigint,
     customer_id bigint,
@@ -58,8 +52,10 @@ CREATE TABLE partners (
     email text,
     status enum_partner_status NOT NULL DEFAULT 'NULL',
     --previous day without platform_commission
+    -- بس يسحب مصاري نحسم منها
+    -- نحدثها بس يطلبها 
     wallet_balance DOUBLE PRECISION,
-    last_updated_at timestamp with time zone,
+    last_updated_wallet_at timestamp with time zone,
     PRIMARY KEY (partner_id),
     UNIQUE("user_name")
 );
@@ -117,12 +113,24 @@ CREATE TABLE IF NOT EXISTS public.role_permission
     create_at timestamp with time zone,
     PRIMARY KEY (id)
 );
+CREATE TABLE statistics_previous_day (
+    store_id  bigint,
+    total_orders text,
+    total_revenue text,
+    average_delivery_time timestamp with time zone,
+    customers_visited integer,
+    --previous day without platform_commission
+    balance_previous_day DOUBLE PRECISION,
+    --previous day platform_commission
+    platform_commission_balance_previous_day DOUBLE PRECISION,
+    last_updated_at timestamp with time zone,
+    UNIQUE("store_id")
+);
 
 CREATE TABLE store_wallets (
     store_id  text,
     internal_store_id bigint,
     partner_id bigint,
-        --previous day without platform_commission
 
     balance_previous_day DOUBLE PRECISION,
     last_updated_at timestamp with time zone,
@@ -131,14 +139,16 @@ CREATE TABLE store_wallets (
 );
 
 CREATE TABLE store_transactions (
-    transaction_id bigint,
+    transaction_id text,
     partner_id bigint,
     store_id text,
     internal_store_id bigint ,
     transaction_type enum_store_transaction_type NOT NULL DEFAULT 'NULL',
-     --without platform_commission
+    --without platform_commission
     amount DOUBLE PRECISION,
-    transaction_date timestamp with time zone,
+    --platform_commission
+    amount_platform_commission DOUBLE PRECISION,
+    transaction_at timestamp with time zone,
     notes text,
     PRIMARY KEY(transaction_id)
 
@@ -215,7 +225,9 @@ CREATE TABLE stores (
     email text,
     full_address text,
     status enum_store_status NOT NULL DEFAULT 'NULL',
-    category_id bigint,
+    internal_category_id bigint,
+    category_id text,
+
     min_order_price DOUBLE PRECISION,
     Latitude text,
     longitude text,
@@ -234,7 +246,7 @@ CREATE TABLE stores (
 
 );
 CREATE TABLE store_tags (
-    tag_id bigserial,
+    tag_id bigint,
     store_id text,
     internal_store_id bigint,
     PRIMARY KEY(tag_id)
@@ -243,9 +255,9 @@ CREATE TABLE store_tags (
 --Added
 
 CREATE TABLE category_tags (
-    tag_id bigserial,
-    category_id bigint,
-    category_store_id text,
+    tag_id bigint,
+    category_id text,
+    internal_category_id bigint ,
     PRIMARY KEY(tag_id)
 
 );
@@ -285,10 +297,11 @@ CREATE TABLE products_sold (
     size_name_en text,
     size_name_ar text,
     price DOUBLE PRECISION,
+
+
     full_price DOUBLE PRECISION,
     coupon_code text,
       PRIMARY KEY (create_at)
-      --TODO index in coupon_code 
 );
 
 --For Admin 
@@ -311,7 +324,25 @@ CREATE TABLE document_images (
     expired boolean 
 
 );
+CREATE TABLE withdrawal_document_images (
+    document_id bigserial,
+    partner_id bigint,
+    image_url text,
+    Withdrawal_id text,
+    uploaded_at timestamp with time zone,
+    expired boolean 
 
+);
+
+CREATE TABLE withdrawal_requests (
+    withdrawal_id text,
+    partner_id bigint,
+    withdrawal_status enum_withdrawal_status NOT NULL DEFAULT 'NULL',
+    withdrawal_user enum_withdrawal_user NOT NULL DEFAULT 'NULL',
+    uploaded_at timestamp with time zone,
+    expired boolean 
+
+);
 
 CREATE TABLE products (
     store_id text ,
