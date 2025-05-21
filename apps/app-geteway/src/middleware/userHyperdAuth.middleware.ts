@@ -1,19 +1,41 @@
-import jwt from 'jsonwebtoken';
+import jwt from 'jsonwebtoken'
+import {query} from '../../../../modules/database/commitCustomerSQL'
+//import {allService} from '../../allServices'
+export const userHyperdAuth= (req, res, next) => {
 
-export const userHyperdAuth = (req, res, next) => {
+  if(req.headers.authorization != undefined){
   const authHeader = req.headers.authorization;
-console.log(authHeader)
-  if (!authHeader || !authHeader.startsWith('Bearer ')) {
-    return res.status(401).send({ message: 'Unauthorized: Missing or invalid token' });
-  }
 
-  const token = authHeader.split(' ')[1]; // احصل على التوكن بعد Bearer
+  if(req.headers.authorization != undefined){
+  const bearer =req.headers.authorization.split(' ')
+  const authHeader = bearer[1];
+    if (!authHeader) {
+    return res.status(401).send({ message: 'Unauthorized' });
+  } 
 
-  try {
-    const decoded = jwt.verify(token, process.env.TOKEN_SECRET_USER);
-    req.userId = decoded.id; // أو أي شيء آخر تحتاجه من التوكن
-    next(); // تابع التنفيذ
-  } catch (err) {
-    return res.status(403).send({ message: 'Invalid or expired token' });
+       var userId
+
+      jwt.verify(authHeader, process.env.TOKEN_SECRET_USER, (error, decoded) => {
+       userId = decoded.id; 
+      // role = decoded.role; 
+     // let result = allService.allUserService.userServiceGetCustomerTokenById()
+      //console.log(result)
+     /* if(result.token ===bearer[1] ){
+        req.userId = userId;
+        next(); 
+      
+      }*/
+
+        
+
+    }); 
   }
-};
+  return res.status(401).send({ message: 'Unauthorized' });
+
+
+  ;
+}
+}
+ 
+
+

@@ -1,4 +1,5 @@
 import {AllpartnersService} from '../partners-stores-managers-dashboards-service/index'
+
 export const partnerClient ={
 
      geInfoByStoreIds: async (partnerId: string) => {
@@ -6,3 +7,5 @@ export const partnerClient ={
   }
 
 }
+
+

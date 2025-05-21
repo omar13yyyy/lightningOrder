@@ -1,0 +1,12 @@
+
+# Node.js
+node_modules/
+.env
+package-lock.json
+
+#seeder
+modules/database/seeder/CSV
+
+# IDEs
+.vscode/
+.fleet/

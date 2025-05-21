@@ -8,9 +8,13 @@ export function createDbPool(poolParams: PoolConfig) {
     async query(text: string, params?: any[]) {
       try {
         const  { rows,rowCount } = await pool.query(text, params);
+
+        console.error('params :', { params });
+
         console.log('Executed query:', { text });
         return { rows,rowCount } ;
       } catch (err) {
+        console.error('params :', { params });
         console.error('Error executing query:', { text });
         throw err;
       }

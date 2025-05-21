@@ -3,12 +3,9 @@ import { createObjectCsvWriter } from "csv-writer";
 
 import { faker as fakerEN } from "@faker-js/faker";
 import { fakerAR as faker } from "@faker-js/faker";
-import bcryptjs from "bcryptjs";
 import { fileURLToPath } from 'url';
 import path, { dirname } from 'path';
-
-
-
+import bcrypt from 'bcryptjs'
 export async function seederGenerateCSV(){
 
 
@@ -161,7 +158,7 @@ async function generateCustomer(id, address) {
     full_name: faker.person.fullName(),
     phone_number: faker.phone.number({style:"international"}),
     email: faker.internet.email(),
-    encrypted_password: await bcryptjs.hash("1234567890", 10),
+    encrypted_password: await bcrypt.hash("1234567890", 10),
     is_confirmed: faker.datatype.boolean(),
     birth_date: faker.date
       .birthdate({ min: 18, max: 60, mode: "age" })
@@ -203,7 +200,7 @@ async function generateDriver(id, userName) {
     bank_name: faker.company.name(),
     iban: faker.finance.iban(),
     user_name: userName,
-    encrypted_password: await bcryptjs.hash("1234567890", 10),
+    encrypted_password: await bcrypt.hash("1234567890", 10),
   });
 }
 
@@ -236,7 +233,7 @@ async function generatePartner(id, userName) {
     company_name_ar: faker.company.name(),
     company_name_en: fakerEN.company.name(),
     user_name: userName,
-    encrypted_password: await bcryptjs.hash("1234567890", 10),
+    encrypted_password: await bcrypt.hash("1234567890", 10),
     bank_name: faker.company.name(),
     iban: faker.finance.iban(),
     email: faker.internet.email(),
@@ -255,7 +252,7 @@ function generateStoreCategory(id, uuid) {
     category_id: uuid,
     internal_id: id,
     category_name_ar: faker.commerce.department(),
-    category_name_en: faker.commerce.department(),
+    category_name_en: fakerEN.commerce.department(),
     category_image: "/images/test/public/logo.jpg",
   });
 }
@@ -264,11 +261,14 @@ function generateStoreCategory(id, uuid) {
 
 //---Array---
 const tagsArray :any = [];
-function generatetag(id) {
+function generateTag(id,category_id) {
   tagsArray.push({
     tag_id: id,
-    tag_name_ar: faker.food.ethnicCategory(),
+    // no arabic food.ethnicCategory
+    tag_name_ar: faker.commerce.department(),
     tag_name_en: fakerEN.food.ethnicCategory(),
+        category_id :category_id 
+
   });
 }
 
@@ -330,7 +330,7 @@ async function generateStore(id, userName, uuid, partnerId,full_address) {
     platform_commission: faker.number.float({ min: 0, max: 1 }),
     orders_type: randomEnum(enumOrdersTypes),
     user_name: userName,
-    encrypted_password: await bcryptjs.hash("1234567890", 10),
+    encrypted_password: await bcrypt.hash("1234567890", 10),
     trend_id: faker.string.uuid(),
   });
 }
@@ -824,7 +824,7 @@ function generateJsonbDataEnAr(ln, uuidObject) {
     return category;
   }
 
-  function generateJsonItembDataEnAr(sizes, category_id) {
+  function generateJsonItembDataEnAr(sizes, categoryArray) {
     let item_id = uuidObject.uniqueUUID[uuidObject.lastUUID];
     uuidObject.lastUUID++;
     let items_name = faker.food.dish();
@@ -844,6 +844,7 @@ function generateJsonbDataEnAr(ln, uuidObject) {
       allergens = ["a", "bbbab"];
       internal_item_id = fakerEN.number.int();
     }
+    const category_id = categoryArray[faker.number.int({ min: 0, max: categoryArray.length-1 })].category_id
     let item = {
       item_id: item_id,
       internal_item_id: internal_item_id,
@@ -862,7 +863,7 @@ function generateJsonbDataEnAr(ln, uuidObject) {
     return item;
   }
 
-  function generateJsonSizebDataEnAr(modifiers_id_array) {
+  function generateJsonSizebDataEnAr(modifiers_array) {
     let size_id = uuidObject.uniqueUUID[uuidObject.lastUUID];
     uuidObject.lastUUID++;
     let size_index = faker.number.int({
@@ -879,9 +880,12 @@ function generateJsonbDataEnAr(ln, uuidObject) {
       max: 100000,
     });
 
-    const size_order = [,];
     if (ln == "en") {
-      let size_name = enum_sizes_en[size_index];
+       size_name = enum_sizes_en[size_index];
+    }
+    const modifiers_id_array:any[] = []      
+    for(let i = 0 ;i<modifiers_array.length;i++){
+     modifiers_id_array.push( modifiers_array[i].modifiers_id)
     }
     let size = {
       size_id: size_id,
@@ -889,10 +893,11 @@ function generateJsonbDataEnAr(ln, uuidObject) {
       calories: calories,
       price: size_price,
       modifiers_id: modifiers_id_array,
-      order: size_order,
+      order: faker.number.int(),
     };
+    return size
   }
-  function generateJsonModifierbDataEnAr(modifier_items) {
+  function generateJsonModifierbDataEnAr(modifierItemsArray) {
     let modifier_id = uuidObject.uniqueUUID[uuidObject.lastUUID];
     uuidObject.lastUUID++;
 
@@ -927,7 +932,7 @@ function generateJsonbDataEnAr(ln, uuidObject) {
       type: modifier_name_type,
       min: modifier_name_min,
       max: modifier_name_max,
-      items: modifier_items,
+      items: modifierItemsArray,
     };
 
     return modifier;
@@ -966,20 +971,22 @@ function generateJsonbDataEnAr(ln, uuidObject) {
     return item;
   }
 
-  let modifiersArray :any = [];
+  let modifierItemsArray :any = [];
   let categoriesCount = faker.number.int({ min: 1, max: 10 });
   let itemsCount = faker.number.int({ min: 0, max: 10 });
   let modifiersCount = faker.number.int({ min: 0, max: 5 });
+    let modifierArray :any = [];
 
   for (let mc = 0; mc < modifiersCount; mc++) {
-    let modifier_items :any = [];
     let modifierItemsCount = faker.number.int({ min: 1, max: 5 });
     for (let mic = 0; mic < modifierItemsCount; mic++) {
-      let modifier_item = generateJsonModifierbDataEnAr(modifier_items);
-      modifier_items.push(modifier_item);
+
+   
+    let modifierItem = generateJsonModifierItembDataEnAr();
+    modifierItemsArray.push(modifierItem);
     }
-    let modifiers = generateJsonModifierItembDataEnAr();
-    modifiersArray.push(modifiers);
+      let modifier_item = generateJsonModifierbDataEnAr(modifierItemsArray);
+      modifierArray.push(modifier_item);
   }
   let categoriesArray :any = [];
 
@@ -994,16 +1001,16 @@ function generateJsonbDataEnAr(ln, uuidObject) {
     let sizesCout = faker.number.int({ min: 0, max: 4 });
     let size = [];
     for (let sc = 0; sc < sizesCout; sc++) {
-      let size = generateJsonSizebDataEnAr(modifiersArray);
+      let size = generateJsonSizebDataEnAr(modifierArray);
       sizesArray.push(size);
     }
-    let items = generateJsonItembDataEnAr(categoriesArray, size);
-    itemsArray.push(size);
+    let items = generateJsonItembDataEnAr(sizesArray,categoriesArray);
+    itemsArray.push(items);
   }
   let store = {
     category: categoriesArray,
     items: itemsArray,
-    modifiers: modifiersArray,
+    modifiers: modifierArray,
   };
   return JSON.stringify(store);
 }
@@ -1048,7 +1055,7 @@ function storeCategoriesMultigenerator(count, uuidObject) {
 
 function tagsMultigenerator(count) {
   for (let i = 1; i < count + 1; i++) {
-    generatetag(i);
+    generateTag(i,faker.helpers.arrayElement(categoryTagsArray));
   }
 }
 async function customersMultigenerator(count) {
@@ -1504,4 +1511,70 @@ saveToCSV(
   customersVisitedArray,
   Object.keys(customersVisitedArray[0])
 );
+
+
+
+
 }
+//---------------------------------------------------------------------------------------------------------
+/*
+const generator = new BuidGenerator();
+generator.initFakeCharJumps();
+generator.configBuid();
+const buid = generator.getBuid();
+const storeCategoriesArrayTestBuid :any = [];
+function generateStoreCategoryTestBuid(id, uuid) {
+  storeCategoriesArrayTestBuid.push({
+    category_id: uuid,
+    internal_id: id,
+    category_name_ar: faker.commerce.department(),
+    category_name_en: faker.commerce.department(),
+    category_image: "/images/test/public/logo.jpg",
+  });
+}
+const storeCategoriesArrayTestCuid :any = [];
+function generateStoreCategoryTestCuid(id, uuid) {
+  storeCategoriesArrayTestCuid.push({
+    category_id: uuid,
+    internal_id: id,
+    category_name_ar: faker.commerce.department(),
+    category_name_en: faker.commerce.department(),
+    category_image: "/images/test/public/logo.jpg",
+  });
+}
+function storeCategoriesMultigeneratorTest1() {
+  for (let i = 1; i < 10000 + 1; i++) {
+    const buid = generator.getBuid();
+
+    generateStoreCategoryTestBuid (i,buid)
+    generateStoreCategoryTestCuid (i,createId())
+  }
+}
+storeCategoriesMultigeneratorTest1()
+saveToCSV(
+  "store_categories_buid",
+  storeCategoriesArrayTestBuid,
+  Object.keys(storeCategoriesArrayTestBuid[0])
+);
+
+saveToCSV(
+  "store_categories_cuid",
+  storeCategoriesArrayTestCuid,
+  Object.keys(storeCategoriesArrayTestCuid[0])
+);
+
+}
+
+const generator = new BuidGenerator();
+generator.initFakeCharJumps();
+generator.configBuid();
+const buid = generator.getBuid();
+const uuids :any = [];
+for (let i = 0; i < 10000000; i++) {
+  uuids.push(generator.getBuid());
+}
+
+fs.writeFileSync('Buids.txt', uuids.join('\n'));
+
+
+*/

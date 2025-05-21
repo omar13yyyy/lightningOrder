@@ -9,7 +9,9 @@ enum_payment_method , CASCADE;
 
 
 CREATE TYPE enum_payment_method AS ENUM ( 'cach','online','wallet','wallet_and_cach','wallet_and_online','NULL');
-CREATE TYPE enum_order_status AS ENUM ( 'accepted', 'rejected','with_driver', 'delivered','returned','NULL');
+CREATE TYPE enum_order_status AS ENUM ( 'accepted', 'rejected','with_driver','delivered','customer_not_Received',"driver_not_Received",'NULL');
+CREATE TYPE enum_orders_type AS ENUM ( 'take_away','delivery','NULL');
+
 
 
 
@@ -32,38 +34,39 @@ CREATE TABLE current_orders (
     internal_id bigint,
     customer_id bigint,
     store_id text,
+    store_name text,
     internal_store_id bigint,
     driver_id bigint,
     amount DOUBLE PRECISION,
     order_details_text text,--with details of locations
     created_at timestamp with time zone,
     payment_method enum_payment_method NOT NULL DEFAULT 'NULL',
+    orders_type enum_orders_type NOT NULL DEFAULT 'NULL',
     location_latitude DOUBLE PRECISION,
     location_longitude DOUBLE PRECISION,
     delivery_fee DOUBLE PRECISION,
     coupon_code text,
-  PRIMARY KEY (internal_id)
-
+    PRIMARY KEY (internal_id)
 );
 
 CREATE TABLE order_status (
     order_id text,
-    store_internal_id bigint,
     status enum_order_status NOT NULL DEFAULT 'NULL',
     status_time timestamp with time zone
 
 );
 
 CREATE TABLE order_financial_logs (
-
     log_id text,
-    store_internal_id bigint,
     driver_id bigint,
     order_id text,
+    --TODO Add to seeder
+    store_id text,
+    --wiht platform_commission
+    order_amount DOUBLE PRECISION,
     platform_commission DOUBLE PRECISION CHECK (platform_commission >= 0 AND platform_commission <= 1),
     driver_earnings DOUBLE PRECISION,
-    log_date timestamp with time zone
-
+    create_at timestamp with time zone
 );
 --Beware of repetition order_id and downt copy internal_id
 CREATE TABLE past_orders (
@@ -77,6 +80,7 @@ CREATE TABLE past_orders (
     amount DOUBLE PRECISION,
     created_at timestamp with time zone,
     payment_method enum_payment_method NOT NULL DEFAULT 'NULL',
+    orders_type enum_orders_type NOT NULL DEFAULT 'NULL',
     location_latitude DOUBLE PRECISION,
     location_longitude DOUBLE PRECISION,
     delivery_fee DOUBLE PRECISION,

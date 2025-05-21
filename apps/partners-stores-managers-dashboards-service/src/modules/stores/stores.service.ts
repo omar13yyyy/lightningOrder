@@ -13,6 +13,10 @@ export const  storesServices = {
         return await storesRepository.fetchStoreProduct(ln,storeId)
     },
     getCouponDetailsService  : async (couponCode,storeId)=>{
-        return await storesRepository.fetchCouponStore(couponCode,storeId)
+        const copounDetails = await storesRepository.fetchCouponStore(couponCode,storeId)
+        return copounDetails
     },
+        getWorkingHoursServie: async (storeId) => {
+    return await storesRepository.fetchWorkingHours(storeId);
+  },
 }
