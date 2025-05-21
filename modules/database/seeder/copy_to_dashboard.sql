@@ -21,6 +21,9 @@ COPY address FROM '/home/omar/project3/coding/backend/modules/database/seeder/CS
 COPY coupons FROM '/home/omar/project3/coding/backend/modules/database/seeder/CSV/coupons.csv' DELIMITER ',' CSV HEADER;
 COPY partners FROM '/home/omar/project3/coding/backend/modules/database/seeder/CSV/partners.csv' DELIMITER ',' CSV HEADER;
 COPY statistics_previous_day FROM '/home/omar/project3/coding/backend/modules/database/seeder/CSV/statistics_previous_day.csv' DELIMITER ',' CSV HEADER;
+COPY withdrawal_requests FROM '/home/omar/project3/coding/backend/modules/database/seeder/CSV/withdrawal_requests.csv' DELIMITER ',' CSV HEADER;
+COPY withdrawal_document_images FROM '/home/omar/project3/coding/backend/modules/database/seeder/CSV/withdrawal_document_images.csv' DELIMITER ',' CSV HEADER;
+
 
 
 

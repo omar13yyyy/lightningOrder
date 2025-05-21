@@ -10,8 +10,8 @@ export function createDbPool(poolParams: PoolConfig) {
         const  { rows,rowCount } = await pool.query(text, params);
 
         console.error('params :', { params });
-
         console.log('Executed query:', { text });
+        
         return { rows,rowCount } ;
       } catch (err) {
         console.error('params :', { params });

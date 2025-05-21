@@ -6,12 +6,13 @@ DROP TABLE IF EXISTS coupons,
 products_sold,daily_statistics,document_images,products,store_ratings_previous_day
 ,store_categories,store_tags,stores,trends,system_settings,tags,working_hours,
 public.roles,public.permisions,store_transactions,store_wallets,customers_visited
-,public.role_permission,public.admins,address,partners,statistics_previous_day,category_tags;
+,public.role_permission,public.admins,address,partners,statistics_previous_day,category_tags
+,withdrawal_document_images,withdrawal_requests;
 
 
 DROP TYPE IF EXISTS enum_store_transaction_type ,enum_day_of_week,enum_store_status,
 enum_orders_type,enum_user_type,enum_on_expense,enum_coupon_type,
-enum_partner_status, CASCADE;
+enum_partner_status,enum_withdrawal_user,enum_withdrawal_status CASCADE;
 
 
 
@@ -327,8 +328,10 @@ CREATE TABLE document_images (
 );
 CREATE TABLE withdrawal_document_images (
     document_id bigserial,
-    partner_id bigint,
-    image_url text,
+    userId bigint,
+    document_description text,
+   user_type enum_withdrawal_user NOT NULL DEFAULT 'NULL',
+   image_url text,
     Withdrawal_id text,
     uploaded_at timestamp with time zone,
     expired boolean 
@@ -341,7 +344,7 @@ CREATE TABLE withdrawal_requests (
     withdrawal_status enum_withdrawal_status NOT NULL DEFAULT 'NULL',
     withdrawal_user enum_withdrawal_user NOT NULL DEFAULT 'NULL',
     uploaded_at timestamp with time zone,
-    expired boolean 
+    done boolean 
 
 );
 
@@ -356,6 +359,64 @@ CREATE TABLE products (
 );
 
 
+
+-- FUNCTION: public.get_store_wallet_balance(text)
+
+-- DROP FUNCTION IF EXISTS public.get_store_wallet_balance(text);
+
+CREATE OR REPLACE FUNCTION public.get_store_wallet_balance(
+  p_store_id text)
+    RETURNS double precision
+    LANGUAGE 'plpgsql'
+    COST 100
+    VOLATILE PARALLEL UNSAFE
+AS $BODY$
+DECLARE
+    previous_balance       DOUBLE PRECISION;
+    last_update            TIMESTAMP WITH TIME ZONE;
+    total_credit           DOUBLE PRECISION;
+    total_debit            DOUBLE PRECISION;
+    current_balance        DOUBLE PRECISION;
+    max_transaction_date   TIMESTAMP WITH TIME ZONE;
+BEGIN
+    -- احصل على الرصيد السابق وآخر وقت تحديث مع قفل السطر لضمان التزامن
+    SELECT balance_previous_day, last_updated_at
+    INTO previous_balance, last_update
+    FROM store_wallets
+    WHERE store_id = p_store_id
+    FOR UPDATE;
+
+    -- اجمع القيم وحدد أعلى تاريخ ترانزكشن في نفس الاستعلام
+    SELECT
+        COALESCE(SUM(amount) FILTER (WHERE transaction_type = 'deposit'), 0),
+        COALESCE(SUM(amount) FILTER (WHERE transaction_type IN ('withdraw', 'discount')), 0),
+        MAX(transaction_date)
+    INTO total_credit, total_debit, max_transaction_date
+    FROM store_transactions
+    WHERE store_id = p_store_id
+      AND transaction_date > last_update;
+
+    -- احسب الرصيد الجديد
+    current_balance := previous_balance + total_credit - total_debit;
+
+    -- إذا ما في معاملات جديدة، نخلي وقت التحديث كما هو
+    IF max_transaction_date IS NULL THEN
+        max_transaction_date := last_update;
+    END IF;
+
+    -- حدّث جدول store_wallets بالرّصيد والتاريخ الجديد
+    UPDATE store_wallets
+    SET balance_previous_day = current_balance,
+        last_updated_at = max_transaction_date
+    WHERE store_id = p_store_id;
+
+    -- أرجع الرصيد الجديد
+    RETURN current_balance;
+END;
+$BODY$;
+
+ALTER FUNCTION public.get_store_wallet_balance(text)
+    OWNER TO postgres;
 
 
 

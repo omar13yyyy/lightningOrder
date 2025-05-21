@@ -4,12 +4,12 @@ DROP TABLE IF EXISTS current_orders ,order_status,order_financial_logs,
 past_orders,ratings,electronic_payment;
 
 DROP TYPE IF EXISTS  enum_order_status, 
-enum_payment_method , CASCADE;
+enum_payment_method,enum_orders_type , CASCADE;
 
 
 
 CREATE TYPE enum_payment_method AS ENUM ( 'cach','online','wallet','wallet_and_cach','wallet_and_online','NULL');
-CREATE TYPE enum_order_status AS ENUM ( 'accepted', 'rejected','with_driver','delivered','customer_not_Received',"driver_not_Received",'NULL');
+CREATE TYPE enum_order_status AS ENUM ( 'accepted', 'rejected','with_driver','delivered','customer_not_Received','driver_not_Received','NULL');
 CREATE TYPE enum_orders_type AS ENUM ( 'take_away','delivery','NULL');
 
 
@@ -34,7 +34,8 @@ CREATE TABLE current_orders (
     internal_id bigint,
     customer_id bigint,
     store_id text,
-    store_name text,
+    store_name_ar text,
+    store_name_en text,
     internal_store_id bigint,
     driver_id bigint,
     amount DOUBLE PRECISION,
@@ -51,6 +52,7 @@ CREATE TABLE current_orders (
 
 CREATE TABLE order_status (
     order_id text,
+    store_id bigint,
     status enum_order_status NOT NULL DEFAULT 'NULL',
     status_time timestamp with time zone
 
@@ -74,6 +76,8 @@ CREATE TABLE past_orders (
     internal_id bigint ,
     customer_id bigint,
     store_id text,
+    store_name_ar text,
+    store_name_en text,
     internal_store_id bigint,
     driver_id bigint,
     order_details_text text,
