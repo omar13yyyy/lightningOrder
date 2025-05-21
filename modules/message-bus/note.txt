@@ -1,0 +1,43 @@
+مثال عن التواصل 
+[order-service]
+    ⇩  (publish order.created)
+[RabbitMQ Queue]
+    ⇩  (consume)
+[delivery-service]
+
+
+
+
+
+🟡 apps/order-service/src/main.ts
+
+import { connectRabbitMQ, publish } from '../../../modules/message-bus';
+
+async function start() {
+  await connectRabbitMQ();
+
+  // مثال: إرسال حدث بعد إنشاء طلب
+  publish('order.created', { orderId: '123', userId: '456' });
+
+  // ... بدء السيرفر
+}
+start();
+
+
+
+
+-------------------------------------------------------------------------
+
+🟢 apps/delivery-service/src/main.ts
+
+import { subscribe } from '../../../modules/message-bus';
+
+async function start() {
+  await subscribe('order.created', (data) => {
+    console.log('[Delivery] Received order.created:', data);
+    // مثال: توليد مهمة توصيل...
+  });
+
+  // ... بدء السيرفر
+}
+start();

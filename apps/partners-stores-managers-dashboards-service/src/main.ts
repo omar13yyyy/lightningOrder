@@ -1,0 +1,54 @@
+/*
+export const services = { fun1, fun2 };
+
+*/
+//import { userHyperdAuth } from '../../app-geteway/src/middleware/userHyperdAuth.middleware';
+
+import { storesController } from "./modules/stores/stores.controler";
+import { partnersController } from "./modules/partners/partners.controler";
+import express from 'express';
+import { get } from "http";
+import checkStoreOwnership from "../../app-geteway/src/middleware/checkStoreOwnership";
+export const visitorStoreRouter= express.Router()
+export const partnerRouter= express.Router()
+
+
+visitorStoreRouter.route('/getCategoryTags').post(storesController.getCategoryTag)
+visitorStoreRouter.route('/getStoreCategories').post(storesController.getStoreCategories)
+visitorStoreRouter.route('/getStoreProducts').post(storesController.getStoreProducts)
+visitorStoreRouter.route('/getCouponDetails').post(storesController.getCouponDetails)
+
+partnerRouter.route('/partnerLogin').post(partnersController.partnerLogin)
+//partnerRouter.use(userHyperdAuth);
+partnerRouter.route('/partnergetAllStors').get(partnersController.partnergetAllStores)
+partnerRouter.route('/partnerInfo').get(partnersController.partnerInfo)
+
+partnerRouter.route('/partnergetAllStores').get(partnersController.partnergetAllStores)
+partnerRouter.route('/bestSeller').get(partnersController.bestSeller)
+partnerRouter.route('/profile').get(partnersController.profile)
+partnerRouter.route('/changeStoreState').post(partnersController.changeStoreState)
+partnerRouter.route('/getStoreProfile').post(partnersController.getStoreProfile)
+
+//partnerRouter.route('/getCurrentStatistics').get(partnersController.getCurrentStatistics)
+
+
+
+
+
+/*
+join in json
+
+{
+let partners = select partners where id = 1
+
+let store = select store where partner_id = 1
+
+stores.map(store => ({
+    ...store
+    patner: patner.find (p=>p.id == store.partner_id)
+
+
+}))
+}
+
+*/
