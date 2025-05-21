@@ -128,7 +128,7 @@ CREATE TABLE statistics_previous_day (
 );
 
 CREATE TABLE store_wallets (
-    store_id  text,ا بتشيليو هاد و يلي تحتو ليصير لكل شريك و وقتا بدكن تتذكرو تحدثو كمان مع كل طلب 
+    store_id  text,--ا بتشيليو هاد و يلي تحتو ليصير لكل شريك و وقتا بدكن تتذكرو تحدثو كمان مع كل طلب 
     internal_store_id bigint,
     partner_id bigint,
 
