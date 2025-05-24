@@ -117,7 +117,7 @@ CREATE TABLE IF NOT EXISTS public.role_permission
 CREATE TABLE statistics_previous_day (
     store_id  text,
     total_orders bigint,
-    total_revenue bigint,
+    total_revenue DOUBLE PRECISION,,
     average_delivery_time timestamp with time zone,
     customers_visited integer,
     --previous day without platform_commission
