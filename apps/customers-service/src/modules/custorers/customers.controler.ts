@@ -7,7 +7,9 @@ export const customersController ={
     const token =await  customersServices.loginService(number,password);
 
     if(token!=null)
-        res.send({"token" : token})
+        
+                res.send({token: token,
+               massage : "Done"  })
     else
     res.status(401).send('The phone number or password is incorrect.');
 } ,
@@ -19,7 +21,7 @@ customerRegister : async    (req, res)=>{
 
     if(token != null){
 
-                res.send({"token" : token,
+                res.send({token : token,
                massage : "Done"  })
     }
 

@@ -13,16 +13,15 @@ export const visitorStoreRouter= express.Router()
 export const partnerRouter= express.Router()
 
 
-visitorStoreRouter.route('/getCategoryTags').post(storesController.getCategoryTag)
-visitorStoreRouter.route('/getStoreCategories').post(storesController.getStoreCategories)
-visitorStoreRouter.route('/getStoreProducts').post(storesController.getStoreProducts)
-visitorStoreRouter.route('/getCouponDetails').post(storesController.getCouponDetails)
+visitorStoreRouter.route('/getCategoryTags').get(storesController.getCategoryTag)
+visitorStoreRouter.route('/getStoreCategories').get(storesController.getStoreCategories)
+visitorStoreRouter.route('/getStoreProducts').get(storesController.getStoreProducts)
+visitorStoreRouter.route('/getCouponDetails').get(storesController.getCouponDetails)
 
 partnerRouter.route('/partnerLogin').post(partnersController.partnerLogin)
 //partnerRouter.use(userHyperdAuth);
 partnerRouter.route('/partnergetAllStors').get(partnersController.partnergetAllStores)
 partnerRouter.route('/partnerInfo').get(partnersController.partnerInfo)
-
 partnerRouter.route('/partnergetAllStores').get(partnersController.partnergetAllStores)
 partnerRouter.route('/bestSeller').get(partnersController.bestSeller)
 partnerRouter.route('/profile').get(partnersController.profile)

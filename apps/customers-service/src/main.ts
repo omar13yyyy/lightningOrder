@@ -1,6 +1,6 @@
 
 //import auth from '../middleware/auth.middleware';
-import { customersController } from "./modules/custorers/custorers.controler";
+import { customersController } from "./modules/custorers/customers.controler";
 import express from 'express';
 export const visitorCustomerRouter= express.Router()
 import {userHyperdAuth} from '../../app-geteway/src/middleware/userHyperdAuth.middleware'
