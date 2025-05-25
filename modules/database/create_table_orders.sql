@@ -2,36 +2,29 @@ BEGIN;
 
 DROP TABLE IF EXISTS current_orders ,order_status,order_financial_logs,
 past_orders,ratings,electronic_payment;
-
-DROP TYPE IF EXISTS  enum_order_status, 
-enum_payment_method,enum_orders_type , CASCADE;
+--CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
 
+    CREATE TABLE ratings (
+        order_id text,
+        --TODO :change name to 
+        internal_order_id bigint,
+        --TODO add store is
+        internal_store_id bigint,
+        customer_id bigint,
+        driver_rating integer CHECK (driver_rating >= 1 AND driver_rating <= 5),
+        order_rating integer  CHECK (order_rating >= 1 AND order_rating <= 5),
+        comment text,
+        rating_at timestamp with time zone,
+        PRIMARY KEY(order_id)
 
-CREATE TYPE enum_payment_method AS ENUM ( 'cach','online','wallet','wallet_and_cach','wallet_and_online','NULL');
-CREATE TYPE enum_order_status AS ENUM ( 'accepted', 'rejected','with_driver','delivered','customer_not_Received','driver_not_Received','NULL');
-CREATE TYPE enum_orders_type AS ENUM ( 'take_away','delivery','NULL');
-
-
-
-
-CREATE TABLE ratings (
-    order_id text,
-    enternal_order_id bigint,
-
-    customer_id bigint,
-    driver_rating integer CHECK (driver_rating >= 1 AND driver_rating <= 5),
-    order_rating integer  CHECK (order_rating >= 1 AND order_rating <= 5),
-    comment text,
-    rating_at timestamp with time zone,
-    PRIMARY KEY(order_id)
-
-);
+    );
 
 --Rejected applications and those without drivers do not enter here.
 CREATE TABLE current_orders ( 
     order_id text ,
     internal_id bigint,
+    --customer_id added
     customer_id bigint,
     store_id text,
     store_name_ar text,
@@ -45,6 +38,9 @@ CREATE TABLE current_orders (
     orders_type enum_orders_type NOT NULL DEFAULT 'NULL',
     location_latitude DOUBLE PRECISION,
     location_longitude DOUBLE PRECISION,
+    --TODO add store_destination,customer_destination
+    store_destination DOUBLE PRECISION,
+    customer_destination DOUBLE PRECISION,
     delivery_fee DOUBLE PRECISION,
     coupon_code text,
     PRIMARY KEY (internal_id)
@@ -87,6 +83,9 @@ CREATE TABLE past_orders (
     orders_type enum_orders_type NOT NULL DEFAULT 'NULL',
     location_latitude DOUBLE PRECISION,
     location_longitude DOUBLE PRECISION,
+    --TODO add store_destination,customer_destination
+    store_destination DOUBLE PRECISION,
+    customer_destination DOUBLE PRECISION,
     delivery_fee DOUBLE PRECISION,
     coupon_code text,
     completed_at timestamp with time zone,

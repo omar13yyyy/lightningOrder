@@ -8,6 +8,8 @@ import jwt from 'jsonwebtoken';
 
 //------------------------------------------------------------------------------------------
 
+
+/*
   partnergetCurrentStatisticsService: async (
     partnerId: string,
     internal_id:number
@@ -53,6 +55,7 @@ offset:number
         order_details_text:number,
     
   }> => {
+
     if (internal_id > 0) {
       return await partnersRepository.getStatistics(internal_id);
     }
@@ -99,8 +102,12 @@ getBillCurrentOrdersService: async (
    return await ordersRepository.getBillPastOrders(orderId)
 },
 //------------------------------------------------------------------------------------------
+
+
+
+
+
+*/
+
+
  }
-
-
-
-

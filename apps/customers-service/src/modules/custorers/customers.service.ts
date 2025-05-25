@@ -3,8 +3,8 @@ import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 
 export const customersServices = {
-  getCustomerTokenByIdService: async () => {
-    userRepository.fetchCustomerTokenById;
+  getCustomerTokenByIdService: async (customerId) => {
+    userRepository.fetchCustomerTokenById(customerId);
   },
 
   loginService: async (number, reqPassword) => {

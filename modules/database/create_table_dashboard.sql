@@ -10,31 +10,11 @@ public.roles,public.permisions,store_transactions,store_wallets,customers_visite
 ,withdrawal_document_images,withdrawal_requests;
 
 
-DROP TYPE IF EXISTS enum_store_transaction_type ,enum_day_of_week,enum_store_status,
-enum_orders_type,enum_user_type,enum_on_expense,enum_coupon_type,
-enum_partner_status,enum_withdrawal_user,enum_withdrawal_status CASCADE;
-
-
-
-
-CREATE TYPE enum_store_transaction_type AS ENUM ( 'deposit', 'withdraw','discount','NULL');
-CREATE TYPE enum_day_of_week AS ENUM ( 'sun', 'mon','tue','wed', 'thu','fri','sat','NULL');
-CREATE TYPE enum_store_status AS ENUM ( 'open','close','busy','NULL');
-CREATE TYPE enum_orders_type AS ENUM ( 'take_away','delivery','take_away_and_delivery','NULL');
-CREATE TYPE enum_user_type AS ENUM ( 'customer', 'store','partner', 'store_Payments','partner_Payments','driver_Payments','NULL');
-CREATE TYPE enum_on_expense AS ENUM ( 'partner', 'our_company','both','NULL');
-CREATE TYPE enum_coupon_type AS ENUM ( 'personal', 'public','NULL');
-CREATE TYPE enum_partner_status AS ENUM ( 'available','blocked','NULL');
-CREATE TYPE enum_withdrawal_status AS ENUM ( 'new','wait','done','NULL');
-
-CREATE TYPE enum_withdrawal_user AS ENUM ( 'driver','partner','NULL');
-
-
 
 --For STORES and Partner
 
 CREATE TABLE customers_visited (
-    visit_id bigint,
+    visit_id bigserial,
     customer_id bigint,
     store_id  bigint,
     create_at timestamp with time zone
@@ -117,7 +97,7 @@ CREATE TABLE IF NOT EXISTS public.role_permission
 CREATE TABLE statistics_previous_day (
     store_id  text,
     total_orders bigint,
-    total_revenue DOUBLE PRECISION,,
+    total_revenue DOUBLE PRECISION,
     average_delivery_time timestamp with time zone,
     customers_visited integer,
     --previous day without platform_commission

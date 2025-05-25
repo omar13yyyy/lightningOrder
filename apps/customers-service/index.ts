@@ -1,3 +1,4 @@
-import {customersController} from './src/modules/custorers/customers.controler'
+import {customersServices} from './src/modules/custorers/customers.service'
 
-export const AllCustomerController =customersController
+export const AllCustomersServices =customersServices
+

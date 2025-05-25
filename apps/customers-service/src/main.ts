@@ -3,7 +3,7 @@
 import { customersController } from "./modules/custorers/customers.controler";
 import express from 'express';
 export const visitorCustomerRouter= express.Router()
-import {userHyperdAuth} from '../../app-geteway/src/middleware/userHyperdAuth.middleware'
+import {customerHyperdAuth} from '../../app-geteway/src/middleware/customerHyperdAuth.middleware'
 
 
 

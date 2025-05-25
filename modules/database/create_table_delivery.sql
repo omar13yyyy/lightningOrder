@@ -7,12 +7,12 @@ BEGIN;
 DROP TABLE IF EXISTS driver_transactions,driver_points,driver_wallets_previous_day
 ,drivers,trust_points_log,delivery_document_images;
 
-DROP TYPE IF EXISTS   enum_vehicle_type,enum_driver_transaction_type ,
-enum_trust_points_operation_type, CASCADE;
 
-CREATE TYPE enum_vehicle_type AS ENUM ( 'car', 'motorcycle','bicycle','electric_bike','NULL');
-CREATE TYPE enum_driver_transaction_type AS ENUM ( 'order_cost', 'driver_profits_received_to_driver','driver_order_cost_received_from_driver','NULL');
-CREATE TYPE enum_trust_points_operation_type AS ENUM ( 'auto','manual','NULL');
+CREATE TABLE effective_tokens (
+    user_id bigint ,
+    token text,
+    UNIQUE("user_id")
+);
 
 CREATE TABLE drivers (
     driver_id bigserial,

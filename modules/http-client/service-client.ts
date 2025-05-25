@@ -1,5 +1,5 @@
 import axios, { AxiosInstance } from 'axios';
-import { ServiceCallOptions } from './types';
+import { ServiceCallOptions } from '../../types/types';
 
 export class ServiceClient {
   private client: AxiosInstance;

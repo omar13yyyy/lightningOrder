@@ -1,5 +1,5 @@
-import { query  as dashboardQuery } from '../../../../../modules/database/commitDashboardSQL';
-import { query   as ordersQuery } from '../../../../../modules/database/commitOrdersSQL';
+import { ar } from '@faker-js/faker';
+import { query   as ordersQuery ,query} from '../../../../../modules/database/commitOrdersSQL';
 //------------------------------------------------------------------------------------------
 
 export const ordersRepository = {
@@ -132,6 +132,111 @@ getBillCurrentOrders: async (
   return {
     order_details_text: rows[0].order_details_text
   };
+},
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//--------------------------OMAR------------------------------------------
+getCurrentOrder : async (customer_id) => {
+    const { rows }= await query(` 
+      
+SELECT
+    co.order_id,
+    os.status,
+    co.store_name_ar,
+    co.store_name_en,
+    co.order_details_text,
+    co.location_latitude,
+    co.location_longitude,
+    co.orders_type,
+    co.payment_method,
+    co.created_at
+FROM
+    current_orders co
+JOIN
+    order_status os
+    ON co.order_id = os.order_id  
+    where customer_id =$1  
+    ORDER BY created_at DESC
+
+    `,[customer_id])
+
+        return rows ;
+},
+
+//------------------------------------------------------
+getPreviousOrder : async (customer_id,limit,offset) => {
+    const { rows }= await query(` 
+      
+SELECT
+    po.order_id,
+    os.status,
+    po.store_name_ar,
+    po.store_name_en,
+    po.order_details_text,
+    po.location_latitude,
+    po.location_longitude,
+    po.orders_type,
+    po.payment_method,
+    po.created_at
+FROM
+    past_orders po
+JOIN
+    order_status os
+    ON co.order_id = po.order_id  
+    where customer_id =$1 
+    ORDER BY created_at DESC
+    LIMIT $2 OFFSET $3 
+    `,[customer_id,limit,offset])
+
+        return rows ;
+},
+
+//------------------------------------------------------------
+
+//TODO : update past_orders
+addRating : async (order_id,customer_id,
+  driver_rating,  order_rating,comment) => {
+ query(` 
+      
+SELECT add_rating_if_delivered($1,$2,$3,$4,$5)
+
+
+    `,[order_id,customer_id,driver_rating,order_rating,comment])
+
+},
+//------------------------------------------------------------
+getPreviousDriverOrder : async (driverId,limit,offset) => {
+ query(` 
+      
+SELECT get_past_deriver_orders($1,$2,$3)
+
+
+    `,[driverId,limit,offset])
+
+},
+
+//-----------------------------------------------------------------------------------------------------------
+driverDeliveOrder : async (driverId,limit,offset) => {
+ query(` 
+      
+SELECT get_past_deriver_orders($1,$2,$3)
+
+
+    `,[driverId,limit,offset])
+
 },
 
 }

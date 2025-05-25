@@ -3,13 +3,6 @@ DROP TABLE IF EXISTS public.confirmation,customer_wallets_previous_day
 ,customers ,customer_transactions,effective_tokens;
 
 
-
-DROP TYPE IF EXISTS enum_order_status
-,enum_user_transaction_type
-, CASCADE;
-
-CREATE TYPE enum_order_status AS ENUM ( 'accepted', 'rejected','with_driver', 'delivered','NULL');
-CREATE TYPE enum_user_transaction_type AS ENUM ( 'input','output','NULL');
 CREATE TABLE effective_tokens (
     user_id bigint ,
     token text,
@@ -36,7 +29,7 @@ code text,
 
 
 CREATE TABLE customers (
-    customer_id bigserial,
+    customer_id bigint,
     full_name text,
     phone_number text,
     email text,

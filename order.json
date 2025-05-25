@@ -1,0 +1,29 @@
+{
+  "latitudes": " ",
+  "logitudes": " ",
+  "location_code": "",
+  "copon": "NULL",
+  "store_id": "string",
+  "delevery_type": "takeaway-delevery",
+  "items": [
+    {
+      "itemId": "string",
+      "sizeId": "string",
+      "modifiers": [
+        {
+          "modifiers_id": "",
+          "modifiers_item": [
+            {
+              "modifiers_item_id": "string",
+              "number": "integer"
+            },
+            {
+              "modifiers_item_id": "string",
+              "number": "integer"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
