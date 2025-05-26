@@ -1,6 +1,39 @@
 BEGIN;
 
+CREATE EXTENSION IF NOT EXISTS postgres_fdw;
+DROP SERVER IF EXISTS customer_server CASCADE;
 
+CREATE SERVER customer_server
+  FOREIGN DATA WRAPPER postgres_fdw
+  OPTIONS (
+    host 'localhost',
+    dbname 'project3_customers',
+    port '5432'
+  );
+
+CREATE USER MAPPING FOR CURRENT_USER
+  SERVER customer_server
+  OPTIONS (
+    user 'postgres',
+    password '12345'
+  );
+
+CREATE FOREIGN TABLE customers_remote (
+  customer_id BIGINT,
+  full_name TEXT,
+  phone_number TEXT,
+  email TEXT,
+  encrypted_password TEXT,
+  is_confirmed BOOLEAN,
+  birth_date TIMESTAMPTZ,
+  address TEXT,
+  create_at TIMESTAMPTZ
+)
+SERVER customer_server
+OPTIONS (
+  schema_name 'public',         
+  table_name 'customers')      
+;
 
 DROP TABLE IF EXISTS coupons,
 products_sold,daily_statistics,document_images,products,store_ratings_previous_day
@@ -115,9 +148,9 @@ CREATE TABLE IF NOT EXISTS public.role_permission
     PRIMARY KEY (id)
 );
 CREATE TABLE statistics_previous_day (
-    store_id  bigint,
-    total_orders text,
-    total_revenue text,
+    store_id  text,
+    total_orders bigint ,
+    total_revenue DOUBLE PRECISION,
     average_delivery_time timestamp with time zone,
     customers_visited integer,
     --previous day without platform_commission
@@ -295,12 +328,9 @@ CREATE TABLE products_sold (
     internal_store_id bigint,
     product_internal_id bigint,
      product_id text,
-
     size_name_en text,
     size_name_ar text,
     price DOUBLE PRECISION,
-
-
     full_price DOUBLE PRECISION, -- قيمة الفاتورة الاجمالية يلي داخلها العنصر 
     coupon_code text,
       PRIMARY KEY (create_at)

@@ -88,8 +88,8 @@ export const partnersController = {
   getStatistics: async (req, res)=> {
     try {
       const partnerId = req.body; 
-   const { storeId,untilnow,fromDate,toDate } = req.query;
-      const stats = await partnersService.getStatisticsService(partnerId,storeId,untilnow,fromDate,toDate);
+   const { storeId,fromDate,toDate } = req.query;
+      const stats = await partnersService.getStatisticsService(partnerId,storeId,fromDate,toDate);
 
       return res.status(200).json({
         success: true,
@@ -177,4 +177,78 @@ export const partnersController = {
     }
   },
   //------------------------------------------------------------------------------
+          getSpecialCustomers: async (req, res)=> {
+      try {
+     const { storeId,fromDate,toDate} =  req.query;
+        const stats = await partnersService.getSpecialCustomers(storeId,fromDate,toDate);
+  
+        return res.status(200).json({
+          success: true,
+          data: stats
+        });
+      } catch (error) {
+        console.error('Error in partnerInfo:', error);
+        return res.status(500).json({
+          success: false,
+          message: 'Internal server error'
+        });
+      }
+    },
+    //-------------------------------------------------------------------------------------------------
+              gePartnerBalance: async (req, res)=> {
+      try {
+     const { storeId,partnerId} =  req.query;
+        const stats = await partnersService.gePartnerBalance(storeId,partnerId);
+  
+        return res.status(200).json({
+          success: true,
+          data: stats
+        });
+      } catch (error) {
+        console.error('Error in partnerInfo:', error);
+        return res.status(500).json({
+          success: false,
+          message: 'Internal server error'
+        });
+      }
+    },
+        //-------------------------------------------------------------------------------------------------
+   
+              walletTransferHistorystore: async (req, res)=> {
+      try {
+     const { partnerId,store_id} =  req.query;
+        const stats = await partnersService.walletTransferHistorystore(store_id,partnerId);
+  
+        return res.status(200).json({
+          success: true,
+          data: stats
+        });
+      } catch (error) {
+        console.error('Error in partnerInfo:', error);
+        return res.status(500).json({
+          success: false,
+          message: 'Internal server error'
+        });
+      }
+    },
+        //-------------------------------------------------------------------------------------------------
+             walletTransferHistory: async (req, res)=> {
+      try {
+     const { partnerId} =  req.query;
+        const stats = await partnersService.walletTransferHistory(partnerId);
+  
+        return res.status(200).json({
+          success: true,
+          data: stats
+        });
+      } catch (error) {
+        console.error('Error in partnerInfo:', error);
+        return res.status(500).json({
+          success: false,
+          message: 'Internal server error'
+        });
+      }
+    },
+        //-------------------------------------------------------------------------------------------------
+
 };
