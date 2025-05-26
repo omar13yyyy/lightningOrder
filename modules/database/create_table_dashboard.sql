@@ -240,6 +240,9 @@ CREATE TABLE category_tags (
     tag_id bigint,
     category_id text,
     internal_category_id bigint ,
+
+    --TODO add internal_store_id
+    internal_store_id bigint ,
     PRIMARY KEY(tag_id)
 
 );
