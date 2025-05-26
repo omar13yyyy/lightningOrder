@@ -1,5 +1,8 @@
 BEGIN;
 
+
+
+
 DROP TABLE IF EXISTS current_orders ,order_status,order_financial_logs,
 past_orders,ratings,electronic_payment;
 --CREATE EXTENSION IF NOT EXISTS "uuid-ossp";

@@ -1,4 +1,3 @@
-import { ar } from '@faker-js/faker';
 import { query   as ordersQuery ,query} from '../../../../../modules/database/commitOrdersSQL';
 //------------------------------------------------------------------------------------------
 
@@ -48,7 +47,78 @@ const sql = `
   }
   ,
   //------------------------------------------------------------------------------------------
+  previousOrder: async (
+  internal_id: number,
+  state?: string,
+  paymentMethod?: number,
+  fromPrice?: number,
+  toPrice?: number,
+  fromDate?: number,
+  toDate?: number,
+  limit: number = 10,
+  offset: number = 0
+): Promise<{
+  order_id: string;
+  created_at: string;
+  store_name: string;
+  type: string;
+  related_rating: number;
+  payment_method: string;
+  order_details_text: string;
+  customer_name: string;
+  customer_phone_number: string;
+  driver_name: string;
+  driver_phone_number: string;
+}[]> => {
+  const conditions: string[] = ['o.store_id = $1'];
+  const values: any[] = [internal_id];
+  let paramIndex = 2;
 
+  if (state) {
+    conditions.push(`o.orders_type = $${paramIndex++}`);
+    values.push(state);
+  }
+
+  if (paymentMethod !== undefined) {
+    conditions.push(`o.payment_method = $${paramIndex++}`);
+    values.push(paymentMethod);
+  }
+
+  if (fromDate && toDate) {
+    conditions.push(`o.created_at BETWEEN $${paramIndex} AND $${paramIndex + 1}`);
+    values.push(new Date(fromDate));
+    values.push(new Date(toDate));
+    paramIndex += 2;
+  }
+
+  const sql = `
+    SELECT
+      o.order_id,
+      o.created_at,
+      o.store_name_ar AS store_name,
+      o.orders_type AS type,
+      o.related_rating,
+      o.payment_method::text,
+      o.order_details_text,
+      c.full_name AS customer_name,
+      c.phone_number AS customer_phone_number,
+      d.full_name AS driver_name,
+      d.phone_number AS driver_phone_number
+    FROM past_orders o
+    JOIN customers c ON c.customer_id = o.customer_id
+    JOIN drivers d ON d.driver_id = o.driver_id
+    WHERE ${conditions.join(' AND ')}
+    ORDER BY o.created_at DESC
+    LIMIT $${paramIndex++} OFFSET $${paramIndex}
+  `;
+
+  values.push(limit, offset);
+
+  const { rows } = await ordersQuery(sql, values);
+  return rows;
+}
+,
+//---------------------------------------------------------------------------------------------
 getCurrentOrders: async (
   storeId: string[] | number,
   limit: number,
@@ -65,8 +135,8 @@ getCurrentOrders: async (
     SELECT
       order_id,
       created_at,
-      store_name,  هي بدك تجيبيها لسا 
-      type, و هي كمان 
+store_name_ar,      
+orders_type,
       payment_method,
       order_details_text
     FROM past_orders
@@ -133,6 +203,7 @@ getBillCurrentOrders: async (
     order_details_text: rows[0].order_details_text
   };
 },
+//-----------------------------------------------------------------------------------------------------------
 
 
 

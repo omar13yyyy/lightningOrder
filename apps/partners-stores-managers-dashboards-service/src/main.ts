@@ -22,11 +22,14 @@ partnerRouter.route('/partnerLogin').post(partnersController.partnerLogin)
 //partnerRouter.use(userHyperdAuth);
 partnerRouter.route('/partnergetAllStors').get(partnersController.partnergetAllStores)
 partnerRouter.route('/partnerInfo').get(partnersController.partnerInfo)
+partnerRouter.route('/getStatistics').get(partnersController.getStatistics)
+
 partnerRouter.route('/partnergetAllStores').get(partnersController.partnergetAllStores)
 partnerRouter.route('/bestSeller').get(partnersController.bestSeller)
 partnerRouter.route('/profile').get(partnersController.profile)
 partnerRouter.route('/changeStoreState').post(partnersController.changeStoreState)
 partnerRouter.route('/getStoreProfile').post(partnersController.getStoreProfile)
+partnerRouter.route('/getSpecialCustomers').get(partnersController.getSpecialCustomers)
 
 //partnerRouter.route('/getCurrentStatistics').get(partnersController.getCurrentStatistics)
 

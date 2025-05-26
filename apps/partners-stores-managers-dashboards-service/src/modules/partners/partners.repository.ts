@@ -107,10 +107,7 @@ console.log(placeholders+"placeholders",includeStoreCount,idsArray)
 ,
 //---------------------------------------------------------------------------------------
 getStatistics: async (
-  storeId: string[] | number,
-  includeStoreCount: boolean,
-    fromDate: Date,
-  toDate: Date
+  storeId: number[],
 ): Promise<{
   orders: number;
   sales_with_commission: number;
@@ -118,19 +115,16 @@ getStatistics: async (
   platform_commission_sales: number;
   visit_count: number;
 }> => {
-  console.log(storeId, 'storeid');
-
   const idsArray = Array.isArray(storeId) ? storeId : [storeId];
   const placeholders = idsArray.map((_, i) => `$${i + 1}`).join(', ');
 
-  console.log(placeholders + " placeholders", includeStoreCount, idsArray);
-
   const sql = `
     SELECT 
-      sum(total_orders) AS total_orders, 
-      sum(total_revenue) AS total_revenue, 
-      avg(average_delivery_time) AS avg_delivery_time,
-      sum(visit_count) AS visit_count
+      SUM(total_orders) AS total_orders, 
+      SUM(balance_previous_day) AS total_revenue, 
+      SUM(platform_commission_balance_previous_day) AS total_revenue_for_platform, 
+      AVG(average_delivery_time) AS avg_delivery_time,
+      SUM(visit_count) AS visit_count
     FROM statistics_previous_day
     WHERE store_id IN (${placeholders})
   `;
@@ -141,14 +135,59 @@ getStatistics: async (
   return {
     orders: Number(row.total_orders) || 0,
     sales_with_commission: Number(row.total_revenue) || 0,
-    sales_without_commission: 0, // تحتاج تحسبها إذا كان عندك منطق لها
-    platform_commission_sales: 0, // كذلك
+    sales_without_commission: Number(row.total_revenue) - Number(row.total_revenue_for_platform) || 0,
+    platform_commission_sales: Number(row.total_revenue_for_platform) || 0,
     visit_count: Number(row.visit_count) || 0
   };
 },
-//---------------------------------------------------------------------------------------
 
+//---------------------------------------------------------------------------------------
+getStatisticsindate: async (
+  storeId: number[],
+  fromDate: Date,
+  toDate: Date
+): Promise<{
+  orders: number;
+  sales_with_commission: number;
+  sales_without_commission: number;
+  platform_commission_sales: number;
+  visit_count: number;
+}> => {
+  const idsArray = Array.isArray(storeId) ? storeId : [storeId];
+  const placeholders = idsArray.map((_, i) => `$${i + 1}`).join(', ');
+
+  const datePlaceholderStart = `$${idsArray.length + 1}`;
+  const datePlaceholderEnd = `$${idsArray.length + 2}`;
+
+  const sql = `
+    SELECT 
+      COUNT(st.transaction_id) AS total_orders, 
+      SUM(st.amount) AS total_revenue, 
+      SUM(st.amount_platform_commission) AS total_revenue_for_platform, 
+      COUNT(cv.visit_id) AS visit_count
+    FROM store_transactions st
+    JOIN customers_visited cv ON cv.store_id = st.internal_store_id
+    WHERE st.store_id IN (${placeholders})
+      AND st.transaction_type = 'deposit'
+      AND st.transaction_at BETWEEN ${datePlaceholderStart} AND ${datePlaceholderEnd}
+  `;
+
+  const { rows } = await ordersQuery(sql, [...idsArray, fromDate, toDate]);
+  const row = rows[0] || {};
+
+  return {
+    orders: Number(row.total_orders) || 0,
+    sales_with_commission: Number(row.total_revenue) || 0,
+    sales_without_commission: Number(row.total_revenue) - Number(row.total_revenue_for_platform) || 0,
+    platform_commission_sales: Number(row.total_revenue_for_platform) || 0,
+    visit_count: Number(row.visit_count) || 0
+  };
+},
+
+
+//---------------------------------------------------------------------------------------
 bestSeller: async (
+  //من الفرونت اذا ما حدد شي بيبعت بس اخر 30 يوم
   storeIds: number[] | number,
   fromDate: Date,
   toDate: Date
@@ -261,9 +300,9 @@ getStoreProfile: async (
       t.tag_name_ar,
       t.tag_name_en
     FROM stores s
-    JOIN store_categories  sc ON sc.category_id = c.category_id
-    JOIN store_tags st ON s.store_id = st.store_id and st.tag_id=st.tag_id
-    JOIN tags t ON t.tag_id = st.tag_id
+    JOIN store_categories  sc ON sc.internal_id = s.category_id
+    JOIN category_tags ct ON sc.internal_id = ct.internal_category_id 
+    JOIN tags t ON t.tag_id = ct.tag_id
     WHERE s.store_id = $1 AND s.partner_id = $2
   `;
 
@@ -274,6 +313,124 @@ getStoreProfile: async (
   }
 
   return rows[0];
-}
+},
 //-----------------------------------------------------------------------------------------------
+getSpecialCustomers: async (
+  storeid: number,
+  fromDate: Date,
+  toDate: Date
+): Promise<{
+  customer_id: number;
+  full_name: string;
+  phone_number: string;
+  order_count: number;
+}[]> => {
+  const sql = `
+    SELECT 
+      ps.customer_id, 
+      c.full_name, 
+      c.phone_number,
+      COUNT(*) AS order_count
+    FROM products_sold ps
+    JOIN customers_remote c ON c.customer_id = ps.customer_id
+    WHERE ps.store_internal_id = $1
+      AND ps.create_at BETWEEN $2 AND $3
+    GROUP BY ps.customer_id, c.full_name, c.phone_number
+    ORDER BY order_count DESC
+    LIMIT 10
+  `;
+
+  const { rows } = await dashboardQuery(sql, [storeid, fromDate, toDate]);
+
+  return rows;
+},
+//-----------------------------------------------------------------------------------
+  gePartnerBalancepartner: async (
+    partner_id: string
+  ): Promise<{
+wallet_balance}> => {
+    const {rows}= await dashboardQuery(
+      'SELECT  wallet_balance FROM partners WHERE partner_id = $1',
+      [partner_id]
+    );
+    return rows[0];
+},
+//----------------------------------------------------------------------------------------
+  gePartnerBalancestore: async (
+    store_id: number
+  ): Promise<{
+wallet_balance:number
+}> => {
+    const {rows}= await dashboardQuery(
+      'SELECT  balance_previous_day FROM statistics_previous_day WHERE store_id = $1',
+      [store_id]
+    );
+    return rows[0];
+},
+
+//-----------------------------------------------------------------------------------
+walletTransferHistorystore: async (
+  store_id: string,
+  partner_id
+): Promise<Array<{
+  transaction_id: string,
+  transaction_type: string,
+  sales_without_commission: number,
+  amount_platform_commission: number,
+  transaction_date: Date,
+  notes: string,
+  sales_with_commission: number,
+  store_name: string
+}>> => {
+  const { rows } = await dashboardQuery(
+    `SELECT 
+      transaction_id,
+      transaction_type,
+      sales_without_commission,
+      amount_platform_commission,
+      transaction_at AS transaction_date,
+      notes,
+      sales_without_commission + amount_platform_commission AS sales_with_commission,
+      s.store_name_ar AS store_name
+    FROM store_transactions st 
+    JOIN stores s ON s.store_id = st.store_id 
+    WHERE st.store_id = $1  and st.partner_id=$2` ,
+    [store_id,partner_id]
+  );
+
+  return rows;
+},
+//-----------------------------------------------------------------------------------
+walletTransferHistory: async (
+  partnerId: string,
+): Promise<Array<{
+  transaction_id: string,
+  transaction_type: string,
+  sales_without_commission: number,
+  amount_platform_commission: number,
+  transaction_date: Date,
+  notes: string,
+  sales_with_commission: number,
+  store_name: string
+}>> => {
+  const { rows } = await dashboardQuery(
+    `SELECT 
+      transaction_id,
+      transaction_type,
+      sales_without_commission,
+      amount_platform_commission,
+      transaction_at AS transaction_date,
+      notes,
+      sales_without_commission + amount_platform_commission AS sales_with_commission,
+      s.store_name_ar AS store_name
+    FROM store_transactions st 
+    JOIN stores s ON s.store_id = st.store_id 
+    WHERE st.partner_id = $1`,
+    [partnerId]
+  );
+
+  return rows;
+},
+//-----------------------------------------------------------------------------------
+
 }

@@ -57,7 +57,6 @@ export const partnersService = {
   getStatisticsService: async (
   partnerId: string,
   internal_id: number,
-  untilnow: boolean,
   fromDate?: Date,
   toDate?: Date
 ): Promise<{
@@ -67,6 +66,8 @@ export const partnersService = {
   platform_commission_sales: number;
   visit_count: number;
 }> => {
+const untilnow = !(fromDate && toDate);
+
   let storeIds: number[];
   if (internal_id > 0) {
     storeIds = [internal_id];
@@ -184,5 +185,71 @@ getStoreProfile: async (
 
 },
 //--------------------------------------------------------------------------------------
+getSpecialCustomers: async (
+  internal_id: number,
+  fromDate: Date,
+  toDate: Date
+): Promise<{
+  customer_id: number;
+  full_name: string;
+  phone_number: string;
+  order_count: number;
+}[]> => {
+  return await partnersRepository.getSpecialCustomers(internal_id, fromDate, toDate);
+}
+,
+//------------------------------------------------------------------------------------------
+gePartnerBalance: async (
+  partnerId: string,
+  internal_id: number
+): Promise<{ wallet_balance: number }> => {
+  const isSingleStore = internal_id > 0;  
+// استدعاء تابع تحديث جدول الاحصائيات و البارتنر 
+  if (isSingleStore) {
+    return await partnersRepository.gePartnerBalancestore(internal_id);  // استرجاع الرصيد للمتجر
+  } else {
+    return await partnersRepository.gePartnerBalancepartner(partnerId);  // استرجاع الرصيد للـ partner
+  }
+},
+
+  
+//-----------------------------------------------------------------------------------------
+
+walletTransferHistorystore: async (
+  store_id:string,
+  partner_id:string
+): Promise<Array<{
+  transaction_id: string,
+  transaction_type: string,
+  sales_without_commission: number,
+  amount_platform_commission: number,
+  transaction_date: Date,
+  notes: string,
+  sales_with_commission: number,
+  store_name: string
+}>> => {
+  return await partnersRepository.walletTransferHistorystore(store_id,partner_id);
+}
+,
+  
+//-----------------------------------------------------------------------------------------
+walletTransferHistory: async (
+  partner_id:string
+
+): Promise<Array<{
+  transaction_id: string,
+  transaction_type: string,
+  sales_without_commission: number,
+  amount_platform_commission: number,
+  transaction_date: Date,
+  notes: string,
+  sales_with_commission: number,
+  store_name: string
+}>> => {
+  return await partnersRepository.walletTransferHistory(partner_id);
+}
+,
+  
+//-----------------------------------------------------------------------------------------
 
 };
