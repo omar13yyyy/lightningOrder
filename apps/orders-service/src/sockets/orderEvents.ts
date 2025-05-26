@@ -1,4 +1,4 @@
-const Ajv = require("ajv");
+import Ajv from 'ajv';
 import {orderSchema}  from '../schemas/order.schema';
 
 const ajv = new Ajv();

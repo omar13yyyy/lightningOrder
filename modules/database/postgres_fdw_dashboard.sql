@@ -25,8 +25,8 @@ remotely.confirmation,
 remotely.customer_wallets_previous_day,
 remotely.customers,
 remotely.customer_transactions,
+remotely.effective_tokens_delevery,
 remotely.effective_tokens;
-
 
 DROP FOREIGN TABLE IF EXISTS
 remotely.driver_transactions,

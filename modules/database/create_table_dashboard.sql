@@ -18,22 +18,6 @@ CREATE USER MAPPING FOR CURRENT_USER
     password '12345'
   );
 
-CREATE FOREIGN TABLE customers_remote (
-  customer_id BIGINT,
-  full_name TEXT,
-  phone_number TEXT,
-  email TEXT,
-  encrypted_password TEXT,
-  is_confirmed BOOLEAN,
-  birth_date TIMESTAMPTZ,
-  address TEXT,
-  create_at TIMESTAMPTZ
-)
-SERVER customer_server
-OPTIONS (
-  schema_name 'public',         
-  table_name 'customers')      
-;
 
 DROP TABLE IF EXISTS coupons,
 products_sold,daily_statistics,document_images,products,store_ratings_previous_day
@@ -274,7 +258,6 @@ CREATE TABLE category_tags (
     category_id text,
     internal_category_id bigint ,
 
-    --TODO add internal_store_id
     internal_store_id bigint ,
     PRIMARY KEY(tag_id)
 

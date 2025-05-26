@@ -4,7 +4,7 @@ import bodyParser from 'body-parser';
 import http from 'http';
 import { Server } from 'socket.io';
 import {orderSocket} from '../orders-service/src/sockets/index'
-const handleOrderEvents = require("./socket-handlers/order");
+//import  handleOrderEvents from './socket-handlers/order'
 //import { errorHandler } from './middleware/error.middleware';
 import {router} from './src/routes/index'
 export const app = express();

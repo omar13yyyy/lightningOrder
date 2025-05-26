@@ -10,9 +10,7 @@ past_orders,ratings,electronic_payment;
 
     CREATE TABLE ratings (
         order_id text,
-        --TODO :change name to 
         internal_order_id bigint,
-        --TODO add store is
         internal_store_id bigint,
         customer_id bigint,
         driver_rating integer CHECK (driver_rating >= 1 AND driver_rating <= 5),
@@ -27,7 +25,6 @@ past_orders,ratings,electronic_payment;
 CREATE TABLE current_orders ( 
     order_id text ,
     internal_id bigint,
-    --customer_id added
     customer_id bigint,
     store_id text,
     store_name_ar text,
@@ -41,7 +38,6 @@ CREATE TABLE current_orders (
     orders_type enum_orders_type NOT NULL DEFAULT 'NULL',
     location_latitude DOUBLE PRECISION,
     location_longitude DOUBLE PRECISION,
-    --TODO add store_destination,customer_destination
     store_destination DOUBLE PRECISION,
     customer_destination DOUBLE PRECISION,
     delivery_fee DOUBLE PRECISION,
@@ -61,7 +57,6 @@ CREATE TABLE order_financial_logs (
     log_id text,
     driver_id bigint,
     order_id text,
-    --TODO Add to seeder
     store_id text,
     --wiht platform_commission
     order_amount DOUBLE PRECISION,
@@ -86,7 +81,6 @@ CREATE TABLE past_orders (
     orders_type enum_orders_type NOT NULL DEFAULT 'NULL',
     location_latitude DOUBLE PRECISION,
     location_longitude DOUBLE PRECISION,
-    --TODO add store_destination,customer_destination
     store_destination DOUBLE PRECISION,
     customer_destination DOUBLE PRECISION,
     delivery_fee DOUBLE PRECISION,

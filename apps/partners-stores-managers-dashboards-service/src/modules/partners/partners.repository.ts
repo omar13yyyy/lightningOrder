@@ -325,6 +325,7 @@ getSpecialCustomers: async (
   phone_number: string;
   order_count: number;
 }[]> => {
+  //laila JOIN remotely.customers c ON c.customer_id = ps.customer_id
   const sql = `
     SELECT 
       ps.customer_id, 
@@ -332,7 +333,7 @@ getSpecialCustomers: async (
       c.phone_number,
       COUNT(*) AS order_count
     FROM products_sold ps
-    JOIN customers_remote c ON c.customer_id = ps.customer_id
+    JOIN remotely.customers c ON c.customer_id = ps.customer_id
     WHERE ps.store_internal_id = $1
       AND ps.create_at BETWEEN $2 AND $3
     GROUP BY ps.customer_id, c.full_name, c.phone_number

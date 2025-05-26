@@ -291,10 +291,11 @@ function generateStoreTag(i,storeUUID, tageId) {
 
 //---Array--
 const categoryTagsArray :any = [];
-function generatecategoryTag(i,categoryUUID, tageId) {
+function generatecategoryTag(i,categoryUUID,internalCategoryId, tageId) {
   categoryTagsArray.push({
     tag_id: tageId,
     store_id: categoryUUID,
+    internal_category_id :internalCategoryId  ,
     internal_store_id: i,
   });
 }
@@ -466,6 +467,17 @@ function generateCurrentOrder(
       fractionDigits: 6,
     })/100,
     delivery_fee: faker.number.int({ min: 1000, max: 50000 }),
+    store_destination:faker.number.float({
+      min: 100,
+      max: 3635,
+      fractionDigits: 6,
+    }),
+    customer_destination :faker.number.float({
+      min: 100,
+      max: 3635,
+      fractionDigits: 6,
+    }),
+
     coupon_code: couponCode || "NULL",
   });
 }
@@ -511,7 +523,16 @@ function generatePastOrder(
       max: 3635,
       fractionDigits: 6,
     })/100,
-
+    store_destination:faker.number.float({
+      min: 100,
+      max: 3635,
+      fractionDigits: 6,
+    }),
+    customer_destination :faker.number.float({
+      min: 100,
+      max: 3635,
+      fractionDigits: 6,
+    }),
     delivery_fee: faker.number.float({ min: 5, max: 20 }),
     coupon_code: couponCode,
     completed_at: faker.date.recent().toISOString(),
@@ -524,10 +545,11 @@ function generatePastOrder(
 
 //---Array---
 const ratingsArray :any = [];
-function generateRating( customerId, orederId,enternal_order_id, orderRating, driverRating) {
+function generateRating( customerId, orederId,enternal_order_id, orderRating, driverRating,internal_store_id) {
   ratingsArray.push({
     order_id: orederId,
-    enternal_order_id : enternal_order_id,
+    internal_order_id : enternal_order_id,
+    internal_store_id :internal_store_id,
     customer_id: customerId,
     driver_rating: driverRating,
     order_rating: orderRating,
@@ -1101,7 +1123,7 @@ function storeCategoriesMultigenerator(count, uuidObject) {
   for (let i = 1; i < count + 1; i++) {
     generateStoreCategory(i, uuidObject.uniqueUUID[uuidObject.lastUUID]);
    
-    generatecategoryTag(i,uuidObject.uniqueUUID[uuidObject.lastUUID], faker.number.int({ min: 1, max: TAGSCOUNT }))
+    generatecategoryTag(i,uuidObject.uniqueUUID[uuidObject.lastUUID],faker.number.int({ min: 1, max: STORECATEGORIESCOUNT }), faker.number.int({ min: 1, max: TAGSCOUNT }))
     uuidObject.lastUUID++;
   }
 }
@@ -1318,7 +1340,8 @@ function ordersMultiGenerator(count) {
       generateorderFinancialLogs(
         uuidObject.uniqueUUID[uuidObject.lastUUID],
         driversArray[driverIndex].driver_id,
-        orderId
+        orderId,
+        storesArray[storeIndex].internal_id
       );
       uuidObject.lastUUID++;
 
@@ -1343,7 +1366,8 @@ function ordersMultiGenerator(count) {
         customersArray[customerIndex].customer_id,
         orderId,i,
         orderRating,
-        driverRating
+        driverRating,
+        storesArray[storeIndex].internal_id
       );
       generateStoreRatings(store_internal_id);
       store_internal_id++
