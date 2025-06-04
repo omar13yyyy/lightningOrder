@@ -1,7 +1,7 @@
 import { ordersRepository } from './orders.repository';
 import { partnerClient } from "../../../index"
-//import bcryptjs from "bcryptjs";
-//import jwt from 'jsonwebtoken';
+import bcryptjs from "bcryptjs";
+import jwt from 'jsonwebtoken';
 //------------------------------------------------------------------------------------------
 
  export const ordersService = {
@@ -9,7 +9,7 @@ import { partnerClient } from "../../../index"
 //------------------------------------------------------------------------------------------
 
 
-/*
+
   partnergetCurrentStatisticsService: async (
     partnerId: string,
     internal_id:number
@@ -114,7 +114,5 @@ getBillCurrentOrdersService: async (
 
 
 
-*/
 
-
- }
+ 

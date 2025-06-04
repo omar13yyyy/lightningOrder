@@ -5,7 +5,6 @@ export const customersController ={
     const {number ,  password} = req.body 
 
     const token =await  customersServices.loginService(number,password);
-
     if(token!=null)
         
                 res.send({token: token,

@@ -7,15 +7,15 @@ import { encodeToQuadrants, generateNeighbors } from "./modules/geo/geohash";
 
 dotenv.config()
 
-/* await seederGenerateCSV()
-
-await createDatabases()
-await seeder()
+await seederGenerateCSV()
  
-  server() */
+await createDatabases()
+ await seeder()
+
+  server() 
 
 
 
 
 
-console.log(encodeToQuadrants(34.35, 33.35, 20))
+//console.log(encodeToQuadrants(34.35, 33.35, 20))
