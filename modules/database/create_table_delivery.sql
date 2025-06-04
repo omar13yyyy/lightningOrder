@@ -86,6 +86,55 @@ CREATE TABLE trust_points_log (
 
 );
 
+ALTER TABLE IF EXISTS public.delivery_document_images
+    ADD FOREIGN KEY (user_id)
+    REFERENCES public.drivers (driver_id) MATCH SIMPLE
+    ON UPDATE NO ACTION
+    ON DELETE NO ACTION
+    NOT VALID;
+
+
+ALTER TABLE IF EXISTS public.driver_points
+    ADD FOREIGN KEY (driver_id)
+    REFERENCES public.drivers (driver_id) MATCH SIMPLE
+    ON UPDATE NO ACTION
+    ON DELETE NO ACTION
+    NOT VALID;
+
+
+ALTER TABLE IF EXISTS public.driver_transactions
+    ADD FOREIGN KEY (user_id)
+    REFERENCES public.drivers (driver_id) MATCH SIMPLE
+    ON UPDATE NO ACTION
+    ON DELETE NO ACTION
+    NOT VALID;
+
+
+ALTER TABLE IF EXISTS public.driver_wallets_previous_day
+    ADD FOREIGN KEY (driver_wallet_orders_id)
+    REFERENCES public.drivers (driver_id) MATCH SIMPLE
+    ON UPDATE NO ACTION
+    ON DELETE NO ACTION
+    NOT VALID;
+
+
+
+ALTER TABLE IF EXISTS public.effective_tokens
+    ADD FOREIGN KEY (user_id)
+    REFERENCES public.drivers (driver_id) MATCH SIMPLE
+    ON UPDATE NO ACTION
+    ON DELETE NO ACTION
+    NOT VALID;
+
+
+ALTER TABLE IF EXISTS public.driver_points
+    ADD FOREIGN KEY (driver_id)
+    REFERENCES public.drivers (driver_id) MATCH SIMPLE
+    ON UPDATE NO ACTION
+    ON DELETE NO ACTION
+    NOT VALID;
+
+END;
 
 END;
 

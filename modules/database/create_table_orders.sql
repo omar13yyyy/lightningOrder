@@ -3,12 +3,12 @@ BEGIN;
 
 
 
-DROP TABLE IF EXISTS current_orders ,order_status,order_financial_logs,
+DROP TABLE IF EXISTS orders,current_orders ,order_status,order_financial_logs,
 past_orders,ratings,electronic_payment;
 --CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
 
-    CREATE TABLE ratings (
+CREATE TABLE ratings (
         order_id text,
         internal_order_id bigint,
         internal_store_id bigint,
@@ -42,6 +42,8 @@ CREATE TABLE current_orders (
     customer_destination DOUBLE PRECISION,
     delivery_fee DOUBLE PRECISION,
     coupon_code text,
+    UNIQUE("order_id"),
+
     PRIMARY KEY (internal_id)
 );
 
@@ -49,20 +51,30 @@ CREATE TABLE order_status (
     order_id text,
     store_id bigint,
     status enum_order_status NOT NULL DEFAULT 'NULL',
-    status_time timestamp with time zone
+    status_time timestamp with time zone,
+    UNIQUE("order_id")
 
 );
+CREATE TABLE orders (
+    order_id text,
+    internal_id bigint,
+    unique("order_id"),
+    UNIQUE("internal_id")
 
+);
 CREATE TABLE order_financial_logs (
     log_id text,
     driver_id bigint,
     order_id text,
+    --todo  add order_internal_id
+    order_internal_id bigint,
     store_id text,
     --wiht platform_commission
     order_amount DOUBLE PRECISION,
     platform_commission DOUBLE PRECISION CHECK (platform_commission >= 0 AND platform_commission <= 1),
     driver_earnings DOUBLE PRECISION,
-    create_at timestamp with time zone
+    create_at timestamp with time zone,
+    unique("order_internal_id")
 );
 --Beware of repetition order_id and downt copy internal_id
 CREATE TABLE past_orders (
@@ -101,10 +113,44 @@ CREATE TABLE electronic_payment (
     bank_transaction text,
     payment_at timestamp with time zone,
         PRIMARY KEY(payment_id),
-    UNIQUE("payment_id")
+    UNIQUE("payment_id"),
+        UNIQUE("order_id")
+
 
 );
+ALTER TABLE IF EXISTS public.electronic_payment
+    ADD FOREIGN KEY (order_id)
+    REFERENCES public.orders (order_id) MATCH SIMPLE
+    ON UPDATE NO ACTION
+    ON DELETE NO ACTION
+    NOT VALID;
 
+
+
+ALTER TABLE IF EXISTS public.order_financial_logs
+    ADD FOREIGN KEY (order_internal_id)
+    REFERENCES public.orders (internal_id) MATCH SIMPLE
+    ON UPDATE NO ACTION
+    ON DELETE NO ACTION
+    NOT VALID;
+
+
+ALTER TABLE IF EXISTS public.order_status
+    ADD FOREIGN KEY (order_id)
+    REFERENCES public.orders (order_id) MATCH SIMPLE
+    ON UPDATE NO ACTION
+    ON DELETE NO ACTION
+    NOT VALID;
+
+
+
+
+ALTER TABLE IF EXISTS public.ratings
+    ADD FOREIGN KEY (internal_order_id)
+    REFERENCES public.past_orders (internal_id) MATCH SIMPLE
+    ON UPDATE NO ACTION
+    ON DELETE NO ACTION
+    NOT VALID;
 
 
 

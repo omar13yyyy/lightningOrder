@@ -60,6 +60,51 @@ CREATE TABLE customer_transactions (
 
 );
 
+
+ALTER TABLE IF EXISTS public.confirmation
+    ADD FOREIGN KEY (phone_number)
+    REFERENCES public.customers (phone_number) MATCH SIMPLE
+    ON UPDATE NO ACTION
+    ON DELETE NO ACTION
+    NOT VALID;
+
+
+ALTER TABLE IF EXISTS public.customer_transactions
+    ADD FOREIGN KEY (driver_id)
+    REFERENCES public.customers (customer_id) MATCH SIMPLE
+    ON UPDATE NO ACTION
+    ON DELETE NO ACTION
+    NOT VALID;
+
+
+ALTER TABLE IF EXISTS public.customer_wallets_previous_day
+    ADD FOREIGN KEY (customer_wallet_id)
+    REFERENCES public.customers (customer_id) MATCH SIMPLE
+    ON UPDATE NO ACTION
+    ON DELETE NO ACTION
+    NOT VALID;
+
+
+ALTER TABLE IF EXISTS public.customers
+    ADD FOREIGN KEY (customer_id)
+    REFERENCES public.customers (customer_id) MATCH SIMPLE
+    ON UPDATE NO ACTION
+    ON DELETE NO ACTION
+    NOT VALID;
+
+
+ALTER TABLE IF EXISTS public.effective_tokens
+    ADD FOREIGN KEY (user_id)
+    REFERENCES public.customers (customer_id) MATCH SIMPLE
+    ON UPDATE NO ACTION
+    ON DELETE NO ACTION
+    NOT VALID;
+
+
+
+
+
+    
 CREATE OR REPLACE FUNCTION register_effective_token()
 RETURNS TRIGGER AS $$
 BEGIN

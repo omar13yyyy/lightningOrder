@@ -1,11 +1,12 @@
 import fs from "fs";
 import { createObjectCsvWriter } from "csv-writer";
 
-import { faker as fakerEN } from "@faker-js/faker";
+import { CssFunction, faker as fakerEN } from "@faker-js/faker";
 import { fakerAR as faker } from "@faker-js/faker";
 import { fileURLToPath } from 'url';
 import path, { dirname } from 'path';
 import bcrypt from 'bcryptjs'
+import { encodeToQuadrants } from "../../geo/geohash";
 export async function seederGenerateCSV(){
 
 
@@ -74,7 +75,6 @@ const enumPaymentMethodTypes = [
   "wallet_and_cach",
   "wallet_and_online",
 ];
-const modifiersARtypes = ["اختياري", "متعدد"];
 const modifiersENtypes = ["Optional", "Multiple"];
 const enum_sizes_en = ["small", "medium,large,veryLarge,verysmall"];
 const enum_sizes_ar = ["small", "medium,large,veryLarge,verysmall"];
@@ -182,7 +182,7 @@ const customerWalletsArray :any= [];
 function generateCustomerWallets(customerId) {
   customerWalletsArray.push({
     customer_wallet_id: customerId,
-    balance_previous_day: 0, //faker.finance.amount(0, 500, 2),
+    balance_previous_day:faker.number.int({ min: 1, max: 100 }),
     last_updated_at: faker.date.recent().toISOString(),
   });
 }
@@ -265,13 +265,14 @@ function generateStoreCategory(id, uuid) {
 
 //---Array---
 const tagsArray :any = [];
-function generateTag(id,category_id) {
+function generateTag(id,category_id,internal_id) {
   tagsArray.push({
     tag_id: id,
+    internal_id:internal_id,
     // no arabic food.ethnicCategory
     tag_name_ar: faker.commerce.department(),
     tag_name_en: fakerEN.food.ethnicCategory(),
-        category_id :category_id 
+    category_id :category_id 
 
   });
 }
@@ -280,9 +281,11 @@ function generateTag(id,category_id) {
 
 //---Array--
 const storeTagsArray :any = [];
-function generateStoreTag(i,storeUUID, tageId) {
+function generateStoreTag(id,i,storeUUID, tageId,internal_tag_id) {
   storeTagsArray.push({
+    id:id,
     tag_id: tageId,
+    internal_tag_id :internal_tag_id,
     store_id: storeUUID,
     internal_store_id: i,
   });
@@ -291,9 +294,10 @@ function generateStoreTag(i,storeUUID, tageId) {
 
 //---Array--
 const categoryTagsArray :any = [];
-function generatecategoryTag(i,categoryUUID,internalCategoryId, tageId) {
+function generateCategoryTag(i,categoryUUID,internalCategoryId, tageId,internal_tag_id) {
   categoryTagsArray.push({
     tag_id: tageId,
+    internal_tag_id:internal_tag_id,
     store_id: categoryUUID,
     internal_category_id :internalCategoryId  ,
     internal_store_id: i,
@@ -305,39 +309,41 @@ function generatecategoryTag(i,categoryUUID,internalCategoryId, tageId) {
 
 const storesArray :any = [];
 
-async function generateStore(id, userName, uuid, partnerId,full_address,categoryId) {
+async function generateStore(id, userName, uuid, partnerId,full_address,categoryId,internal_category_id) {
+  let Latitude= faker.number.float({
+      min: 3345,
+      max: 3355,
+      fractionDigits: 6,
+    })/100
+    let longitude = faker.number.float({
+      min: 3620,
+      max: 3635,
+      fractionDigits: 6,
+    })/100
+    let locationCode =encodeToQuadrants(Latitude,longitude)
   storesArray.push({
     store_id: uuid,
     internal_id: id,
     partner_id: partnerId,
     store_name_ar: faker.commerce.department(),
-    store_name_en: faker.commerce.department(),
+    store_name_en: fakerEN.commerce.department(),
     phone_number: faker.phone.number(),
     email: faker.internet.email(),
     full_address: full_address,
     status: randomEnum(enumStoreStatuses),
-    internal_category_id :faker.number.int(),
+    internal_category_id :internal_category_id,
     category_id:categoryId,
     min_order_price: faker.number.float({ min: 5, max: 100 }),
-    Latitude: faker.number.float({
-      min: 3345,
-      max: 3355,
-      fractionDigits: 6,
-    })/100,
-    longitude: faker.number.float({
-      min: 3620,
-      max: 3635,
-      fractionDigits: 6,
-    })/100,
+    Latitude: Latitude,
+    longitude: longitude,
     logo_image_url: "/images/test/public/logo.jpg",
     cover_image_url: "/images/test/public/logo.jpg",
     store_description: faker.lorem.sentence(),
-    location_code: faker.string.uuid(),
+    location_code: locationCode,
     platform_commission: faker.number.float({ min: 0, max: 1 }),
     orders_type: randomEnum(enumOrdersTypes),
     user_name: userName,
     encrypted_password: await bcrypt.hash("1234567890", 10),
-    trend_id: faker.string.uuid(),
   });
 }
 
@@ -347,7 +353,6 @@ async function generateStore(id, userName, uuid, partnerId,full_address,category
 const trendsArray :any = [];
 function generateTrends(store_id, uuid) {
   trendsArray.push({
-    trend_id: uuid,
     //TODO real store id
     internal_store_id: store_id,
     details: faker.lorem.sentence(),
@@ -428,9 +433,16 @@ function generateOrderStatus(orderId, status,storeId) {
 
 //current order :
 //---Array---
-
+const ordersArray :any = [];
+function generateOrders(
+  uuid,internal_id
+){
+        ordersArray.push({
+order_id: uuid,
+internal_id :internal_id
+        })
+}
 const currentOrdersArray :any = [];
-
 function generateCurrentOrder(
   orderUUID,
   internalId,
@@ -440,19 +452,20 @@ function generateCurrentOrder(
   driverId,
   amount,
   couponCode,
-  storeNameAr,storeNameEn
+  storeNameAr,storeNameEn,
+  order_details_text
 ) {
   currentOrdersArray.push({
     order_id: orderUUID,
     internal_id: internalId,
     customer_id: customerid,
     store_id: storeId,
-   store_name_ar :storeNameAr,
+    store_name_ar :storeNameAr,
     store_name_en :storeNameEn,
     internal_store_id: internalStoreId,
     driver_id: driverId,
     amount: amount,
-    order_details_text: faker.lorem.sentences(10),
+    order_details_text: order_details_text,
     created_at: faker.date.recent().toISOString(),
     payment_method: randomEnum(enumPaymentMethodTypes),
     orders_type: randomEnum(enumOrdersType),
@@ -496,7 +509,7 @@ function generatePastOrder(
   PaymentMethod,
   relatedRating,
   couponCode,storeNameAr,storeNameEn
-  ,
+  ,order_details_text
 ) {
   pastOrdersArray.push({
     order_id: orderId,
@@ -507,7 +520,7 @@ function generatePastOrder(
     store_name_en :storeNameEn,
     internal_store_id: internalStoreId,
     driver_id: driverId,
-    order_details_text: faker.lorem.sentence(),
+    order_details_text: order_details_text,
     amount: amount,
     created_at: faker.date.recent().toISOString(),
     payment_method: PaymentMethod,
@@ -564,8 +577,8 @@ const storeRatingsArray :any = [];
 function generateStoreRatings(store_internal_id) {
   storeRatingsArray.push({
     store_internal_id: store_internal_id,
-    rating_previous_day: 5,
-    number_of_raters: 20,
+    rating_previous_day: faker.number.float({ min: 2, max: 5 }),
+    number_of_raters: faker.number.int({ min: 10, max: 60 }),
     last_updated_at: faker.date.recent().toISOString(),
   });
 }
@@ -694,11 +707,13 @@ function generateCustomerTransaction(
 //----------------------------------------------
 //---Array--
 const orderFinancialLogsArray :any = [];
-function generateorderFinancialLogs(uuid, driverId, orderId,storeId) {
+function generateorderFinancialLogs(uuid, driverId, orderId,storeId,orderInternalId) {
   orderFinancialLogsArray.push({
     log_id: uuid,
     driver_id: driverId,
     order_id: orderId,
+    order_internal_id :orderInternalId,
+
     store_id :storeId,
     order_amount : faker.number.float({ min: 50000, max: 200000 }),
     platform_commission: faker.number.float({ min: 0, max: 1 }),
@@ -978,7 +993,7 @@ function generateJsonbDataEnAr(ln, uuidObject) {
 
     let modifier_name_label = faker.food.adjective();
     let modifier_name_title = faker.food.adjective();
-    let modifier_name_type = randomEnum(modifiersARtypes);
+    let modifier_name_type = randomEnum(modifiersENtypes);
     let number1 = faker.number.int({
       min: 1,
       max: 4,
@@ -1123,20 +1138,20 @@ function storeCategoriesMultigenerator(count, uuidObject) {
   for (let i = 1; i < count + 1; i++) {
     generateStoreCategory(i, uuidObject.uniqueUUID[uuidObject.lastUUID]);
    
-    generatecategoryTag(i,uuidObject.uniqueUUID[uuidObject.lastUUID],faker.number.int({ min: 1, max: STORECATEGORIESCOUNT }), faker.number.int({ min: 1, max: TAGSCOUNT }))
+    generateCategoryTag(i,uuidObject.uniqueUUID[uuidObject.lastUUID],faker.number.int({ min: 1, max: STORECATEGORIESCOUNT }), faker.number.int({ min: 1, max: TAGSCOUNT }),faker.number.int({ min: 1, max: TAGSCOUNT }))
     uuidObject.lastUUID++;
   }
 }
 
 function tagsMultigenerator(count) {
   for (let i = 1; i < count + 1; i++) {
-    generateTag(i,faker.helpers.arrayElement(categoryTagsArray));
+    generateTag(i,randomArrayElement(storeCategoriesArray).category_id,i);
   }
 }
 async function customersMultigenerator(count) {
   for (let i = 1; i < count + 1; i++) {
     await generateCustomer(i, randomArrayElement(addressesArray).full_address);
-    generateCustomerWallets(i - 1);
+    generateCustomerWallets(i );
   }
 }
 const uniqueUserNames = generateUniqueValues(
@@ -1171,17 +1186,23 @@ async function partnerMultigenerator(count) {
 }
 
 async function StoreMultigenerator(count,uuidObject) {
+  let storeTagsId = 1
   for (let i = 1; i < count + 1; i++) {
     let partnerIndex = faker.number.int({ min: 0, max: PARTNERSCOUNT - 1 });
+    let category =storeCategoriesArray[ faker.number.int({ min: 0, max: STORECATEGORIESCOUNT - 1 })]
     await generateStore(
       i,
       userNameObject.uniqueUserNames[userNameObject.lastUserName],
       uuidObject.uniqueUUID[uuidObject.lastUUID],
       partnersArray[partnerIndex].partner_id,faker.helpers.arrayElement(addressesArray).full_address
-    ,storeCategoriesArray[ faker.number.int({ min: 0, max: STORECATEGORIESCOUNT - 1 })].category_id);
+    ,category.category_id,category.internal_id);
+        generateStoreRatings(i);
+generateStatisticsPreviousDay(uuidObject.uniqueUUID[uuidObject.lastUUID]);
     for (let j = 1; j < faker.number.int({ min: 1, max: 4 }); j++){
-      generateStoreTag(i,userNameObject.uniqueUserNames[userNameObject.lastUserName], tagId);
-    tagId++
+        let tag = tagsArray[j-1]
+
+      generateStoreTag(storeTagsId,i,userNameObject.uniqueUserNames[userNameObject.lastUserName], tag.tag_id,tag.internal_id);
+    storeTagsId++
   }
     for (let f = 1; f < 8; f++)
       generateWorkingHours(
@@ -1217,7 +1238,7 @@ generateCoupoun(
   storesArray[storeIndex].store_id,
   couponCodeObject.uniqueCouponCode[couponCodeObject.lastCouponCode],
 );
-couponCodeObject.lastCouponCode++
+  couponCodeObject.lastCouponCode++
 }
 }
 function ordersMultiGenerator(count) {
@@ -1244,8 +1265,11 @@ function ordersMultiGenerator(count) {
       max: 1000000,
       fractionDigits: 2,
     });
+    let orderId = uuidObject.uniqueUUID[uuidObject.lastUUID];
+    uuidObject.lastUUID++;
+    generateOrders(orderId,i)
     generateCurrentOrder(
-      uuidObject.uniqueUUID[uuidObject.lastUUID],
+      orderId,
       i,
       customersArray[customerIndex].customer_id,
       storesArray[storeIndex].store_id,
@@ -1255,10 +1279,9 @@ function ordersMultiGenerator(count) {
       couponsArray[couponIndex].code,
       storesArray[storeIndex].store_name_ar,
       storesArray[storeIndex].store_name_en,
+      "order_html_text"
     );
 
-    let orderId = uuidObject.uniqueUUID[uuidObject.lastUUID];
-    uuidObject.lastUUID++;
 
     generateElectronicPayment(
       uuidObject.uniqueUUID[uuidObject.lastUUID],
@@ -1341,7 +1364,7 @@ function ordersMultiGenerator(count) {
         uuidObject.uniqueUUID[uuidObject.lastUUID],
         driversArray[driverIndex].driver_id,
         orderId,
-        storesArray[storeIndex].internal_id
+        storesArray[storeIndex].internal_id,i
       );
       uuidObject.lastUUID++;
 
@@ -1358,8 +1381,9 @@ function ordersMultiGenerator(count) {
         PaymentMethod,
         orderRating,
         couponsArray[couponIndex].code,
-         storesArray[storeIndex].store_name_ar,
-         storesArray[storeIndex].store_name_en,
+        storesArray[storeIndex].store_name_ar,
+        storesArray[storeIndex].store_name_en,
+        "order_html_text"
       );
       currentOrdersArray.pop();
       generateRating(
@@ -1369,7 +1393,6 @@ function ordersMultiGenerator(count) {
         driverRating,
         storesArray[storeIndex].internal_id
       );
-      generateStoreRatings(store_internal_id);
       store_internal_id++
       generateStoreTransactions(
         transaction_store_id,
@@ -1402,7 +1425,7 @@ function soldProductMultiGenerator(count) {
 function documentImagesMultiGenerator(count) {
   for (let i = 1; i < count; i++) {
     generateDocumentImage(i);
-    generateDriverDocumentImage(i,i)
+    generateDriverDocumentImage(i,randomArrayElement(driversArray).driver_id)
   }
 }
 
@@ -1424,11 +1447,7 @@ function customersVisitedMultiGenerator(count) {
     generateCustomersVisited(i,faker.number.int({ min: 1, max: CUSTOMERCOUNT }),faker.number.int({ min: 1, max: STORESCOUNT}))
   }
 }
-function StatisticsPreviousDayMultiGenerator(count) {
-  for (let i = 1; i < count; i++) {
-    generateStatisticsPreviousDay(i);
-  }
-}
+
 function withdrawalRequestsMultiGenerator(count) {
   for (let i = 1; i < count; i++) {
     let partnerId =partnersArray[ faker.number.int({ min: 1, max: PARTNERSCOUNT-1 })].partner_id;
@@ -1450,7 +1469,6 @@ ordersMultiGenerator(ORDERSCOUNT);
 soldProductMultiGenerator(SOLDPRODUCTSCOUNT);
 documentImagesMultiGenerator(DOCUMENTIMAGESSCOUNT);
 generateDailyStatistics();
-StatisticsPreviousDayMultiGenerator(STORESCOUNT);
 SystemSettingsMultiGenerator(SYSTEMSETTINGCOUNT);
 driverTransactionsMultiGenerator(driverTRANSACTIONSCOUNT)
 customersVisitedMultiGenerator(VISITEDSSCOUNT)
@@ -1506,6 +1524,11 @@ saveToCSV(
 saveToCSV("products", productsArray, Object.keys(productsArray[0]));
 saveToCSV("coupons", couponsArray, Object.keys(couponsArray[0]));
 saveToCSV("order_status", OrderStatusArray, Object.keys(OrderStatusArray[0]));
+saveToCSV(
+  "orders",
+  ordersArray,
+  Object.keys(ordersArray[0])
+);
 saveToCSV(
   "current_orders",
   currentOrdersArray,

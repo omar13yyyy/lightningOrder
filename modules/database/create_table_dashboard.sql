@@ -56,6 +56,7 @@ CREATE TABLE partners (
     last_updated_wallet_at timestamp with time zone,
     PRIMARY KEY (partner_id),
     UNIQUE("user_name")
+    
 );
 
 
@@ -132,7 +133,10 @@ CREATE TABLE store_wallets (
 
     balance_previous_day DOUBLE PRECISION,
     last_updated_at timestamp with time zone,
-        PRIMARY KEY(store_id)
+        PRIMARY KEY(store_id),
+            UNIQUE("store_id"),
+            UNIQUE("internal_store_id")
+
 
 );
 
@@ -189,14 +193,12 @@ CREATE TABLE system_settings (
 
 
 CREATE TABLE trends (
-    trend_id text,
-    internal_store_id text ,
+    internal_store_id bigint ,
     details text,
     contract_image text,
     from_date timestamp with time zone,
     to_date timestamp with time zone,
     create_at timestamp with time zone,
-     PRIMARY KEY(trend_id),
      UNIQUE("internal_store_id")
 
 
@@ -205,10 +207,12 @@ CREATE TABLE trends (
 
 
 CREATE TABLE tags (
-    tag_id bigserial,
+    tag_id text,
+    internal_id   bigint,
     tag_name_ar text,
     tag_name_en text,
     category_id text,
+        UNIQUE("internal_id"),
 
     PRIMARY KEY(tag_id)
 
@@ -228,8 +232,9 @@ CREATE TABLE stores (
     category_id text,
 
     min_order_price DOUBLE PRECISION,
-    Latitude text,
-    longitude text,
+    --TODO longitude Latitude DOUBLE PRECISION
+    Latitude DOUBLE PRECISION,
+    longitude DOUBLE PRECISION,
     logo_image_url text,
     cover_image_url text,
     store_description text,
@@ -238,28 +243,30 @@ CREATE TABLE stores (
     orders_type enum_orders_type NOT NULL DEFAULT 'NULL',
     user_name text ,
     encrypted_password text ,
-    trend_id text DEFAULT 'NULL',
-        PRIMARY KEY(internal_id),
-            UNIQUE("store_id")
-
-
+    PRIMARY KEY(internal_id),
+    UNIQUE("store_id")
 );
 CREATE TABLE store_tags (
-    tag_id bigint,
+    id bigserial,
+    tag_id text,
+    internal_tag_id bigint,
     store_id text,
     internal_store_id bigint,
-    PRIMARY KEY(tag_id)
+    PRIMARY KEY(id)
 
 );
 --Added
 
 CREATE TABLE category_tags (
-    tag_id bigint,
+    tag_id text,
+    internal_tag_id bigint,
     category_id text,
     internal_category_id bigint ,
 
     internal_store_id bigint ,
-    PRIMARY KEY(tag_id)
+    PRIMARY KEY(tag_id),
+    UNIQUE("internal_tag_id")
+
 
 );
 CREATE TABLE store_categories (
@@ -267,7 +274,6 @@ CREATE TABLE store_categories (
     internal_id bigserial,
     category_name_ar text,
     category_name_en text,
-
     category_image text,
     PRIMARY KEY(internal_id),
     UNIQUE("category_id")
@@ -340,7 +346,9 @@ CREATE TABLE withdrawal_requests (
     withdrawal_status enum_withdrawal_status NOT NULL DEFAULT 'NULL',
     withdrawal_user enum_withdrawal_user NOT NULL DEFAULT 'NULL',
     uploaded_at timestamp with time zone,
-    done boolean 
+    done boolean ,
+        UNIQUE("withdrawal_id")
+
 
 );
 
@@ -353,6 +361,187 @@ CREATE TABLE products (
         PRIMARY KEY(store_id)
 
 );
+
+
+ALTER TABLE IF EXISTS public.category_tags
+    ADD FOREIGN KEY (internal_store_id)
+    REFERENCES public.stores (internal_id) MATCH SIMPLE
+    ON UPDATE NO ACTION
+    ON DELETE NO ACTION
+    NOT VALID;
+
+
+ALTER TABLE IF EXISTS public.coupons
+    ADD FOREIGN KEY (internal_store_id)
+    REFERENCES public.stores (internal_id) MATCH SIMPLE
+    ON UPDATE NO ACTION
+    ON DELETE NO ACTION
+    NOT VALID;
+
+
+ALTER TABLE IF EXISTS public.customers_visited
+    ADD FOREIGN KEY (store_id)
+    REFERENCES public.stores (internal_id) MATCH SIMPLE
+    ON UPDATE NO ACTION
+    ON DELETE NO ACTION
+    NOT VALID;
+
+
+ALTER TABLE IF EXISTS public.document_images
+    ADD FOREIGN KEY (user_id)
+    REFERENCES public.partners (partner_id) MATCH SIMPLE
+    ON UPDATE NO ACTION
+    ON DELETE NO ACTION
+    NOT VALID;
+
+
+ALTER TABLE IF EXISTS public.statistics_previous_day
+    ADD FOREIGN KEY (store_id)
+    REFERENCES public.stores (store_id) MATCH SIMPLE
+    ON UPDATE NO ACTION
+    ON DELETE NO ACTION
+    NOT VALID;
+
+
+ALTER TABLE IF EXISTS public.store_ratings_previous_day
+    ADD FOREIGN KEY (store_internal_id)
+    REFERENCES public.stores (internal_id) MATCH SIMPLE
+    ON UPDATE NO ACTION
+    ON DELETE NO ACTION
+    NOT VALID;
+
+
+ALTER TABLE IF EXISTS public.store_tags
+    ADD FOREIGN KEY (internal_store_id)
+    REFERENCES public.stores (internal_id) MATCH SIMPLE
+    ON UPDATE NO ACTION
+    ON DELETE NO ACTION
+    NOT VALID;
+
+
+ALTER TABLE IF EXISTS public.store_tags
+    ADD FOREIGN KEY (internal_tag_id)
+    REFERENCES public.tags (internal_id) MATCH SIMPLE
+    ON UPDATE NO ACTION
+    ON DELETE NO ACTION
+    NOT VALID;
+
+
+ALTER TABLE IF EXISTS public.store_transactions
+    ADD FOREIGN KEY (partner_id)
+    REFERENCES public.partners (partner_id) MATCH SIMPLE
+    ON UPDATE NO ACTION
+    ON DELETE NO ACTION
+    NOT VALID;
+
+
+ALTER TABLE IF EXISTS public.store_transactions
+    ADD FOREIGN KEY (internal_store_id)
+    REFERENCES public.stores (internal_id) MATCH SIMPLE
+    ON UPDATE NO ACTION
+    ON DELETE NO ACTION
+    NOT VALID;
+
+
+ALTER TABLE IF EXISTS public.stores
+    ADD FOREIGN KEY (partner_id)
+    REFERENCES public.partners (partner_id) MATCH SIMPLE
+    ON UPDATE NO ACTION
+    ON DELETE NO ACTION
+    NOT VALID;
+
+
+ALTER TABLE IF EXISTS public.stores
+    ADD FOREIGN KEY (full_address)
+    REFERENCES public.address (full_address) MATCH SIMPLE
+    ON UPDATE NO ACTION
+    ON DELETE NO ACTION
+    NOT VALID;
+
+
+ALTER TABLE IF EXISTS public.trends
+    ADD FOREIGN KEY (internal_store_id)
+    REFERENCES public.stores (internal_id) MATCH SIMPLE
+    ON UPDATE NO ACTION
+    ON DELETE NO ACTION
+    NOT VALID;
+
+
+ALTER TABLE IF EXISTS public.store_wallets
+    ADD FOREIGN KEY (internal_store_id)
+    REFERENCES public.stores (internal_id) MATCH SIMPLE
+    ON UPDATE NO ACTION
+    ON DELETE NO ACTION
+    NOT VALID;
+
+
+ALTER TABLE IF EXISTS public.stores
+    ADD FOREIGN KEY (internal_category_id)
+    REFERENCES public.store_categories (internal_id) MATCH SIMPLE
+    ON UPDATE NO ACTION
+    ON DELETE NO ACTION
+    NOT VALID;
+
+
+ALTER TABLE IF EXISTS public.tags
+    ADD FOREIGN KEY (category_id)
+    REFERENCES public.store_categories (category_id) MATCH SIMPLE
+    ON UPDATE NO ACTION
+    ON DELETE NO ACTION
+    NOT VALID;
+
+
+
+ALTER TABLE IF EXISTS public.withdrawal_document_images
+    ADD FOREIGN KEY (withdrawal_id)
+    REFERENCES public.withdrawal_requests (withdrawal_id) MATCH SIMPLE
+    ON UPDATE NO ACTION
+    ON DELETE NO ACTION
+    NOT VALID;
+
+
+ALTER TABLE IF EXISTS public.withdrawal_requests
+    ADD FOREIGN KEY (partner_id)
+    REFERENCES public.partners (partner_id) MATCH SIMPLE
+    ON UPDATE NO ACTION
+    ON DELETE NO ACTION
+    NOT VALID;
+
+
+ALTER TABLE IF EXISTS public.working_hours
+    ADD FOREIGN KEY (internal_store_id)
+    REFERENCES public.stores (internal_id) MATCH SIMPLE
+    ON UPDATE NO ACTION
+    ON DELETE NO ACTION
+    NOT VALID;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -417,4 +606,76 @@ ALTER FUNCTION public.get_store_wallet_balance(text)
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+----------------------------------------------------------------------------------------------
+CREATE OR REPLACE FUNCTION haversine_distance_km(
+  lat1 double precision, lon1 double precision,
+  lat2 double precision, lon2 double precision
+) RETURNS double precision AS $$
+DECLARE
+  dlat double precision := radians(lat2 - lat1);
+  dlon double precision := radians(lon2 - lon1);
+  a double precision;
+  c double precision;
+BEGIN
+  a := sin(dlat / 2)^2 + cos(radians(lat1)) * cos(radians(lat2)) * sin(dlon / 2)^2;
+  c := 2 * atan2(sqrt(a), sqrt(1 - a));
+  RETURN 6371 * c;  
 END;
+$$ LANGUAGE plpgsql IMMUTABLE;
+
+
+END;
+    
