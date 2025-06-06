@@ -3,8 +3,8 @@ import {
   getDeliveryTimePerKm,
   getDeliveryCostPerKm,
   getMaxDistance,
-} from "../../../../../modules/config/settingConfig";
-
+} 
+from "../../../../../modules/config/settingConfig";
 import bcryptjs from "bcryptjs";
 import jwt from "jsonwebtoken";
 import { CategoryService, CouponDetailsRepo, CouponDetailsService, LanguageService, NearStoresByCategoryRepo, NearStoresByCategoryReq, NearStoresBytagRepo, NearStoresBytagService, NearStoresRepo,
@@ -32,7 +32,7 @@ function processRow(row) : StoreItem{
    number_of_raters: row.number_of_raters,
    logo_image_url: row.logo_image_url,
    cover_image_url: row.cover_image_url,
-   orders_type: "take_away",
+   orders_type: row.orders_type,
  }
 return result
 }

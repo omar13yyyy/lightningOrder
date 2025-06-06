@@ -1,104 +1,150 @@
 import { userRepository } from "./customers.repository";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
+import {
+  CustomerServeceParams,
+  CustomerRepoParams,
+  LoginServeceParams,
+  PhoneOnlyRepoParams,
+  updateEffectiveTokenRepoParams,
+  RegisterServeceParams,
+  CodeValidationRepoParams,
+  PhoneOnlyServeceParams,
+  insertCustomerRepoParams,
+  CodeValidationServeceParams,
+  ResetPasswordServeceParams,
+  ResetPasswordRepoParams,
+} from "../../../types/customers";
 
 export const customersServices = {
-  getCustomerTokenByIdService: async (customerId) => {
-    userRepository.fetchCustomerTokenById(customerId);
+  getCustomerTokenByIdService: async (params: CustomerServeceParams) => {
+    userRepository.fetchCustomerTokenById({
+      customerId: params.customerId,
+    } as CustomerRepoParams);
   },
 
-  loginService: async (number, reqPassword) => {
+  loginService: async (params: LoginServeceParams) => {
     if (await userRepository.isCustomerNumberUsed) {
       const { encrypted_password, customer_id } =
-        await userRepository.fetchCustomerIdPasswordByNumber(number);
-      if (await bcrypt.compare(reqPassword, encrypted_password)) {
+        await userRepository.fetchCustomerIdPasswordByNumber({
+          phoneNumber: params.number,
+        } as PhoneOnlyRepoParams);
+      if (await bcrypt.compare(params.reqPassword, encrypted_password)) {
         const token = jwt.sign(
           { customer_id: customer_id },
           process.env.TOKEN_SECRET_ADMIN
         );
-        await userRepository.updateEffectiveToken(token, customer_id);
+        await userRepository.updateEffectiveToken({
+          token: token,
+          customerId: customer_id,
+        } as updateEffectiveTokenRepoParams);
         return token;
       }
     }
     return null;
   },
-  customerRegisterService: async (
-    fullName,
-    phoneNumber,
-    email,
-    password,
-    birthDate,
-    address,
-    code
-  ) => {
-          console.log("code : ",code)
+  customerRegisterService: async (params: RegisterServeceParams) => {
+    console.log("code : ", params.code);
 
     if (
-      await userRepository.isValidCode(
-        phoneNumber,
-        code )&& !(await userRepository.isCustomerNumberUsed(phoneNumber))
-      
+      (await userRepository.isValidCode({
+        phoneNumber: params.phoneNumber,
+        code: params.code,
+      } as CodeValidationRepoParams)) &&
+      !(await userRepository.isCustomerNumberUsed({
+        phoneNumber: params.phoneNumber,
+      } as PhoneOnlyServeceParams))
     ) {
-      const encryptedPassword = await bcrypt.hash(password, 10);
-      const customerId = await userRepository.insertCustomer(
-        fullName,
-        phoneNumber,
-        email,
-        encryptedPassword,
-        birthDate,
-        address
-      );
+      const encryptedPassword = await bcrypt.hash(params.password, 10);
+      const customerId = await userRepository.insertCustomer({
+        fullName: params.fullName,
+        phoneNumber: params.phoneNumber,
+        email: params.email,
+        encryptedPassword: encryptedPassword,
+        birthDate: params.birthDate,
+        address: params.address,
+      } as insertCustomerRepoParams);
       const token = jwt.sign(
         { customer_id: customerId },
         process.env.TOKEN_SECRET_ADMIN
       );
-      await userRepository.deleteCode(phoneNumber)
+      await userRepository.deleteCode({
+        phoneNumber: params.phoneNumber,
+      } as PhoneOnlyServeceParams);
 
       return token;
     }
     return null;
   },
-  confirmedCodeIsValidService: async (phoneNumber, code) => {
-    return await userRepository.isValidCode(phoneNumber, code);
+  confirmedCodeIsValidService: async (params: CodeValidationServeceParams) => {
+    return await userRepository.isValidCode({
+      phoneNumber: params.phoneNumber,
+      code: params.code,
+    } as CodeValidationRepoParams);
   },
 
-  addRestConfirmationCodeService: async (phoneNumber) => {
-    if ((await userRepository.isCustomerNumberUsed(phoneNumber))) {
+  addRestConfirmationCodeService: async (params: PhoneOnlyServeceParams) => {
+    if (
+      await userRepository.isCustomerNumberUsed({
+        phoneNumber: params.phoneNumber,
+      } as PhoneOnlyServeceParams)
+    ) {
       const codeString = Math.floor(1000 + Math.random() * 9000);
       const code = codeString.toString();
 
-      console.log("code for ", phoneNumber, " is : ", code);
-      await userRepository.insertConfirmationCode(phoneNumber, code);
+      console.log("code for ", params.phoneNumber, " is : ", code);
+      await userRepository.insertConfirmationCode({
+        phoneNumber: params.phoneNumber,
+        code: code,
+      } as CodeValidationRepoParams);
 
       return true;
     }
     return false;
   },
-    addConfirmationCodeService: async (phoneNumber) => {
-    if (!(await userRepository.isCustomerNumberUsed(phoneNumber))) {
+  addConfirmationCodeService: async (params: PhoneOnlyServeceParams) => {
+    if (
+      !(await userRepository.isCustomerNumberUsed({
+        phoneNumber: params.phoneNumber,
+      } as PhoneOnlyServeceParams))
+    ) {
       const codeString = Math.floor(1000 + Math.random() * 9000);
       const code = codeString.toString();
 
-      console.log("code for ", phoneNumber, " is : ", code);
-      await userRepository.insertConfirmationCode(phoneNumber, code);
+      console.log("code for ", params.phoneNumber, " is : ", code);
+      await userRepository.insertConfirmationCode({
+        phoneNumber: params.phoneNumber,
+        code: code,
+      } as CodeValidationRepoParams);
 
       return true;
     }
     return false;
   },
-  customerResetPasswordService: async (phoneNumber, newPassword, code) => {
-    if (await userRepository.isValidCode(phoneNumber, code)) {
-      const encryptedPassword = await bcrypt.hash(newPassword, 10);
-      if (await userRepository.isCustomerNumberUsed(phoneNumber)) {
-        await userRepository.updateCustomerPassword(
-          phoneNumber,
-          encryptedPassword
-        );
-        await userRepository.deleteCode(phoneNumber)
+  customerResetPasswordService: async (params: ResetPasswordServeceParams) => {
+    if (
+      await userRepository.isValidCode({
+        phoneNumber: params.phoneNumber,
+        code: params.code,
+      } as CodeValidationRepoParams)
+    ) {
+      const encryptedPassword = await bcrypt.hash(params.newPassword, 10);
+      if (
+        await userRepository.isCustomerNumberUsed({
+          phoneNumber: params.phoneNumber,
+        } as PhoneOnlyServeceParams)
+      ) {
+        await userRepository.updateCustomerPassword({
+          phoneNumber: params.phoneNumber,
+          newPassword: encryptedPassword,
+        } as ResetPasswordRepoParams);
+        await userRepository.deleteCode({
+          phoneNumber: params.phoneNumber,
+        } as PhoneOnlyServeceParams);
 
-        return true
+        return true;
       }
     }
-    return false
+    return false;
   },
 };

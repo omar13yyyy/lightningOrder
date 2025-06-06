@@ -145,10 +145,10 @@ getStoreProducts: async   (req, res)=>{
     res.send(result)
 },
 getCouponDetails: async   (req, res)=>{
-    const query :CouponDetailsReq = req.body 
+    const body :CouponDetailsReq = req.body 
 const params :CouponDetailsService ={
-         couponCode: query.couponCode,
-         storeId: query.storeId
+         couponCode: body.couponCode,
+         storeId: body.storeId
      }
     const result = await storesServices.getCouponDetailsService(params);
     res.send(result)
