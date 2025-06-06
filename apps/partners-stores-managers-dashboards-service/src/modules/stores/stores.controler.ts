@@ -1,34 +1,159 @@
 
+import { CategoryReq, CategoryService, CouponDetailsReq, StoreProductsReq, LanguageReq,
+     NearStoresByCategoryReq, NearStoresByTagReq, NearStoresReq, SearchForStoreReq, StoreIdReq, 
+     TagReq,
+     TagService,
+     NearStoresService,
+     NearStoresBytagService,
+     NearStoresByCategoryService,
+     SearchForStoreService,
+     StoreProductsService,
+     CouponDetailsService} from '../../types/stores';
 import { storesServices } from './stores.service';
 export const storesController ={
-    getCategoryTag : async    (req, res)=>{
-        const ln = req.query.ln; 
-        const categoryId = req.query.categoryId; 
-    const result = await storesServices.getCategoryTagsService(ln,categoryId);
+    getCategoryTags : async    (req, res)=>{
+        const query :TagReq = req.query; 
+        const params :TagService = {
+            categoryId : query.categoryId, 
+            ln : query.ln
+        }
+    const result = await storesServices.getCategoryTagsService(params );
         res.send(result)
 } ,
 getStoreCategories: async   (req, res)=>{
-    const ln = req.query.ln; // undefined لأن 'ln' بدون قيمة
-
-    const result = await storesServices.getStoreCategoriesService(ln);
+        const query :CategoryReq = req.query; 
+        const params :CategoryService = {
+            categoryId : query.categoryId, 
+            ln : query.ln
+        }
+    const result = await storesServices.getStoreCategoriesService(params);
     res.send(result)
 }
 ,
+getNearStores: async   (req, res)=>{
+    const query : NearStoresReq= req.query  
+    const params :NearStoresService = {
+        ln: query.ln,
+        latitudes:  query.latitudes,
+        logitudes:  query.logitudes,
+        locationCode:  query.locationCode,
+        limit:  query.limit,
+        offset:  query.offset,
+    }
+    const result = await storesServices.getNearStoresService(params);
+    res.send(result)
+},
+getNearStoresByTag: async   (req, res)=>{
+    const query :NearStoresByTagReq = req.query ; 
+    const params :NearStoresBytagService = {
+        ln: query.ln,
+        latitudes: query.latitudes,
+        logitudes: query.logitudes,
+        locationCode: query.locationCode,
+        limit: query.limit,
+        offset: query.offset,
+        tagId:  query.tagId
+    }
+    const result = await storesServices.getNearStoresByTagService(params);
+    res.send(result)
+},
+getNearStoresByCategory: async   (req, res)=>{
+     const query :NearStoresByCategoryReq =  req.query ; 
+        const params :NearStoresByCategoryService = {
+        ln: query.ln,
+        latitudes: query.latitudes,
+        logitudes: query.logitudes,
+        locationCode: query.locationCode,
+        limit: query.limit,
+        offset: query.offset,
+        categoryId:  query.categoryId
+    }
+    const result = await storesServices.getNearStoresByCategoryService(params);
+    res.send(result)
+},
+getNearTrandStores: async   (req, res)=>{
+    const query :NearStoresReq = req.query   
+        const params :NearStoresService = {
+        ln: query.ln,
+        latitudes:  query.latitudes,
+        logitudes:  query.logitudes,
+        locationCode:  query.locationCode,
+        limit:  query.limit,
+        offset:  query.offset,
+    }
+    const result = await storesServices.getNearTrandStoresService(params);
+    res.send(result)
+},
+getNearTrandStoresByTag: async   (req, res)=>{
+      const query :NearStoresByTagReq = req.query ; 
+    const params :NearStoresBytagService = {
+        ln: query.ln,
+        latitudes: query.latitudes,
+        logitudes: query.logitudes,
+        locationCode: query.locationCode,
+        limit: query.limit,
+        offset: query.offset,
+        tagId:  query.tagId
+    }
+    const result = await storesServices.getNearTrendStoresByTagService(params);
+    res.send(result)
+},
+getNearTrandStoresByCategory: async   (req, res)=>{
+      const query :NearStoresByCategoryReq =  req.query ; 
+        const params :NearStoresByCategoryService = {
+        ln: query.ln,
+        latitudes: query.latitudes,
+        logitudes: query.logitudes,
+        locationCode: query.locationCode,
+        limit: query.limit,
+        offset: query.offset,
+        categoryId:  query.categoryId
+    }
+    const result = await storesServices.getNearTrendStoresByCategoryService(params);
+    res.send(result)
+},
+searchForStore: async   (req, res)=>{
+    const query :SearchForStoreReq = req.query; 
+    const params :SearchForStoreService = {
+               ln: query.ln,
+        latitudes: query.latitudes,
+        logitudes: query.logitudes,
+        locationCode: query.locationCode,
+        limit: query.limit,
+        offset: query.offset,
+        storeName: query.storeName
+    }
+    const result = await storesServices.SearchForStoreService(params);
+    res.send(result)
+},
 getWorkShifts: async   (req, res)=>{
-    const storeId = req.query.storeId; 
-    const result = await storesServices.getWorkingHoursServie(storeId);
+    const query :StoreIdReq = req.query  ; 
+    const params : StoreIdReq = {
+        storeId:query.storeId
+    }
+
+    const result = await storesServices.getWorkingHoursServie(params);
     res.send(result)
 },
 getStoreProducts: async   (req, res)=>{
-    const ln = req.query.ln; 
-    const storeId = req.query.storeId; 
-    const result = await storesServices.getStoreProductsService(ln,storeId);
+    const query : StoreProductsReq = req.query 
+     const params :StoreProductsService ={
+         ln: query.ln,
+         storeId: query.storeId
+     }
+    const result = await storesServices.getStoreProductsService(params);
     res.send(result)
 },
 getCouponDetails: async   (req, res)=>{
-    const {couponCode,storeId} = req.body
-
-    const result = await storesServices.getCouponDetailsService(couponCode,storeId);
+    const query :CouponDetailsReq = req.body 
+const params :CouponDetailsService ={
+         couponCode: query.couponCode,
+         storeId: query.storeId
+     }
+    const result = await storesServices.getCouponDetailsService(params);
     res.send(result)
 }
+
+
+
 }

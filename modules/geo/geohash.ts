@@ -1,53 +1,53 @@
-
-
 const EARTH_RADIUS_KM = 6371;
 function kmToLat(km) {
   return (km / EARTH_RADIUS_KM) * (180 / Math.PI);
 }
 
 function kmToLng(km, latitude) {
-  return (km / EARTH_RADIUS_KM) * (180 / Math.PI) / Math.cos(latitude * Math.PI / 180);
+  return (
+    ((km / EARTH_RADIUS_KM) * (180 / Math.PI)) /
+    Math.cos((latitude * Math.PI) / 180)
+  );
 }
 
 export function encodeToQuadrants(latitude, longitude, precision = 20) {
-  let latMin = -90.0, latMax = 90.0;
-  let lonMin = -180.0, lonMax = 180.0;
+  let latMin = -90.0,
+    latMax = 90.0;
+  let lonMin = -180.0,
+    lonMax = 180.0;
   let quadrantCode = "";
 
   for (let i = 0; i < precision; i++) {
     const latMid = (latMin + latMax) / 2.0;
     if (latitude > latMid) {
-      quadrantCode += "1";  // شمال
+      quadrantCode += "1"; // شمال
       latMin = latMid;
     } else {
-      quadrantCode += "3";  // جنوب
+      quadrantCode += "3"; // جنوب
       latMax = latMid;
     }
 
     const lonMid = (lonMin + lonMax) / 2.0;
     if (longitude > lonMid) {
-      quadrantCode += "2";  // شرق
+      quadrantCode += "2"; // شرق
       lonMin = lonMid;
     } else {
-      quadrantCode += "4";  // غرب
+      quadrantCode += "4"; // غرب
       lonMax = lonMid;
     }
   }
   let CompressQuadrantCode = "";
-  for(let i =0 ; i <quadrantCode.length ; i+=2 ){
-    if(quadrantCode[i]+quadrantCode[i+1] == "13"){
-      CompressQuadrantCode+=1
+  for (let i = 0; i < quadrantCode.length; i += 2) {
+    if (quadrantCode[i] + quadrantCode[i + 1] == "13") {
+      CompressQuadrantCode += 1;
+    } else if (quadrantCode[i] + quadrantCode[i + 1] == "24") {
+      CompressQuadrantCode += 2;
     }
-    else if(quadrantCode[i]+quadrantCode[i+1] == "24"){
-      CompressQuadrantCode+=2
+    if (quadrantCode[i] + quadrantCode[i + 1] == "34") {
+      CompressQuadrantCode += 3;
+    } else if (quadrantCode[i] + quadrantCode[i + 1] == "34") {
+      CompressQuadrantCode += 4;
     }
-      if(quadrantCode[i]+quadrantCode[i+1] == "34"){
-      CompressQuadrantCode+=3
-    }
-    else if(quadrantCode[i]+quadrantCode[i+1] == "34"){
-      CompressQuadrantCode+=4
-    }
-    
   }
   return quadrantCode;
 }
@@ -58,12 +58,22 @@ export function encodeToQuadrants(latitude, longitude, precision = 20) {
 24 → جنوب شرق 4
 
 */
-export function generateNeighborsByDistance(latitude, longitude, precision = 20, distanceKm,slice=24) {
-  const neighbors:any = [];
+export function generateNeighborsByDistance(
+  latitude,
+  longitude,
+  precision = 20,
+  distanceKm,
+  slice = 24
+) {
+  const neighbors: any = [];
 
   // إزاحة 0 و +distanceKm و -distanceKm للخط عرض وخط طول
   const latOffsets = [0, kmToLat(distanceKm), -kmToLat(distanceKm)];
-  const lngOffsets = [0, kmToLng(distanceKm, latitude), -kmToLng(distanceKm, latitude)];
+  const lngOffsets = [
+    0,
+    kmToLng(distanceKm, latitude),
+    -kmToLng(distanceKm, latitude),
+  ];
 
   for (const dLat of latOffsets) {
     for (const dLng of lngOffsets) {
@@ -76,152 +86,216 @@ export function generateNeighborsByDistance(latitude, longitude, precision = 20,
   return neighbors;
 }
 export function generateNeighbors(location_code) {
-  let neighbors :string[] = [];
+  let neighbors: string[] = [];
 
-  location_code = location_code.slice(24)
-    neighbors.push(location_code)
-  console.log(location_code)
-  let lastTwo = location_code.slice(-2)
-  let lastFour= location_code.slice(-4)
-  let lastFourthTwoFromFourth = lastFour.slice(2)
-    neighbors.push(location_code+lastFour)
+  location_code = location_code.slice(0, -24);
+  //neighbors.push(location_code)
+  console.log("location_code +", location_code);
+  let firstFromLeft = location_code.slice(-1);
+  let lastTwoFromLeft = location_code.slice(-2);
+  let secondFromLeft = lastTwoFromLeft.slice(0, -1);
+  location_code = location_code.slice(0, -2);
+  neighbors.push(location_code + lastTwoFromLeft);
 
-  console.log(location_code+lastFour)
+  console.log("location_code +", location_code);
+  console.log("firstFromLeft +", firstFromLeft);
+  console.log("secondFromLeft +", secondFromLeft);
+  if (secondFromLeft == 1 && firstFromLeft == 1) {
+    neighbors.push(location_code + "12");
+    neighbors.push(location_code + "13");
+    neighbors.push(location_code + "14");
 
-if (lastTwo === "1" && lastFourthTwoFromFourth === "1") {
-  neighbors.push(location_code + "1" + "2");
-  neighbors.push(location_code + "1" + "4");
-  neighbors.push(location_code + "1" + "3");
-  neighbors.push(location_code + "3" + "3");
-  neighbors.push(location_code + "3" + "4");
-  neighbors.push(location_code + "2" + "4");
-  neighbors.push(location_code + "4" + "2");
-}
 
-else if (lastTwo === "1" && lastFourthTwoFromFourth === "2") {
-  neighbors.push(location_code + "2" + "1");
-  neighbors.push(location_code + "2" + "3");
-  neighbors.push(location_code + "2" + "4");
-  neighbors.push(location_code + "4" + "4");
-  neighbors.push(location_code + "4" + "3");
-  neighbors.push(location_code + "1" + "3");
-  neighbors.push(location_code + "3" + "1");
-}
 
-else if (lastTwo === "1" && lastFourthTwoFromFourth === "4") {
-  neighbors.push(location_code + "4" + "1");
-  neighbors.push(location_code + "4" + "2");
-  neighbors.push(location_code + "4" + "3");
-  neighbors.push(location_code + "2" + "1");
-  neighbors.push(location_code + "3" + "1");
-  neighbors.push(location_code + "1" + "2");
-  neighbors.push(location_code + "1" + "3");
-}
+    neighbors.push(location_code + "22");
+    neighbors.push(location_code + "24");
+    neighbors.push(location_code + "33");
+    neighbors.push(location_code + "34");
+    neighbors.push(location_code + "44");
 
-else if (lastTwo === "1" && lastFourthTwoFromFourth === "3") {
-  neighbors.push(location_code + "3" + "1");
-  neighbors.push(location_code + "3" + "2");
-  neighbors.push(location_code + "3" + "4");
-  neighbors.push(location_code + "1" + "2");
-  neighbors.push(location_code + "2" + "1");
-  neighbors.push(location_code + "4" + "1");
-  neighbors.push(location_code + "2" + "4");
-}
+  } else if (secondFromLeft == 1 && firstFromLeft == 2) {
+    neighbors.push(location_code + "11");
+    neighbors.push(location_code + "13");
+    neighbors.push(location_code + "14");
 
-else if (lastTwo === "2" && lastFourthTwoFromFourth === "4") {
-  neighbors.push(location_code + "4" + "2");
-  neighbors.push(location_code + "4" + "1");
-  neighbors.push(location_code + "4" + "3");
-  neighbors.push(location_code + "2" + "1");
-  neighbors.push(location_code + "1" + "2");
-  neighbors.push(location_code + "3" + "2");
-  neighbors.push(location_code + "1" + "3");
-}
 
-else if (lastTwo === "2" && lastFourthTwoFromFourth === "3") {
-  neighbors.push(location_code + "3" + "2");
-  neighbors.push(location_code + "3" + "1");
-  neighbors.push(location_code + "3" + "4");
-  neighbors.push(location_code + "1" + "2");
-  neighbors.push(location_code + "2" + "1");
-  neighbors.push(location_code + "4" + "2");
-  neighbors.push(location_code + "1" + "4");
-}
+    neighbors.push(location_code + "21");
+    neighbors.push(location_code + "23");
+    neighbors.push(location_code + "33");
+    neighbors.push(location_code + "34");
+    neighbors.push(location_code + "43");
 
-else if (lastTwo === "2" && lastFourthTwoFromFourth === "2") {
-  neighbors.push(location_code + "2" + "1");
-  neighbors.push(location_code + "2" + "3");
-  neighbors.push(location_code + "2" + "4");
-  neighbors.push(location_code + "3" + "2");
-  neighbors.push(location_code + "4" + "2");
-  neighbors.push(location_code + "1" + "4");
-  neighbors.push(location_code + "1" + "3");
-}
+  } else if (secondFromLeft == 1 && firstFromLeft == 3) {
+    neighbors.push(location_code + "11");
+    neighbors.push(location_code + "12");
+    neighbors.push(location_code + "14");
 
-else if (lastTwo === "4" && lastFourthTwoFromFourth === "3") {
-  neighbors.push(location_code + "3" + "4");
-  neighbors.push(location_code + "3" + "2");
-  neighbors.push(location_code + "3" + "1");
-  neighbors.push(location_code + "2" + "4");
-  neighbors.push(location_code + "1" + "4");
-  neighbors.push(location_code + "1" + "2");
-  neighbors.push(location_code + "2" + "1");
-}
+    neighbors.push(location_code + "22");
+    neighbors.push(location_code + "24");
+    neighbors.push(location_code + "42");
+    neighbors.push(location_code + "31");
+    neighbors.push(location_code + "32");
 
-else if (lastTwo === "4" && lastFourthTwoFromFourth === "2") {
-  neighbors.push(location_code + "2" + "4");
-  neighbors.push(location_code + "2" + "3");
-  neighbors.push(location_code + "2" + "1");
-  neighbors.push(location_code + "1" + "4");
-  neighbors.push(location_code + "3" + "4");
-  neighbors.push(location_code + "1" + "2");
-  neighbors.push(location_code + "1" + "3");
-}
 
-else if (lastTwo === "4" && lastFourthTwoFromFourth === "4") {
-  neighbors.push(location_code + "4" + "3");
-  neighbors.push(location_code + "4" + "1");
-  neighbors.push(location_code + "4" + "2");
-  neighbors.push(location_code + "3" + "4");
-  neighbors.push(location_code + "2" + "4");
-  neighbors.push(location_code + "1" + "4");
-  neighbors.push(location_code + "1" + "2");
-}
+  } else if (secondFromLeft == 1 && firstFromLeft == 4) {
+    neighbors.push(location_code + "11");
+    neighbors.push(location_code + "12");
+    neighbors.push(location_code + "13");
 
-else if (lastTwo === "3" && lastFourthTwoFromFourth === "3") {
-  neighbors.push(location_code + "3" + "4");
-  neighbors.push(location_code + "3" + "2");
-  neighbors.push(location_code + "3" + "1");
-  neighbors.push(location_code + "2" + "3");
-  neighbors.push(location_code + "1" + "3");
-  neighbors.push(location_code + "1" + "2");
-  neighbors.push(location_code + "2" + "1");
-}
+    neighbors.push(location_code + "21");
+    neighbors.push(location_code + "23");
+    neighbors.push(location_code + "41");
+    neighbors.push(location_code + "31");
+    neighbors.push(location_code + "32");
 
-else if (lastTwo === "3" && lastFourthTwoFromFourth === "2") {
-  neighbors.push(location_code + "2" + "3");
-  neighbors.push(location_code + "2" + "4");
-  neighbors.push(location_code + "2" + "1");
-  neighbors.push(location_code + "4" + "3");
-  neighbors.push(location_code + "1" + "3");
-  neighbors.push(location_code + "1" + "2");
-  neighbors.push(location_code + "1" + "4");
-}
 
-else if (lastTwo === "3" && lastFourthTwoFromFourth === "4") {
-  neighbors.push(location_code + "4" + "3");
-  neighbors.push(location_code + "4" + "1");
-  neighbors.push(location_code + "4" + "2");
-  neighbors.push(location_code + "1" + "3");
-  neighbors.push(location_code + "2" + "3");
-  neighbors.push(location_code + "1" + "2");
-  neighbors.push(location_code + "2" + "1");
-}
-return neighbors
+
+  } else if (secondFromLeft == 2 && firstFromLeft == 1) {
+    neighbors.push(location_code + "22");
+    neighbors.push(location_code + "23");
+    neighbors.push(location_code + "24");
+
+
+    neighbors.push(location_code + "12");
+    neighbors.push(location_code + "14");
+    neighbors.push(location_code + "43");
+    neighbors.push(location_code + "44");
+    neighbors.push(location_code + "34");
+
+  } else if (secondFromLeft == 2 && firstFromLeft == 2) {
+    neighbors.push(location_code + "21");
+    neighbors.push(location_code + "23");
+    neighbors.push(location_code + "24");
+
+
+    neighbors.push(location_code + "33");
+    neighbors.push(location_code + "43");
+    neighbors.push(location_code + "44");
+    neighbors.push(location_code + "11");
+    neighbors.push(location_code + "13");
+
+  } else if (secondFromLeft == 2 && firstFromLeft == 3) {
+    neighbors.push(location_code + "21");
+    neighbors.push(location_code + "22");
+    neighbors.push(location_code + "24");
+
+    neighbors.push(location_code + "12");
+    neighbors.push(location_code + "14");
+    neighbors.push(location_code + "41");
+    neighbors.push(location_code + "42");
+    neighbors.push(location_code + "32");
+
+  } else if (secondFromLeft == 2 && firstFromLeft == 4) {
+    neighbors.push(location_code + "21");
+    neighbors.push(location_code + "22");
+    neighbors.push(location_code + "23");
+
+
+    neighbors.push(location_code + "41");
+    neighbors.push(location_code + "42");
+    neighbors.push(location_code + "11");
+    neighbors.push(location_code + "13");
+    neighbors.push(location_code + "31");
+  } else if (secondFromLeft == 3 && firstFromLeft == 1) {
+    neighbors.push(location_code + "32");
+    neighbors.push(location_code + "33");
+    neighbors.push(location_code + "34");
+
+
+    neighbors.push(location_code + "13");
+    neighbors.push(location_code + "14");
+    neighbors.push(location_code + "24");
+    neighbors.push(location_code + "42");
+    neighbors.push(location_code + "44");
+  } else if (secondFromLeft == 3 && firstFromLeft == 2) {
+    neighbors.push(location_code + "31");
+    neighbors.push(location_code + "33");
+    neighbors.push(location_code + "34");
+
+
+        neighbors.push(location_code + "13");
+    neighbors.push(location_code + "14");
+    neighbors.push(location_code + "23");
+    neighbors.push(location_code + "41");
+    neighbors.push(location_code + "43");
+    
+  } else if (secondFromLeft == 3 && firstFromLeft == 3) {
+    neighbors.push(location_code + "31");
+    neighbors.push(location_code + "32");
+    neighbors.push(location_code + "34");
+
+
+
+        neighbors.push(location_code + "22");
+    neighbors.push(location_code + "12");
+    neighbors.push(location_code + "22");
+    neighbors.push(location_code + "42");
+    neighbors.push(location_code + "44");
+  } else if (secondFromLeft == 3 && firstFromLeft == 4) {
+    neighbors.push(location_code + "31");
+    neighbors.push(location_code + "32");
+    neighbors.push(location_code + "33");
+
+
+
+    neighbors.push(location_code + "41");
+    neighbors.push(location_code + "43");
+    neighbors.push(location_code + "21");
+    neighbors.push(location_code + "12");
+    neighbors.push(location_code + "21");
+  } else if (secondFromLeft == 4 && firstFromLeft == 1) {
+    neighbors.push(location_code + "42");
+    neighbors.push(location_code + "43");
+    neighbors.push(location_code + "44");
+
+        
+    neighbors.push(location_code + "23");
+    neighbors.push(location_code + "24");
+    neighbors.push(location_code + "14");
+    neighbors.push(location_code + "32");
+    neighbors.push(location_code + "34");
+
+  } else if (secondFromLeft == 4 && firstFromLeft == 2) {
+    neighbors.push(location_code + "41");
+    neighbors.push(location_code + "43");
+    neighbors.push(location_code + "44");
+
+
+        neighbors.push(location_code + "23");
+    neighbors.push(location_code + "24");
+    neighbors.push(location_code + "13");
+    neighbors.push(location_code + "31");
+    neighbors.push(location_code + "33");
+  } else if (secondFromLeft == 4 && firstFromLeft == 3) {
+    neighbors.push(location_code + "41");
+    neighbors.push(location_code + "42");
+    neighbors.push(location_code + "44");
+
+
+        neighbors.push(location_code + "34");
+    neighbors.push(location_code + "32");
+    neighbors.push(location_code + "22");
+    neighbors.push(location_code + "21");
+    neighbors.push(location_code + "12");
+  } else if (secondFromLeft == 4 && firstFromLeft == 4) {
+    neighbors.push(location_code + "41");
+    neighbors.push(location_code + "42");
+    neighbors.push(location_code + "43");
+
+
+    neighbors.push(location_code + "31");
+    neighbors.push(location_code + "33");
+    neighbors.push(location_code + "11");
+    neighbors.push(location_code + "21");
+    neighbors.push(location_code + "22");
+  }
+  return neighbors;
 }
 export function decodeFromQuadrants(quadrantCode) {
-  let latMin = -90.0, latMax = 90.0;
-  let lonMin = -180.0, lonMax = 180.0;
+  let latMin = -90.0,
+    latMax = 90.0;
+  let lonMin = -180.0,
+    lonMax = 180.0;
 
   // كل خطوتين هما رمز واحد: lat direction, lon direction
   for (let i = 0; i < quadrantCode.length; i += 2) {
@@ -254,23 +328,21 @@ export function decodeFromQuadrants(quadrantCode) {
   return { latitude, longitude };
 }
 
-
 export function haversineDistanceKm(lat1, lon1, lat2, lon2) {
-  const toRadians = angle => (angle * Math.PI) / 180;
+  const toRadians = (angle) => (angle * Math.PI) / 180;
 
-  const R = 6371; 
+  const R = 6371;
   const dLat = toRadians(lat2 - lat1);
   const dLon = toRadians(lon2 - lon1);
 
   const a =
     Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-    Math.cos(toRadians(lat1)) * Math.cos(toRadians(lat2)) *
-    Math.sin(dLon / 2) * Math.sin(dLon / 2);
+    Math.cos(toRadians(lat1)) *
+      Math.cos(toRadians(lat2)) *
+      Math.sin(dLon / 2) *
+      Math.sin(dLon / 2);
 
   const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 
-  return R * c; 
+  return R * c;
 }
-
-
-

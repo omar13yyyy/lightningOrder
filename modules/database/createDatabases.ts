@@ -15,7 +15,10 @@ const dashboardFDWSQL = fs.readFileSync(`${ROOT_LOCATION}modules/database/postgr
 const deliveryFDWSQL = fs.readFileSync(`${ROOT_LOCATION}modules/database/postgres_fdw_delivery.sql`, "utf8");
 const ordersFDWSQL = fs.readFileSync(`${ROOT_LOCATION}modules/database/postgres_fdw_orders.sql`, "utf8");
 const createEnum = fs.readFileSync(`${ROOT_LOCATION}modules/database/create_enum.sql`, "utf8");
-
+const customersFunctions = fs.readFileSync(`${ROOT_LOCATION}modules/database/functions/create_functions_customers.sql`, "utf8");
+const dashboardFunctions = fs.readFileSync(`${ROOT_LOCATION}modules/database/functions/create_functions_dashboard.sql`, "utf8");
+const deliveryFunctions = fs.readFileSync(`${ROOT_LOCATION}modules/database/functions/create_functions_delivery.sql`, "utf8");
+const ordersFunctions = fs.readFileSync(`${ROOT_LOCATION}modules/database/functions/create_functions_orders.sql`, "utf8");
 export async function createDatabases(){
    await customersQuery(createEnum,[]);
    await  ordersQuery(createEnum,[]);
@@ -29,10 +32,14 @@ export async function createDatabases(){
 
 
    await customersQuery(customersFDWSQL,[]);
-   await  ordersQuery(dashboardFDWSQL,[]);
+   await  ordersQuery(ordersFDWSQL,[]);
    await deliveryQuery(deliveryFDWSQL,[]);
-   await dashboardQuery(ordersFDWSQL,[]);
+   await dashboardQuery(dashboardFDWSQL,[]);
 
+   await customersQuery(customersFunctions,[]);
+   await  ordersQuery(ordersFunctions,[]);
+   await deliveryQuery(deliveryFunctions,[]);
+   await dashboardQuery(dashboardFunctions,[]);
 
 
 

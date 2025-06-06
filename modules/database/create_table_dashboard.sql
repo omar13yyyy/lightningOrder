@@ -1,5 +1,6 @@
 BEGIN;
-
+CREATE EXTENSION IF NOT EXISTS fuzzystrmatch;
+CREATE EXTENSION IF NOT EXISTS pg_trgm;
 CREATE EXTENSION IF NOT EXISTS postgres_fdw;
 DROP SERVER IF EXISTS customer_server CASCADE;
 
@@ -186,7 +187,6 @@ CREATE TABLE system_settings (
     setting_key text,
     setting_value text,
     description text,
-    category text,
     last_updated_at timestamp with time zone,
     UNIQUE("setting_key")
 );
@@ -241,6 +241,7 @@ CREATE TABLE stores (
     location_code text,
     platform_commission DOUBLE PRECISION,
     orders_type enum_orders_type NOT NULL DEFAULT 'NULL',
+    preparation_time integer,
     user_name text ,
     encrypted_password text ,
     PRIMARY KEY(internal_id),
@@ -283,7 +284,7 @@ CREATE TABLE store_categories (
 CREATE TABLE store_ratings_previous_day (
     store_internal_id bigserial,
     --not get costumer daily
-    rating_previous_day DOUBLE PRECISION,
+    rating_previous_day NUMERIC(10,2),
     number_of_raters integer,
     last_updated_at timestamp with time zone,
    PRIMARY KEY(store_internal_id)

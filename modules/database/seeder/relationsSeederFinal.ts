@@ -67,7 +67,7 @@ const enumUserTransactionTypes = ["input", "output"];
 
 const enumStoreStatuses = ["open", "close", "busy"];
 
-const enumOrdersTypes = ["take_away", "delivery", "take_away_and_delivery"];
+const enumOrdersTypes = ["take_away", "delivery","take_away_and_delivery"];
 const enumPaymentMethodTypes = [
   "cach",
   "online",
@@ -310,16 +310,8 @@ function generateCategoryTag(i,categoryUUID,internalCategoryId, tageId,internal_
 const storesArray :any = [];
 
 async function generateStore(id, userName, uuid, partnerId,full_address,categoryId,internal_category_id) {
-  let Latitude= faker.number.float({
-      min: 3345,
-      max: 3355,
-      fractionDigits: 6,
-    })/100
-    let longitude = faker.number.float({
-      min: 3620,
-      max: 3635,
-      fractionDigits: 6,
-    })/100
+  let Latitude= faker.number.float({ min: 33.45, max: 33.55, fractionDigits: 5 })
+    let longitude = faker.number.float({ min: 36.20, max: 36.35, fractionDigits:5})
     let locationCode =encodeToQuadrants(Latitude,longitude)
   storesArray.push({
     store_id: uuid,
@@ -342,6 +334,7 @@ async function generateStore(id, userName, uuid, partnerId,full_address,category
     location_code: locationCode,
     platform_commission: faker.number.float({ min: 0, max: 1 }),
     orders_type: randomEnum(enumOrdersTypes),
+    preparation_time:faker.number.int({ min: 1, max: 100 }),
     user_name: userName,
     encrypted_password: await bcrypt.hash("1234567890", 10),
   });
@@ -469,16 +462,8 @@ function generateCurrentOrder(
     created_at: faker.date.recent().toISOString(),
     payment_method: randomEnum(enumPaymentMethodTypes),
     orders_type: randomEnum(enumOrdersType),
-    location_latitude: faker.number.float({
-      min: 3345,
-      max: 3355,
-      fractionDigits: 6,
-    })/100,
-    location_longitude: faker.number.float({
-      min: 3620,
-      max: 3635,
-      fractionDigits: 6,
-    })/100,
+    location_latitude: faker.number.float({ min: 33.45, max: 33.55, fractionDigits: 5 }),
+    location_longitude: faker.number.float({ min: 36.20, max: 36.35, fractionDigits:5}),
     delivery_fee: faker.number.int({ min: 1000, max: 50000 }),
     store_destination:faker.number.float({
       min: 100,
@@ -526,16 +511,8 @@ function generatePastOrder(
     payment_method: PaymentMethod,
         orders_type: randomEnum(enumOrdersType),
 
-    location_latitude: faker.number.float({
-      min: 3345,
-      max: 3355,
-      fractionDigits: 6,
-    })/100,
-    location_longitude: faker.number.float({
-      min: 3620,
-      max: 3635,
-      fractionDigits: 6,
-    })/100,
+    location_latitude: faker.number.float({ min: 33.45, max: 33.55, fractionDigits: 5 }),
+    location_longitude: faker.number.float({ min: 36.20, max: 36.35, fractionDigits:5}),
     store_destination:faker.number.float({
       min: 100,
       max: 3635,
@@ -761,12 +738,11 @@ function generateStatisticsPreviousDay(storId) {
 //----------------------------------------------
 //---Array---
 const systemSettingsArray :any = [];
-function generateSystemSettings(userName) {
+function generateSystemSettings(setting_key,setting_value) {
   systemSettingsArray.push({
-    setting_key: userName,
-    setting_value: faker.internet.password(),
+    setting_key: setting_key,
+    setting_value: setting_value,
     description: faker.lorem.sentence(),
-    category: faker.commerce.department(),
     last_updated_at: faker.date.recent().toISOString(),
   });
 }
@@ -1201,7 +1177,7 @@ generateStatisticsPreviousDay(uuidObject.uniqueUUID[uuidObject.lastUUID]);
     for (let j = 1; j < faker.number.int({ min: 1, max: 4 }); j++){
         let tag = tagsArray[j-1]
 
-      generateStoreTag(storeTagsId,i,userNameObject.uniqueUserNames[userNameObject.lastUserName], tag.tag_id,tag.internal_id);
+      generateStoreTag(storeTagsId,i,uuidObject.uniqueUUID[uuidObject.lastUUID], tag.tag_id,tag.internal_id);
     storeTagsId++
   }
     for (let f = 1; f < 8; f++)
@@ -1429,11 +1405,12 @@ function documentImagesMultiGenerator(count) {
   }
 }
 
-function SystemSettingsMultiGenerator(count) {
-  for (let i = 1; i < count; i++) {
-    generateSystemSettings(userNameObject.uniqueUserNames[userNameObject.lastUserName]);
-    userNameObject.lastUserName++
-  }
+function SystemSettingsMultiGenerator() {
+    generateSystemSettings("delivery_cost_per_km",5000);
+    generateSystemSettings("delivery_time_per_km",5);
+    generateSystemSettings("max_distance_km",15);
+
+
 }
 
 
@@ -1469,7 +1446,7 @@ ordersMultiGenerator(ORDERSCOUNT);
 soldProductMultiGenerator(SOLDPRODUCTSCOUNT);
 documentImagesMultiGenerator(DOCUMENTIMAGESSCOUNT);
 generateDailyStatistics();
-SystemSettingsMultiGenerator(SYSTEMSETTINGCOUNT);
+SystemSettingsMultiGenerator();
 driverTransactionsMultiGenerator(driverTRANSACTIONSCOUNT)
 customersVisitedMultiGenerator(VISITEDSSCOUNT)
 withdrawalRequestsMultiGenerator(WITHDRAWALREQUESTSCOUNT)

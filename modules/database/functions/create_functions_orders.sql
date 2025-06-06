@@ -1,0 +1,205 @@
+BEGIN;
+CREATE OR REPLACE FUNCTION move_order_to_past(driver_id bigint)
+RETURNS void
+LANGUAGE plpgsql
+AS $$
+DECLARE
+    current_order_record current_orders%ROWTYPE;
+    duration_minutes integer;
+BEGIN
+    -- Step 1: Fetch order
+    SELECT * INTO current_order_record
+    FROM current_orders
+    WHERE driver_id = driver_id;
+
+    IF NOT FOUND THEN
+        RAISE EXCEPTION 'Order % not found in current_orders', driver_id;
+    END IF;
+
+    -- Step 2: Calculate duration
+    duration_minutes := EXTRACT(EPOCH FROM (NOW() - current_order_record.created_at)) / 60;
+
+    -- Step 3: Insert into past_orders
+    INSERT INTO past_orders (
+        order_id,
+        internal_id,
+        customer_id,
+        store_id,
+        store_name_ar,
+        store_name_en,
+        internal_store_id,
+        driver_id,
+        order_details_text,
+        amount,
+        created_at,
+        payment_method,
+        orders_type,
+        location_latitude,
+        location_longitude,
+        store_destination,
+        customer_destination,
+        delivery_fee,
+        coupon_code,
+        completed_at,
+        delivery_duration,
+        related_rating
+    ) VALUES (
+        current_order_record.order_id,
+        current_order_record.internal_id,
+        current_order_record.customer_id,
+        current_order_record.store_id,
+        current_order_record.store_name_ar,
+        current_order_record.store_name_en,
+        current_order_record.internal_store_id,
+        current_order_record.driver_id,
+        current_order_record.order_details_text,
+        current_order_record.amount,
+        current_order_record.created_at,
+        current_order_record.payment_method,
+        current_order_record.orders_type,
+        current_order_record.location_latitude,
+        current_order_record.location_longitude,
+        current_order_record.store_destination,
+        current_order_record.customer_destination,
+        current_order_record.delivery_fee,
+        current_order_record.coupon_code,
+        NOW(),
+        duration_minutes,
+        NULL -- related_rating to be added later
+    );
+
+    -- Step 4: Delete from current_orders
+    DELETE FROM current_orders WHERE driver_id = driver_id;
+
+    -- Step 5: Update order_status
+    INSERT INTO order_status (order_id, store_id, status, status_time)
+    VALUES (p_order_id, current_order_record.internal_store_id, 'deliverd', NOW());
+END;
+$$;
+
+----------------------------------------
+
+CREATE OR REPLACE FUNCTION add_rating_if_delivered(
+    p_order_id TEXT,
+    p_customer_id BIGINT,
+    p_driver_rating INTEGER,
+    p_order_rating INTEGER,
+    p_comment TEXT
+) RETURNS void AS $$
+DECLARE
+    last_status TEXT;
+    v_enternal_order_id BIGINT;
+BEGIN
+    -- التأكد من آخر حالة للطلب
+    SELECT status
+    INTO last_status
+    FROM order_status
+    WHERE order_id = p_order_id
+    ORDER BY status_time DESC
+    LIMIT 1;
+
+    -- التحقق أن الطلب تم توصيله
+    IF last_status = 'delivered' THEN
+
+        -- جلب internal_id من past_orders
+        SELECT internal_id
+        INTO v_enternal_order_id
+        FROM past_orders
+        WHERE order_id = p_order_id;
+
+        -- إدراج التقييم
+        INSERT INTO ratings (
+            order_id,
+            enternal_order_id,
+            customer_id,
+            driver_rating,
+            order_rating,
+            comment,
+            rating_at
+        ) VALUES (
+            p_order_id,
+            v_enternal_order_id,
+            p_customer_id,
+            p_driver_rating,
+            p_order_rating,
+            p_comment,
+            NOW()
+        );
+
+        RETURN;
+    ELSE
+        RETURN;
+    END IF;
+END;
+$$ LANGUAGE plpgsql;
+
+-------------------------------------------------------------------------------
+CREATE OR REPLACE FUNCTION create_order_with_coupon(
+    in_coupon_code TEXT,
+    in_store_id TEXT,
+    in_json_input JSONB,
+    in_customer_id BIGINT,
+    in_driver_id BIGINT,
+    in_payment_method enum_payment_method,
+    in_orders_type enum_orders_type
+)
+RETURNS VOID
+LANGUAGE plpgsql AS
+$$
+DECLARE
+    row RECORD;
+    total_price DOUBLE PRECISION := 0;
+    discounted_price DOUBLE PRECISION := 0;
+    order_uid TEXT := encode(gen_random_bytes(8), 'hex');
+BEGIN
+    -- استدعاء الدالة السابقة
+    FOR row IN
+        SELECT * FROM apply_coupon_and_calculate_total(in_coupon_code, in_store_id, in_json_input)
+    LOOP
+        total_price := total_price + row.final_price;
+    END LOOP;
+
+    discounted_price := total_price; -- نفترض أنه تم الخصم داخل الدالة السابقة
+
+    -- إضافة الطلب إلى جدول current_orders
+    INSERT INTO current_orders (
+        order_id,
+        internal_id,
+        customer_id,
+        store_id,
+        internal_store_id,
+        driver_id,
+        amount,
+        order_details_text,
+        created_at,
+        payment_method,
+        orders_type,
+        location_latitude,
+        location_longitude,
+        delivery_fee,
+        coupon_code
+    ) VALUES (
+        order_uid,
+        nextval('order_internal_id_seq'),
+        in_customer_id,
+        in_store_id,
+        NULL, -- يمكن تعديله لاحقًا
+        in_driver_id,
+        discounted_price,
+        in_json_input::TEXT,
+        NOW(),
+        in_payment_method,
+        in_orders_type,
+        NULL, NULL, NULL, in_coupon_code
+    );
+
+    -- تحديث استخدام الكوبون
+    IF in_coupon_code IS NOT NULL AND in_coupon_code != 'NULL' THEN
+        UPDATE coupons
+        SET real_usage = COALESCE(real_usage, 0) + 1
+        WHERE code = in_coupon_code;
+    END IF;
+END;
+$$;
+
+END;

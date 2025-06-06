@@ -94,7 +94,7 @@ console.log(placeholders+"placeholders",includeStoreCount,idsArray)
       s.logo_image_url,
       sr.rating_previous_day,
      get_store_wallet_balance(s.store_id) AS wallet_balance
-    FROM stores s
+    FROM remotely.stores s
     LEFT JOIN store_wallets sw ON s.internal_id = sw.internal_store_id
     LEFT JOIN store_ratings_previous_day sr ON s.internal_id = sr.store_internal_id
     WHERE s.partner_id = $1
@@ -299,7 +299,7 @@ getStoreProfile: async (
       st.category_name_en,
       t.tag_name_ar,
       t.tag_name_en
-    FROM stores s
+    FROM remotely.stores s
     JOIN store_categories  sc ON sc.internal_id = s.category_id
     JOIN category_tags ct ON sc.internal_id = ct.internal_category_id 
     JOIN tags t ON t.tag_id = ct.tag_id

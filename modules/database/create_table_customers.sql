@@ -29,7 +29,7 @@ code text,
 
 
 CREATE TABLE customers (
-    customer_id bigint,
+    customer_id bigserial,
     full_name text,
     phone_number text,
     email text,
@@ -61,12 +61,7 @@ CREATE TABLE customer_transactions (
 );
 
 
-ALTER TABLE IF EXISTS public.confirmation
-    ADD FOREIGN KEY (phone_number)
-    REFERENCES public.customers (phone_number) MATCH SIMPLE
-    ON UPDATE NO ACTION
-    ON DELETE NO ACTION
-    NOT VALID;
+
 
 
 ALTER TABLE IF EXISTS public.customer_transactions

@@ -13,10 +13,20 @@ export const visitorStoreRouter= express.Router()
 export const partnerRouter= express.Router()
 
 
-visitorStoreRouter.route('/getCategoryTags').get(storesController.getCategoryTag)
+visitorStoreRouter.route('/getCategoryTags').get(storesController.getCategoryTags)
 visitorStoreRouter.route('/getStoreCategories').get(storesController.getStoreCategories)
 visitorStoreRouter.route('/getStoreProducts').get(storesController.getStoreProducts)
 visitorStoreRouter.route('/getCouponDetails').get(storesController.getCouponDetails)
+visitorStoreRouter.route('/getNearStores').get(storesController.getNearStores)
+visitorStoreRouter.route('/getNearStoresByTag').get(storesController.getNearStoresByTag)
+visitorStoreRouter.route('/getNearStoresByCategory').get(storesController.getNearStoresByCategory)
+
+visitorStoreRouter.route('/getTrendStores').get(storesController.getNearTrandStores)
+visitorStoreRouter.route('/getNearTrandStoresByTag').get(storesController.getNearStores)
+visitorStoreRouter.route('/getNearTrandStoresByCategory').get(storesController.getNearTrandStoresByCategory)
+visitorStoreRouter.route('/SearchForStore').get(storesController.searchForStore)
+
+
 
 partnerRouter.route('/partnerLogin').post(partnersController.partnerLogin)
 //partnerRouter.use(userHyperdAuth);

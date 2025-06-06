@@ -63,7 +63,8 @@ remotely.order_status,
 remotely.order_financial_logs,
 remotely.past_orders,
 remotely.ratings,
-remotely.electronic_payment;
+remotely.electronic_payment,
+remotely.orders;
 
 
 CREATE EXTENSION IF NOT EXISTS postgres_fdw;

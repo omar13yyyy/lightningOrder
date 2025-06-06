@@ -16,6 +16,13 @@ export function createDbPool(poolParams: PoolConfig) {
       } catch (err) {
         console.error('params :', { params });
         console.error('Error executing query:', { text });
+            console.error('PG Error:', err);
+    if (err.position) {
+      console.error('🧭 SQL error position:', err.position); // مكان الخطأ
+    }
+    if (err.message) {
+      console.error('📌 Error message:', err.message); // رسالة الخطأ
+    }
         throw err;
       }
     },
