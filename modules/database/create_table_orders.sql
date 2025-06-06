@@ -57,11 +57,13 @@ CREATE TABLE order_status (
 );
 CREATE TABLE orders (
     order_id text,
-    internal_id bigint,
+    internal_id bigserial,
     unique("order_id"),
     UNIQUE("internal_id")
 
 );
+ALTER SEQUENCE orders_order_id_seq RESTART WITH 10000;
+
 CREATE TABLE order_financial_logs (
     log_id text,
     driver_id bigint,
