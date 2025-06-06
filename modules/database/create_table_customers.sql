@@ -44,7 +44,7 @@ CREATE TABLE customers (
     PRIMARY KEY (customer_id)
 
 );
-
+ALTER SEQUENCE customers_customer_id_seq RESTART WITH 1000;
 
 
 CREATE TABLE customer_transactions (

@@ -9,7 +9,7 @@ import { storesRepository } from './apps/partners-stores-managers-dashboards-ser
 dotenv.config()
 
      //await seederGenerateCSV()
-    // await createDatabases()
+     await createDatabases()
 
  //await seeder()    
 

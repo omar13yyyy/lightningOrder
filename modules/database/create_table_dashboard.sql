@@ -37,7 +37,7 @@ CREATE TABLE customers_visited (
     store_id  bigint,
     create_at timestamp with time zone
 );
-
+ALTER SEQUENCE customers_visited_visit_id_seq RESTART WITH 1000;
 CREATE TABLE partners (
     partner_id bigserial,
     partner_name text,
@@ -59,7 +59,7 @@ CREATE TABLE partners (
     UNIQUE("user_name")
     
 );
-
+ALTER SEQUENCE partners_partner_id_seq RESTART WITH 1000;
 
 CREATE TABLE coupons (
     code text ,
@@ -183,6 +183,8 @@ CREATE TABLE working_hours (
         PRIMARY KEY(shift_id)
 
 );
+ALTER SEQUENCE working_hours_shift_id_seq RESTART WITH 1000;
+
 CREATE TABLE system_settings (
     setting_key text,
     setting_value text,
@@ -221,7 +223,7 @@ CREATE TABLE tags (
 CREATE TABLE stores (
     store_id text,
     internal_id bigserial,
-    partner_id bigserial,
+    partner_id bigint,
     store_name_ar text,
     store_name_en text,
     phone_number text,
@@ -247,6 +249,8 @@ CREATE TABLE stores (
     PRIMARY KEY(internal_id),
     UNIQUE("store_id")
 );
+ALTER SEQUENCE stores_internal_id_seq RESTART WITH 1000;
+
 CREATE TABLE store_tags (
     id bigserial,
     tag_id text,
@@ -256,6 +260,8 @@ CREATE TABLE store_tags (
     PRIMARY KEY(id)
 
 );
+ALTER SEQUENCE store_tags_id_seq RESTART WITH 1000;
+
 --Added
 
 CREATE TABLE category_tags (
@@ -280,6 +286,7 @@ CREATE TABLE store_categories (
     UNIQUE("category_id")
 
 );
+ALTER SEQUENCE store_categories_internal_id_seq RESTART WITH 1000;
 
 CREATE TABLE store_ratings_previous_day (
     store_internal_id bigserial,
@@ -290,6 +297,7 @@ CREATE TABLE store_ratings_previous_day (
    PRIMARY KEY(store_internal_id)
 
 );
+ALTER SEQUENCE store_ratings_previous_day_store_internal_id_seq RESTART WITH 1000;
 
 CREATE TABLE products_sold ( 
     create_at text, --todo data+;+id
@@ -329,6 +337,8 @@ CREATE TABLE document_images (
     expired boolean 
 
 );
+ALTER SEQUENCE document_images_document_id_seq RESTART WITH 1000;
+
 CREATE TABLE withdrawal_document_images (
     document_id bigserial,
     userId bigint,
@@ -340,6 +350,7 @@ CREATE TABLE withdrawal_document_images (
     expired boolean 
 
 );
+ALTER SEQUENCE withdrawal_document_images_document_id_seq RESTART WITH 1000;
 
 CREATE TABLE withdrawal_requests (
     withdrawal_id text,

@@ -34,6 +34,8 @@ CREATE TABLE drivers (
 
         PRIMARY KEY (driver_id)
 );
+ALTER SEQUENCE drivers_driver_id_seq RESTART WITH 1000;
+
 CREATE TABLE delivery_document_images (
     document_id bigserial,
     document_description text,
@@ -43,6 +45,7 @@ CREATE TABLE delivery_document_images (
     expired boolean 
 
 );
+ALTER SEQUENCE delivery_document_images_document_id_seq RESTART WITH 1000;
 
 CREATE TABLE driver_transactions (
     transaction_id bigserial,
@@ -56,6 +59,8 @@ CREATE TABLE driver_transactions (
           PRIMARY KEY (transaction_id)
 
 );
+ALTER SEQUENCE driver_transactions_transaction_id_seq RESTART WITH 1000;
+
 CREATE TABLE driver_points (
     driver_id bigint,
     completed_orders_previous_day bigint,
