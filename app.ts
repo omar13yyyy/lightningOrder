@@ -5,15 +5,17 @@ import {seederGenerateCSV} from './modules/database/seeder/relationsSeederFinal'
 import dotenv from 'dotenv';
 import { encodeToQuadrants, generateNeighbors } from "./modules/geo/geohash";
 import { storesRepository } from './apps/partners-stores-managers-dashboards-service/src/modules/stores/stores.repository';
+import { OrderInput } from './apps/partners-stores-managers-dashboards-service/src/types/order';
+import { OrderInputWithStoreId } from './apps/partners-stores-managers-dashboards-service/src/types/stores';
+import { storesServices } from './apps/partners-stores-managers-dashboards-service/src/modules/stores/stores.service';
 
 dotenv.config()
 
-     //await seederGenerateCSV()
-     await createDatabases()
+ // await seederGenerateCSV()
+ // await createDatabases()
+ // await seeder()    
 
- //await seeder()    
-
- server() 
+server() 
 /*  const damasLat = 33.51814950118199;
 const damasLan =36.29422578371265
 const location_code =encodeToQuadrants(damasLat,damasLan)

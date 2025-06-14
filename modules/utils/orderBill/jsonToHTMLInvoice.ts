@@ -10,7 +10,7 @@ type OrderRow = {
 
 type InvoiceOptions = {
   width?: string;
-  fontSize?: string;
+  fontSize?: string;  
   fontFamily?: string;
   direction?: 'rtl' | 'ltr';
   title?: string;

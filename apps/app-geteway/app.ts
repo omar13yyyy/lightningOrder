@@ -9,7 +9,8 @@ import {orderSocket} from '../orders-service/src/sockets/index'
 import {router} from './src/routes/index'
 export const app = express();
 
-
+app.use(express.static('public'));
+app.use('/images/stores',express.static('images/stores'));
 app.use(express.json());
 app.use(bodyParser.json()); 
 app.use(bodyParser.urlencoded({ extended: true })); 

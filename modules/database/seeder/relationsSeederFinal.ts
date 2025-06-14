@@ -43,7 +43,7 @@ const enumUserTypes = [
   "partner_Payments",
 ];
 
-const enumDaysOfWeek = ["sun", "mon", "tue", "wed", "thu", "fri", "sat"];
+const enumDaysOfWeek = ['Sun', 'Mon','Tue','Wed', 'Thu','Fri','Sat'];
 
 const enumOnExpense = ["partner", "our_company", "both"];
 
@@ -76,8 +76,8 @@ const enumPaymentMethodTypes = [
   "wallet_and_online",
 ];
 const modifiersENtypes = ["Optional", "Multiple"];
-const enum_sizes_en = ["small", "medium,large,veryLarge,verysmall"];
-const enum_sizes_ar = ["small", "medium,large,veryLarge,verysmall"];
+const enum_sizes_en = ["small", "medium","large","veryLarge","verysmall"];
+const enum_sizes_ar = ["small", "medium","large","veryLarge","verysmall"];
 const enumWithdrawalStatus =[ 'new','wait','done','NULL'];
 const enumWithdrawalUser =[ 'driver','partner','NULL'];
 const enumOrdersType =[ 'take_away','delivery','NULL'];
@@ -257,7 +257,7 @@ function generateStoreCategory(id, uuid) {
     internal_id: id,
     category_name_ar: faker.commerce.department(),
     category_name_en: fakerEN.commerce.department(),
-    category_image: "/images/test/public/logo.jpg",
+    category_image: "burger.png",
   });
 }
 
@@ -328,8 +328,8 @@ async function generateStore(id, userName, uuid, partnerId,full_address,category
     min_order_price: faker.number.float({ min: 5, max: 100 }),
     Latitude: Latitude,
     longitude: longitude,
-    logo_image_url: "/images/test/public/logo.jpg",
-    cover_image_url: "/images/test/public/logo.jpg",
+    logo_image_url: "storeLogo.jpg",
+    cover_image_url: "storeCover.jpg",
     store_description: faker.lorem.sentence(),
     location_code: locationCode,
     platform_commission: faker.number.float({ min: 0, max: 1 }),
@@ -396,6 +396,9 @@ function generateCoupoun(store_id, store_uuid, couponCode) {
     internal_store_id: store_id ,
     description: faker.commerce.productDescription(),
     discount_value_percentage: parseFloat(
+      faker.number.float({ min: 0.05, max: 0.5 }).toFixed(2)
+    ),
+    delevery_discount_percentage: parseFloat(
       faker.number.float({ min: 0.05, max: 0.5 }).toFixed(2)
     ),
     on_expense: faker.helpers.arrayElement(enumOnExpense),
@@ -1012,8 +1015,8 @@ function generateJsonbDataEnAr(ln, uuidObject) {
       min: 500,
       max: 99999,
     });
-    let modifier_item_is_default = faker.string.uuid();
-    let modifier_item_is_enable = faker.string.uuid();
+    let modifier_item_is_default = faker.datatype.boolean();
+    let modifier_item_is_enable = faker.datatype.boolean();
     let modifier_modifier_item_order = faker.number.int({
       min: 0,
       max: 200,
@@ -1064,9 +1067,8 @@ function generateJsonbDataEnAr(ln, uuidObject) {
 
   for (let ic = 0; ic < itemsCount; ic++) {
     let sizesArray :any = [];
-    let sizesCout = faker.number.int({ min: 0, max: 4 });
-    let size = [];
-    for (let sc = 0; sc < sizesCout; sc++) {
+    let sizesCount = faker.number.int({ min: 1, max: 4 });
+    for (let sc = 0; sc < sizesCount; sc++) {
       let size = generateJsonSizebDataEnAr(modifierArray);
       sizesArray.push(size);
     }

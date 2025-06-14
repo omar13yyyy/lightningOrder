@@ -67,3 +67,17 @@ export const getMaxDistance = async (): Promise<number> => {
 
   return parseFloat(time);
 };
+
+export class DeliveryConfig {
+  static maxDistance: number ; 
+  static timePerKM: number ; 
+  static costPerKM: number ; 
+  constructor(){
+    DeliveryConfig.update()
+  }
+  static async update() {
+     this.maxDistance = await getMaxDistance();; 
+   this.timePerKM =await getDeliveryTimePerKm();  
+   this.costPerKM = await getDeliveryCostPerKm();  
+  }
+}

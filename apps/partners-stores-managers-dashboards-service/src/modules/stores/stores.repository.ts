@@ -1,3 +1,4 @@
+import dayjs from 'dayjs'
 import { query } from "../../../../../modules/database/commitDashboardSQL";
 import { generateNeighbors } from "../../../../../modules/geo/geohash";
 import { CategoryRepo, CouponDetailsRepo, LanguageRepo, NearStoresByCategoryRepo, NearStoresBytagRepo, NearStoresByTagReq, NearStoresRepo, NearStoresReq, SearchForStoreRepo, StoreIdRepo, StoreRepo, TagRepo } from "../../types/stores";
@@ -7,8 +8,8 @@ export const storesRepository = {
   fetchCategoryTags: async (tag :TagRepo) => {
     //TODO after login or first reques save token in redis
       const { rows } = await query(
-        "select tag_id,tag_name_${$1} as tag_name from tags where category_id=$2 ",
-        [tag.ln,tag.categoryId]
+        `select tag_id,tag_name_${tag.ln} as tag_name from tags where category_id=$1 `,
+        [tag.categoryId]
       );
       return rows;
 
@@ -17,8 +18,8 @@ export const storesRepository = {
     //TODO after login or first reques save token in redis
 
       const { rows } = await query(
-        "select category_id,category_name_${$1} as category_name,category_image from store_categories ",
-        [language.ln]
+        `select category_id,category_name_${language.ln} as category_name,category_image from store_categories `,
+        []
       );
       return rows;
     }
@@ -26,12 +27,13 @@ export const storesRepository = {
   fetchStoreProduct: async (param:StoreRepo) => {
       //TODO make server return url with ip
       const { rows, rowCount } = await query(
-        "select product_data_${$1}_jsonb as products from products where store_id = $2 ",
-        [param.ln,param.storeId]
+        `select product_data_${param.ln}_jsonb as products from products where store_id = $1 LIMIT 1 `,
+        [param.storeId]
       );
       if (rowCount > 0) {
         return rows[0];
-      } else return {};
+      }
+       else return {};
    
   },
   fetchCouponStore: async (coupon : CouponDetailsRepo) => {
@@ -222,6 +224,23 @@ FROM (
     ]);
     return rows;
   },
+  async getOrderItems(param :StoreIdRepo){
+       const { rows } = await query(
+        "SELECT product_data_ar_jsonb as ar, product_data_en_jsonb as en  FROM public.products where store_id = $1 LIMIT 1",
+        [param.storeId]
+      );
+      return rows[0];
+},
+  async isOpenNow(param :StoreIdRepo){
+    const dayOfWeek = dayjs().format('ddd').toLowerCase()
+    const currentTime = dayjs().format('HH:mm:ss');
+
+       const { rows } = await query(
+`SELECT 1 FROM working_hours where store_id =$1 AND day_of_week $2 AND $3::time BETWEEN opening_time AND closing_time`,
+          [param.storeId,dayOfWeek,currentTime]
+      );
+      return rows[0];
+}
 
 };
 
@@ -252,12 +271,15 @@ SELECT
   swd.store_id,
   swd.distance_km ,
  swd.store_name_${ln} as title,swd.status,swd.min_order_price,swd.logo_image_url,swd.cover_image_url,swd.orders_type,swd.preparation_time,
+ cop.discount_value_percentage,cop.delevery_discount_percentage,cop.code as coupon_code,
   ARRAY_AGG(t.tag_name_${ln}) AS tags
 FROM stores_with_distance swd
 JOIN store_ratings_previous_day sr ON sr.store_internal_id = swd.internal_id
 LEFT JOIN store_tags st ON st.internal_store_id = swd.internal_id
 LEFT JOIN tags t ON t.internal_id = st.internal_tag_id 
-WHERE swd.distance_km <= $4 ${and}
+LEFT JOIN coupons cop ON cop.internal_store_id = st.internal_id 
+WHERE swd.distance_km <= $4  AND expiration_date > now() AND
+         real_usage IS NULL OR max_usage IS NULL OR real_usage < max_usage And coupon_type = "public"${and}
 GROUP BY ${searchParamOrder} swd.store_id,swd.distance_km,swd.internal_id,store_name_${ln},swd.status,swd.min_order_price,swd.logo_image_url,
 swd.cover_image_url,swd.orders_type,swd.preparation_time,sr.number_of_raters,sr.rating_previous_day 
 ORDER BY ${searchParamOrder} swd.distance_km
@@ -266,3 +288,4 @@ OFFSET $6;
  `;
   return sql;
 }
+//-------------------------------------------------

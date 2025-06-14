@@ -16,7 +16,7 @@ enum_payment_method   CASCADE;
 
 
 CREATE TYPE enum_store_transaction_type AS ENUM ( 'deposit', 'withdraw','discount','NULL');
-CREATE TYPE enum_day_of_week AS ENUM ( 'sun', 'mon','tue','wed', 'thu','fri','sat','NULL');
+CREATE TYPE enum_day_of_week AS ENUM ( 'Sun', 'Mon','Tue','Wed', 'Thu','Fri','Sat','NULL');
 CREATE TYPE enum_store_status AS ENUM ( 'open','close','busy','NULL');
 CREATE TYPE enum_orders_type AS ENUM ( 'take_away','delivery','take_away_and_delivery','NULL');
 CREATE TYPE enum_user_type AS ENUM ( 'customer', 'store','partner', 'store_Payments','partner_Payments','driver_Payments','NULL');

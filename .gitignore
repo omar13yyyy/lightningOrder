@@ -5,8 +5,8 @@ node_modules/
 package-lock.json
 
 #seeder
-modules/database/seeder/CSV
-
+modules/database/seeder/CSV/
+images/
 # IDEs
 .vscode/
 .fleet/

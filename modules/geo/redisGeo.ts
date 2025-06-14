@@ -7,9 +7,9 @@ export class DataStore {
   private client = createClient();
 
   // إضافة عنصر إلى مصفوفة معينة
-  async addToTrandStoreList(item: StoreData) {
+  async addToTrendStoreList(item: StoreData) {
 
-  await this.client.geoAdd('trand_stores', 
+  await this.client.geoAdd('trend_stores', 
     [item]
   );
   }
@@ -42,9 +42,9 @@ export class DataStore {
   }
 );
   }
-  async removeFromTrandStoreList(center, radiusInKM) {
+  async removeFromTrendStoreList(center, radiusInKM) {
   return  await this.client.geoSearch(
-  'trand_stores', // المفتاح
+  'trend_stores', // المفتاح
   { // from
     longitude: center.longitude,
     latitude: center.latitude

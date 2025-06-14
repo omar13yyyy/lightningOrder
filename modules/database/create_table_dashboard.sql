@@ -67,6 +67,7 @@ CREATE TABLE coupons (
     internal_store_id bigint ,
     description text,
     discount_value_percentage DOUBLE PRECISION CHECK (discount_value_percentage >= 0 AND discount_value_percentage <= 1) ,
+    delevery_discount_percentage DOUBLE PRECISION CHECK (delevery_discount_percentage >= 0 AND delevery_discount_percentage <= 1),
     on_expense enum_on_expense NOT NULL DEFAULT 'NULL',
     min_order_value integer,
     expiration_date timestamp with time zone,

@@ -62,7 +62,7 @@ CREATE TABLE orders (
     UNIQUE("internal_id")
 
 );
-ALTER SEQUENCE orders_order_id_seq RESTART WITH 10000;
+ALTER SEQUENCE orders_internal_id_seq RESTART WITH 10000;
 
 CREATE TABLE order_financial_logs (
     log_id text,

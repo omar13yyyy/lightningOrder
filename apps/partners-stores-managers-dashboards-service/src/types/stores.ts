@@ -1,3 +1,5 @@
+import { OrderInput } from "./order";
+
 type StoreStatus = 'busy' | 'open' | 'closed' 
 type OrdersType = 'take_away' | 'delivery' | 'take_away_and_delivery';
 
@@ -15,11 +17,19 @@ export interface StoreItem {
   orders_type: OrdersType
   preparation_time: number;
   tags: (string | null)[];
+  couponCode:String;
+  discount_value_percentage :number,
+  min_order_value :number,
+  delevery_discount_percentage :number
+
+
 }
 
 export interface StoresResponse {
   hasNext :boolean;
-  data: StoreItem[];
+  stores: StoreItem[];
+  trendStores: StoreItem[];
+
 }
 
 
@@ -91,8 +101,8 @@ export interface NearStoresReq {
   latitudes: string;
   logitudes: string;
   locationCode: string;
-  limit: string;
-  offset: string;
+  limit: number;
+  offset: number;
 }
 
 
@@ -101,8 +111,8 @@ export interface NearStoresService {
   latitudes: string;
   logitudes: string;
   locationCode: string;
-  limit: string;
-  offset: string;
+  limit: number;
+  offset: number;
 }
 
 export interface NearStoresRepo {
@@ -110,8 +120,8 @@ export interface NearStoresRepo {
   latitudes: string;
   logitudes: string;
   locationCode: string;
-  limit: string;
-  offset: string;
+  limit: number;
+  offset: number;
   distanceKm:number;
 
 }
@@ -128,8 +138,8 @@ export interface NearStoresByCategoryReq {
   latitudes: string;
   logitudes: string;
   locationCode: string;
-  limit: string;
-  offset: string;
+  limit: number;
+  offset: number;
   categoryId: string;
 }
 
@@ -138,8 +148,8 @@ export interface NearStoresByCategoryService {
   latitudes: string;
   logitudes: string;
   locationCode: string;
-  limit: string;
-  offset: string;
+  limit: number;
+  offset: number;
   categoryId: string;
 }
 
@@ -148,8 +158,8 @@ export interface NearStoresByCategoryRepo {
   latitudes: string;
   logitudes: string;
   locationCode: string;
-  limit: string;
-  offset: string;
+  limit: number;
+  offset: number;
   categoryId: string;
   distanceKm:number;
 }
@@ -161,8 +171,8 @@ export interface NearStoresByTagReq {
   latitudes: string;
   logitudes: string;
   locationCode: string;
-  limit: string;
-  offset: string;
+  limit: number;
+  offset: number;
   tagId: string;
 }
 
@@ -174,8 +184,8 @@ export interface NearStoresBytagService {
   latitudes: string;
   logitudes: string;
   locationCode: string;
-  limit: string;
-  offset: string;
+  limit: number;
+  offset: number;
   tagId: string;
 }
 
@@ -184,8 +194,8 @@ export interface NearStoresBytagRepo {
   latitudes: string;
   logitudes: string;
   locationCode: string;
-  limit: string;
-  offset: string;
+  limit: number;
+  offset: number;
   tagId: string;
   distanceKm:number;
 
@@ -198,8 +208,8 @@ export interface SearchForStoreReq {
   latitudes: string;
   logitudes: string;
   locationCode: string;
-  limit: string;
-  offset: string;
+  limit: number;
+  offset: number;
   storeName: string;
 }
 export interface SearchForStoreService{
@@ -207,8 +217,8 @@ export interface SearchForStoreService{
   latitudes: string;
   logitudes: string;
   locationCode: string;
-  limit: string;
-  offset: string;
+  limit: number;
+  offset: number;
   storeName: string;
 }
 
@@ -218,8 +228,8 @@ export interface SearchForStoreRepo{
   latitudes: string;
   logitudes: string;
   locationCode: string;
-  limit: string;
-  offset: string;
+  limit: number;
+  offset: number;
   storeName: string;
   distanceKm:number
 }
@@ -273,7 +283,11 @@ export interface StoreIdRepo{
 
 //-----------------------------
 
-
+export interface  OrderInputWithStoreId{
+  storeId: string;
+  order:OrderInput;
+}
+//-----------------------------
 
 export interface CouponDetailsReq {
   couponCode: string;
