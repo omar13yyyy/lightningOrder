@@ -346,8 +346,8 @@ CREATE TABLE document_images (
 ALTER SEQUENCE document_images_document_id_seq RESTART WITH 1000;
 
 CREATE TABLE withdrawal_document_images (
-    document_id bigserial,
-    userId bigint,
+document_id bigserial,
+userId bigint,
     document_description text,
    user_type enum_withdrawal_user NOT NULL DEFAULT 'NULL',
    image_url text,

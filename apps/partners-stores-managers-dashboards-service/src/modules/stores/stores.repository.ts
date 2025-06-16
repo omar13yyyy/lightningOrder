@@ -4,7 +4,36 @@ import { generateNeighbors } from "../../../../../modules/geo/geohash";
 import { CategoryRepo, CouponDetailsRepo, LanguageRepo, NearStoresByCategoryRepo, NearStoresBytagRepo, NearStoresByTagReq, NearStoresRepo, NearStoresReq, SearchForStoreRepo, StoreIdRepo, StoreRepo, TagRepo } from "../../types/stores";
 
 export const storesRepository = {
+  //---------------------------------------------------------------------------------------
+  fetchStoreIdPasswordByUserName: async (
+    userName: string
+  ): Promise<{store_id: string; encrypted_password: string }[]> => {
+    const { rows } = await query(
+      "SELECT store_id, encrypted_password,store_name_ar,store_name_en FROM stores WHERE store_name_ar = $1",
+      [userName]
+    );
+    return rows;
+  },
+//----------------------------------------------------------------------------------------
+    updateProductDataByStoreId: async (ln,storeId: string, newProductData: any) => {
+          if (ln == "ar") {
+console.log({newProductData}+'new')
+    await query(
+      `UPDATE products SET product_data_ar_jsonb = $1 WHERE store_id = $2`,
+      [newProductData, storeId]
+    );}
+    else if (ln == "en") {
+         await query(
+      `UPDATE products SET product_data_en_jsonb = $1 WHERE store_id = $2`,
+      [newProductData, storeId]
+    );}
+  },
 
+
+
+
+
+//----------------------------------------------------------------------------------------------
   fetchCategoryTags: async (tag :TagRepo) => {
     //TODO after login or first reques save token in redis
       const { rows } = await query(
