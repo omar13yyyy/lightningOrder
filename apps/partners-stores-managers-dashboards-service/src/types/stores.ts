@@ -19,8 +19,8 @@ export interface StoreItem {
   tags: (string | null)[];
   couponCode:String;
   discount_value_percentage :number,
-  min_order_value :number,
-  delevery_discount_percentage :number
+  coupon_min_order_value :number,
+  delivery_discount_percentage :number
 
 
 }
@@ -32,7 +32,11 @@ export interface StoresResponse {
 
 }
 
+export interface StoresAndTrendResponse {
+  stores: StoreItem[];
+  trendStores: StoreItem[];
 
+}
 
 
 

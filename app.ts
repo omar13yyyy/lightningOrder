@@ -8,13 +8,14 @@ import { storesRepository } from './apps/partners-stores-managers-dashboards-ser
 import { OrderInput } from './apps/partners-stores-managers-dashboards-service/src/types/order';
 import { OrderInputWithStoreId } from './apps/partners-stores-managers-dashboards-service/src/types/stores';
 import { storesServices } from './apps/partners-stores-managers-dashboards-service/src/modules/stores/stores.service';
+import { DeliveryConfig } from './modules/config/settingConfig';
 
 dotenv.config()
 
- // await seederGenerateCSV()
- // await createDatabases()
- // await seeder()    
-
+//  await seederGenerateCSV()
+//  await createDatabases()
+//  await seeder()    
+DeliveryConfig.update()
 server() 
 /*  const damasLat = 33.51814950118199;
 const damasLan =36.29422578371265

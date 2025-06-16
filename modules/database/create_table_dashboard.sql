@@ -2,6 +2,10 @@ BEGIN;
 CREATE EXTENSION IF NOT EXISTS fuzzystrmatch;
 CREATE EXTENSION IF NOT EXISTS pg_trgm;
 CREATE EXTENSION IF NOT EXISTS postgres_fdw;
+
+SET pg_trgm.similarity_threshold = 0.2;
+
+
 DROP SERVER IF EXISTS customer_server CASCADE;
 
 CREATE SERVER customer_server
@@ -67,7 +71,7 @@ CREATE TABLE coupons (
     internal_store_id bigint ,
     description text,
     discount_value_percentage DOUBLE PRECISION CHECK (discount_value_percentage >= 0 AND discount_value_percentage <= 1) ,
-    delevery_discount_percentage DOUBLE PRECISION CHECK (delevery_discount_percentage >= 0 AND delevery_discount_percentage <= 1),
+    delivery_discount_percentage DOUBLE PRECISION CHECK (delivery_discount_percentage >= 0 AND delivery_discount_percentage <= 1),
     on_expense enum_on_expense NOT NULL DEFAULT 'NULL',
     min_order_value integer,
     expiration_date timestamp with time zone,
@@ -227,6 +231,7 @@ CREATE TABLE stores (
     partner_id bigint,
     store_name_ar text,
     store_name_en text,
+    store_name_ar_clean text,
     phone_number text,
     email text,
     full_address text,
@@ -625,6 +630,8 @@ ALTER FUNCTION public.get_store_wallet_balance(text)
 
 
 
+CREATE INDEX idx_stores_name_ar_trgm ON stores USING GIN (store_name_ar gin_trgm_ops);
+CREATE INDEX idx_stores_name_en_trgm ON stores USING GIN (store_name_en gin_trgm_ops);
 
 
 
@@ -636,8 +643,29 @@ ALTER FUNCTION public.get_store_wallet_balance(text)
 
 
 
+CREATE OR REPLACE FUNCTION normalize_arabic(text)
+RETURNS text AS $$
+BEGIN
+  RETURN translate(
+    regexp_replace(lower($1), '[ًٌٍَُِّْـ]', '', 'g'),
+    'أإآؤئىة',
+    'اااوييه'
+  );
+END;
+$$ LANGUAGE plpgsql IMMUTABLE;
 
+CREATE OR REPLACE FUNCTION set_store_name_ar_clean()
+RETURNS trigger AS $$
+BEGIN
+  NEW.store_name_ar_clean := normalize_arabic(NEW.store_name_ar);
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
 
+CREATE TRIGGER trg_set_store_name_ar_clean
+BEFORE INSERT OR UPDATE ON stores
+FOR EACH ROW
+EXECUTE FUNCTION set_store_name_ar_clean();
 
 
 

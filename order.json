@@ -4,7 +4,7 @@
   "location_code": "",
   "copon": "NULL",
   "store_id": "string",
-  "delevery_type": "takeaway-delevery",
+  "delivery_type": "takeaway-delivery",
   "items": [
     {
       "itemId": "string",

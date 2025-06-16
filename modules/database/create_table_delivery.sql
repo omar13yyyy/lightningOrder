@@ -5,10 +5,10 @@ BEGIN;
 
 
 DROP TABLE IF EXISTS driver_transactions,driver_points,driver_wallets_previous_day
-,drivers,trust_points_log,delivery_document_images,effective_tokens_delevery;
+,drivers,trust_points_log,delivery_document_images,effective_tokens_delivery,effective_tokens_delevery;
 
 
-CREATE TABLE effective_tokens_delevery (
+CREATE TABLE effective_tokens_delivery (
     user_id bigint ,
     token text,
     UNIQUE("user_id")

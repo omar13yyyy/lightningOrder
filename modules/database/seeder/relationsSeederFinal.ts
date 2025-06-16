@@ -16,7 +16,7 @@ export async function seederGenerateCSV(){
   const CUSTOMERCOUNT = 20;
   const DRIVERCOUNT = 10;
   const PARTNERSCOUNT = 6;
-  const STORESCOUNT = 26;
+  const STORESCOUNT = 150;
   const ORDERSCOUNT = 10000;
   const SOLDPRODUCTSCOUNT = 1000;
   const TRANDSCOUNT = 10;
@@ -317,22 +317,23 @@ async function generateStore(id, userName, uuid, partnerId,full_address,category
     store_id: uuid,
     internal_id: id,
     partner_id: partnerId,
-    store_name_ar: faker.commerce.department(),
-    store_name_en: fakerEN.commerce.department(),
+    store_name_ar: faker.commerce.department()+id,
+    store_name_en: fakerEN.commerce.department()+id,
+    store_name_ar_clean: faker.commerce.department()+id,
     phone_number: faker.phone.number(),
     email: faker.internet.email(),
     full_address: full_address,
     status: randomEnum(enumStoreStatuses),
     internal_category_id :internal_category_id,
     category_id:categoryId,
-    min_order_price: faker.number.float({ min: 5, max: 100 }),
+    min_order_price: faker.number.float({ min: 5, max: 100, fractionDigits: 1 }),
     Latitude: Latitude,
     longitude: longitude,
     logo_image_url: "storeLogo.jpg",
     cover_image_url: "storeCover.jpg",
     store_description: faker.lorem.sentence(),
     location_code: locationCode,
-    platform_commission: faker.number.float({ min: 0, max: 1 }),
+    platform_commission: faker.number.float({ min: 0, max: 1 , fractionDigits: 1}),
     orders_type: randomEnum(enumOrdersTypes),
     preparation_time:faker.number.int({ min: 1, max: 100 }),
     user_name: userName,
@@ -349,7 +350,7 @@ function generateTrends(store_id, uuid) {
     //TODO real store id
     internal_store_id: store_id,
     details: faker.lorem.sentence(),
-    contract_image: "/images/test/public/logo.jpg",
+    contract_image: "logo.jpg",
     from_date: faker.date.recent().toISOString(),
     to_date: faker.date.recent().toISOString(),
     create_at: faker.date.recent().toISOString(),
@@ -398,7 +399,7 @@ function generateCoupoun(store_id, store_uuid, couponCode) {
     discount_value_percentage: parseFloat(
       faker.number.float({ min: 0.05, max: 0.5 }).toFixed(2)
     ),
-    delevery_discount_percentage: parseFloat(
+    delivery_discount_percentage: parseFloat(
       faker.number.float({ min: 0.05, max: 0.5 }).toFixed(2)
     ),
     on_expense: faker.helpers.arrayElement(enumOnExpense),
@@ -557,7 +558,7 @@ const storeRatingsArray :any = [];
 function generateStoreRatings(store_internal_id) {
   storeRatingsArray.push({
     store_internal_id: store_internal_id,
-    rating_previous_day: faker.number.float({ min: 2, max: 5 }),
+    rating_previous_day: faker.number.float({ min: 2, max: 5 , fractionDigits: 1}),
     number_of_raters: faker.number.int({ min: 10, max: 60 }),
     last_updated_at: faker.date.recent().toISOString(),
   });
@@ -695,9 +696,9 @@ function generateorderFinancialLogs(uuid, driverId, orderId,storeId,orderInterna
     order_internal_id :orderInternalId,
 
     store_id :storeId,
-    order_amount : faker.number.float({ min: 50000, max: 200000 }),
-    platform_commission: faker.number.float({ min: 0, max: 1 }),
-    driver_earnings: faker.number.float({ min: 500, max: 2000 }),
+    order_amount : faker.number.float({ min: 50000, max: 200000 , fractionDigits: 1}),
+    platform_commission: faker.number.float({ min: 0, max: 1 , fractionDigits: 1}),
+    driver_earnings: faker.number.float({ min: 500, max: 2000, fractionDigits: 1 }),
     log_date: faker.date.recent().toISOString(),
   });
 }
@@ -728,7 +729,7 @@ function generateStatisticsPreviousDay(storId) {
     //TODO real DATA
     store_id: storId,
     total_orders: faker.number.int({ min: 50, max: 200 }),
-    total_revenue: faker.number.float({ min: 1000, max: 10000 }),
+    total_revenue: faker.number.float({ min: 1000, max: 10000 , fractionDigits: 1}),
     average_delivery_time: faker.date.recent().toISOString(),
     customers_visited: faker.number.int({ min: 5, max: 50 }),
     balance_previous_day: faker.finance.amount({min :10000, max:50000, dec :2}),
@@ -905,19 +906,25 @@ function generateJsonbDataEnAr(ln, uuidObject) {
     });
     let allergens = ["صويا", "بقوليات"];
     let is_item_best_seller = faker.datatype.boolean();
-    let internal_item_id = faker.number.int();
+    let internal_item_id = faker.number.int({
+      min: 0,
+      max: 100000,
+    })
 
     if (ln == "en") {
       items_name = fakerEN.food.dish();
       items_description = fakerEN.food.description();
       allergens = ["a", "bbbab"];
-      internal_item_id = fakerEN.number.int();
+      internal_item_id = faker.number.int({
+      min: 0,
+      max: 100000,
+    })
     }
     const category_id = categoryArray[faker.number.int({ min: 0, max: categoryArray.length-1 })].category_id
     let item = {
       item_id: item_id,
       internal_item_id: internal_item_id,
-      image_url: "/images/test/public/logo.jpg",
+      image_url: "logo.jpg",
       name: items_name,
       description: items_description,
       external_price: faker.commerce.price(),
@@ -962,7 +969,10 @@ function generateJsonbDataEnAr(ln, uuidObject) {
       calories: calories,
       price: size_price,
       modifiers_id: modifiers_id_array,
-      order: faker.number.int(),
+      order: faker.number.int({
+      min: 0,
+      max: 200,
+    }),
     };
     return size
   }
@@ -1176,11 +1186,10 @@ async function StoreMultigenerator(count,uuidObject) {
     ,category.category_id,category.internal_id);
         generateStoreRatings(i);
 generateStatisticsPreviousDay(uuidObject.uniqueUUID[uuidObject.lastUUID]);
-    for (let j = 1; j < faker.number.int({ min: 1, max: 4 }); j++){
-        let tag = tagsArray[j-1]
-
+    for (let j = 1; j < faker.number.int({ min: 1, max: 3 }); j++){
+        let tag = randomEnum (tagsArray)
       generateStoreTag(storeTagsId,i,uuidObject.uniqueUUID[uuidObject.lastUUID], tag.tag_id,tag.internal_id);
-    storeTagsId++
+       storeTagsId++
   }
     for (let f = 1; f < 8; f++)
       generateWorkingHours(
@@ -1411,6 +1420,7 @@ function SystemSettingsMultiGenerator() {
     generateSystemSettings("delivery_cost_per_km",5000);
     generateSystemSettings("delivery_time_per_km",5);
     generateSystemSettings("max_distance_km",15);
+    generateSystemSettings("min_delivery_cost",8000);
 
 
 }

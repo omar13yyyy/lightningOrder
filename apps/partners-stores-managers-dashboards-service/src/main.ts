@@ -18,13 +18,13 @@ visitorStoreRouter.route('/getStoreCategories').get(storesController.getStoreCat
 visitorStoreRouter.route('/getStoreProducts').get(storesController.getStoreProducts)
 visitorStoreRouter.route('/getCouponDetails').get(storesController.getCouponDetails)
 visitorStoreRouter.route('/getNearStores').post(storesController.getNearStores)
-visitorStoreRouter.route('/getNearStoresByTag').post(storesController.getNearStoresByTag)
-visitorStoreRouter.route('/getNearStoresByCategory').post(storesController.getNearStoresByCategory)
-/*
-visitorStoreRouter.route('/getTrendStores').get(storesController.getNearTrendStores)
-visitorStoreRouter.route('/getNearTrendStoresByTag').get(storesController.getNearTrendStores)
-visitorStoreRouter.route('/getNearTrendStoresByCategory').get(storesController.getNearTrendStoresByCategory)
-*/
+visitorStoreRouter.route('/getStoresByTag').post(storesController.getNearStoresByTag)
+visitorStoreRouter.route('/getStoresByCategory').post(storesController.getNearStoresByCategory)
+/* 
+visitorStoreRouter.route('/getNearTrendStores').get(storesController.getNearTrendStores)
+visitorStoreRouter.route('/getTrendStoresByTag').get(storesController.getNearTrendStores)
+visitorStoreRouter.route('/getTrendStoresByCategory').get(storesController.getNearTrendStoresByCategory)
+ */
 
 
 visitorStoreRouter.route('/SearchForStore').post(storesController.searchForStore)

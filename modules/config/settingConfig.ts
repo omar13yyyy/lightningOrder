@@ -67,17 +67,39 @@ export const getMaxDistance = async (): Promise<number> => {
 
   return parseFloat(time);
 };
+export const getMinDeliveryCost = async (): Promise<number> => {
+  const MIN_DELIVERY_COST = "settings:min_delivery_cost";
 
+  const cachedMinDeliveryCost = await redis.get(MIN_DELIVERY_COST);
+  if (cachedMinDeliveryCost) {
+    return parseFloat(cachedMinDeliveryCost);
+  }
+ const getMinDeliveryCostDB= async () => {
+    //TODO after login or first reques save token in redis
+      const { rows } = await query(
+        "select setting_value from system_settings where setting_key = 'min_delivery_cost' ",
+      [])
+      return rows[0].setting_value
+  }
+  const time = await getMinDeliveryCostDB();
+
+  await redis.set(MIN_DELIVERY_COST, time, "EX", 6 * 60 * 60);
+
+  return parseFloat(time);
+};
 export class DeliveryConfig {
   static maxDistance: number ; 
   static timePerKM: number ; 
-  static costPerKM: number ; 
+  static costPerKM: number ;
+    static MinDeliveryCost: number ; 
+ 
   constructor(){
     DeliveryConfig.update()
   }
   static async update() {
-     this.maxDistance = await getMaxDistance();; 
+   this.maxDistance = await getMaxDistance();; 
    this.timePerKM =await getDeliveryTimePerKm();  
    this.costPerKM = await getDeliveryCostPerKm();  
+    this.MinDeliveryCost = await getMinDeliveryCost();
   }
 }

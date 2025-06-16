@@ -2,7 +2,7 @@ import { ar } from '@faker-js/faker';
 import { query} from '../../../../../modules/database/commitDeliverySQL';
 //------------------------------------------------------------------------------------------
 
-export const deleveryRepository = {
+export const deliveryRepository = {
   //------------------------------------------------------------------------------------------
 
 
@@ -24,7 +24,7 @@ From drivers where driver_id =$1
 logout : async (customer_id) => {
     const { rows }= await query(` 
       
-        DELETE from effective_tokens_delevery where user_id = $1
+        DELETE from effective_tokens_delivery where user_id = $1
 
     `,[customer_id])
 
@@ -33,7 +33,7 @@ logout : async (customer_id) => {
 
 fetchDriverTokenById : async (userId)=>{
     //todo if not exist in redis search in database dont forget logout
-   const {rows} =(await query('select token from effective_tokens_delevery where user_id = $1 LIMIT 1',[userId]))[0].token
+   const {rows} =(await query('select token from effective_tokens_delivery where user_id = $1 LIMIT 1',[userId]))[0].token
 
     return rows[0].token
 
@@ -51,7 +51,7 @@ fetchDriverIdPasswordByNumber : async (userName)=>{
 updateEffectiveToken : async (token ,userId) =>{
     //TODO after login or first reques save token in redis
     
-     await query('UPDATE effective_tokens_delevery SET token =$1 where user_id =$2 ',[token,userId])
+     await query('UPDATE effective_tokens_delivery SET token =$1 where user_id =$2 ',[token,userId])
 
 },
 }

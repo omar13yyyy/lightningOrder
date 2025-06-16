@@ -20,15 +20,15 @@ function roundUpToNearestten(num) :number{
 }
 
 function processRow(row) : StoreItem{
-
+const delivery_price = roundUpToNearestThousand(DeliveryConfig.costPerKM * row.distance_km)
  const result : StoreItem = {
    store_id: row.store_id,
    title: row.title,
    tags: row.tags,
    status: row.status,
-   delivery_price: roundUpToNearestThousand(DeliveryConfig.costPerKM * row.distance_km),
+   delivery_price: delivery_price > DeliveryConfig.MinDeliveryCost?delivery_price :DeliveryConfig.MinDeliveryCost,
    min_order_price: row.min_order_price,
-   distance_km: row.distance_km.toFixed(1),
+   distance_km: Math.round(row.distance_km * 10) / 10,
    preparation_time: roundUpToNearestten(
      row.preparation_time + DeliveryConfig.timePerKM * row.distance_km
    ),
@@ -37,10 +37,10 @@ function processRow(row) : StoreItem{
    logo_image_url: serverHost+storeImagePath+row.logo_image_url,
    cover_image_url:serverHost+storeImagePath+ row.cover_image_url,
    orders_type: row.orders_type,
-   couponCode :row.copounCode,
+   couponCode :row.code,
     discount_value_percentage :row.discount_value_percentage,
-   min_order_value :row.min_order_value,
-    delevery_discount_percentage :row.delevery_discount_percentage
+   coupon_min_order_value :row.coupon_min_order_value,
+    delivery_discount_percentage :row.delivery_discount_percentage
 
 
  }
@@ -260,21 +260,21 @@ export const storesServices = {
       limit: params.limit,
       offset: params.offset,
       distanceKm: DeliveryConfig.maxDistance,
+      storeName :params.storeName
     } as SearchForStoreRepo
     );
         return rowsJson(rows,[],params.limit) 
 
   },
   getStoreProductsService: async (params :StoreService) => {
-    let rows = await storesRepository.fetchStoreProduct({ln:params.ln, storeId:params.storeId}as StoreRepo );
-    if(rows != undefined){
-     for(let i =0 ; i< rows.items.length ;i++) {
-      rows.items[0].image_url =serverHost +storeImagePath+ rows.items[0].image_url
-     }
+    let row = await storesRepository.fetchStoreProduct({ln:params.ln, storeId:params.storeId}as StoreRepo );
+    if(row != undefined){
+     for(let i =0 ; i< row.products.items.length ;i++) {
+    row.products.items[i].image_url = serverHost + storeImagePath + row.products.items[i].image_url     }
 
 
     }
-        return 
+        return row
 
   },
   getCouponDetailsService: async (coupon :CouponDetailsService) => {

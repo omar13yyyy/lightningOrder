@@ -78,7 +78,7 @@ FROM (
     const precision = 20;
     const locationCodeLength = 14; //عدد الاسطر
     const neighbors = generateNeighbors(param.locationCode);
-    let sql = getStoreSql(param.ln, "",'','','','');
+    let sql = getStoreSql(param.ln, "",'',"WHERE  s.status = 'open'",'','');
 
     const { rows } = await query(sql, [
       neighbors,
@@ -100,7 +100,7 @@ FROM (
 
     const precision = 20;
     const neighbors = generateNeighbors(param.locationCode);
-    let sql = getStoreSql(param.ln, " AND swd.category_id =$8",'','','','');
+    let sql = getStoreSql(param.ln, " AND swd.category_id =$8","WHERE  s.status = 'open'",'',"",'');
     const { rows } = await query(sql, [
       neighbors,
       param.latitudes,
@@ -120,7 +120,7 @@ FROM (
 
     const precision = 20;
     const neighbors = generateNeighbors(param.locationCode);
-    const sql = getStoreSql(param.ln, " AND st.tag_id =$8",'','','','');
+    const sql = getStoreSql(param.ln, " AND st.tag_id =$8","WHERE  s.status = 'open'",'','','');
 
     const { rows } = await query(sql, [
       neighbors,
@@ -142,7 +142,7 @@ FROM (
     const locationCodeLength = 14; //عدد الاسطر
     const neighbors = generateNeighbors(param.locationCode);
     let sql = getStoreSql(param.ln, "",
-      'JOIN trends tr ON s.internal_id = tr.internal_store_id','','','');
+      'JOIN trends tr ON s.internal_id = tr.internal_store_id',"WHERE  s.status = 'open'",'','');
 
     const { rows } = await query(sql, [
       neighbors,
@@ -165,7 +165,7 @@ FROM (
     const precision = 20;
     const neighbors = generateNeighbors(param.locationCode);
     let sql = getStoreSql(param.ln, " AND swd.category_id =$8",
-      'JOIN trends tr ON s.internal_id = tr.internal_store_id','','','');
+      'JOIN trends tr ON s.internal_id = tr.internal_store_id',"WHERE  s.status = 'open'",'','');
     const { rows } = await query(sql, [
       neighbors,
       param.latitudes,
@@ -186,7 +186,7 @@ FROM (
     const precision = 20;
     const neighbors = generateNeighbors(param.locationCode);
     const sql = getStoreSql(param.ln, " AND st.tag_id =$8",
-      'JOIN trends tr ON s.internal_id = tr.internal_store_id','','','');
+      'JOIN trends tr ON s.internal_id = tr.internal_store_id',"WHERE  s.status = 'open'",'','');
 
     const { rows } = await query(sql, [
       neighbors,
@@ -207,15 +207,12 @@ FROM (
 
     const precision = 20;
     const neighbors = generateNeighbors(param.locationCode);
-    const sql = getStoreSql(param.ln,'','',
-       " WHERE  s.store_name_ar % $8 OR s.store_name_en % $8 ",
-      "similarity(s.store_name_ar, $8) as score1,similarity(s.store_name_en, $8) as score2,",
-      'swd.score1,swd.score2,');
+    const sql = searchForStoreSql(param.ln,'','','','','')
 
     const { rows } = await query(sql, [
       neighbors,
       param.latitudes,
-      param.locationCode,
+      param.logitudes,
       param.distanceKm,
       param.limit,
       param.offset,
@@ -271,21 +268,117 @@ SELECT
   swd.store_id,
   swd.distance_km ,
  swd.store_name_${ln} as title,swd.status,swd.min_order_price,swd.logo_image_url,swd.cover_image_url,swd.orders_type,swd.preparation_time,
- cop.discount_value_percentage,cop.delevery_discount_percentage,cop.code as coupon_code,
-  ARRAY_AGG(t.tag_name_${ln}) AS tags
+ cop.discount_value_percentage,cop.delivery_discount_percentage,cop.code,cop.min_order_value as coupon_min_order_value,
+  COALESCE(
+  ARRAY_AGG(DISTINCT t.tag_name_en) FILTER (WHERE t.tag_name_en IS NOT NULL),
+  ARRAY[]::text[]
+) AS tags
 FROM stores_with_distance swd
-JOIN store_ratings_previous_day sr ON sr.store_internal_id = swd.internal_id
+LEFT JOIN store_ratings_previous_day sr ON sr.store_internal_id = swd.internal_id
 LEFT JOIN store_tags st ON st.internal_store_id = swd.internal_id
 LEFT JOIN tags t ON t.internal_id = st.internal_tag_id 
-LEFT JOIN coupons cop ON cop.internal_store_id = st.internal_id 
-WHERE swd.distance_km <= $4  AND expiration_date > now() AND
-         real_usage IS NULL OR max_usage IS NULL OR real_usage < max_usage And coupon_type = "public"${and}
+LEFT JOIN coupons cop ON cop.internal_store_id = swd.internal_id 
+WHERE (
+  ( swd.distance_km <= $4 AND expiration_date > now() AND real_usage IS NULL)
+  OR max_usage IS NULL
+  OR (real_usage < max_usage AND coupon_type = 'public')
+) ${and}
 GROUP BY ${searchParamOrder} swd.store_id,swd.distance_km,swd.internal_id,store_name_${ln},swd.status,swd.min_order_price,swd.logo_image_url,
+cop.discount_value_percentage,cop.delivery_discount_percentage,cop.code, cop.min_order_value  ,
 swd.cover_image_url,swd.orders_type,swd.preparation_time,sr.number_of_raters,sr.rating_previous_day 
-ORDER BY ${searchParamOrder} swd.distance_km
+ORDER BY  ${searchParamOrder} swd.store_id, swd.distance_km 
+LIMIT $5
+OFFSET $6
+ `;
+  return sql;
+}
+function searchForStoreSql(ln, and, join, where, searchParamScore, searchParamOrder) {
+  const sql = `
+WITH nearby_codes AS (
+  SELECT unnest($1::text[]) AS prefix
+),
+stores_with_distance AS (
+  SELECT 
+    s.preparation_time,
+    s.store_id,
+    s.internal_id,
+    s.store_name_en,
+    s.store_name_ar,
+    s.store_name_ar_clean,
+    s.status,
+    s.min_order_price,
+    s.logo_image_url,
+    s.cover_image_url,
+    s.orders_type,
+    s.category_id,
+    haversine_distance_km(
+      $2,              -- user_lat
+      $3,              -- user_lng
+      s.latitude::double precision,
+      s.longitude::double precision
+    ) AS distance_km
+  FROM stores s 
+  JOIN nearby_codes nc ON LEFT(s.location_code, $7) = LEFT(nc.prefix, $7)
+),
+fuzzy_filtered AS (
+  SELECT  
+     swd.preparation_time,
+    swd.store_id,
+    swd.internal_id,
+    swd.store_name_en,
+    swd.store_name_ar,
+    swd.store_name_ar_clean,
+    swd.status,
+    swd.min_order_price,
+    swd.logo_image_url,
+    swd.cover_image_url,
+    swd.orders_type,
+    swd.category_id,
+    swd.distance_km
+
+  FROM stores_with_distance swd
+  WHERE 
+    swd.store_name_ar_clean % normalize_arabic($8) OR
+    swd.store_name_en % $8
+)
+SELECT 
+  sr.rating_previous_day,
+  sr.number_of_raters,
+  swd.store_id,
+  swd.distance_km,
+  swd.store_name_${ln} AS title,
+  swd.status,
+  swd.min_order_price,
+  swd.logo_image_url,
+  swd.cover_image_url,
+  swd.orders_type,
+  swd.preparation_time,
+  cop.discount_value_percentage,
+  cop.delivery_discount_percentage,
+  cop.code,
+  cop.min_order_value AS coupon_min_order_value,
+  COALESCE(
+    ARRAY_AGG(DISTINCT t.tag_name_en) FILTER (WHERE t.tag_name_en IS NOT NULL),
+    ARRAY[]::text[]
+  ) AS tags
+FROM fuzzy_filtered swd
+LEFT JOIN store_ratings_previous_day sr ON sr.store_internal_id = swd.internal_id
+LEFT JOIN store_tags st ON st.internal_store_id = swd.internal_id
+LEFT JOIN tags t ON t.internal_id = st.internal_tag_id 
+LEFT JOIN coupons cop ON cop.internal_store_id = swd.internal_id 
+WHERE (
+  (swd.distance_km <= $4 AND expiration_date > now() AND real_usage IS NULL)
+  OR max_usage IS NULL
+  OR (real_usage < max_usage AND coupon_type = 'public')
+)
+GROUP BY  swd.store_id,swd.distance_km,swd.internal_id,store_name_${ln},swd.status,
+swd.min_order_price,swd.logo_image_url,cop.discount_value_percentage,
+cop.delivery_discount_percentage,cop.code, cop.min_order_value,
+swd.cover_image_url,swd.orders_type,swd.preparation_time,sr.number_of_raters,sr.rating_previous_day 
+ORDER BY  swd.store_id, swd.distance_km 
 LIMIT $5
 OFFSET $6;
- `;
+`;
   return sql;
 }
 //-------------------------------------------------

@@ -31,42 +31,42 @@ getStoreCategories: async   (req, res)=>{
 }
 ,
 getNearStores: async   (req, res)=>{
-    const query : NearStoresReq= req.body 
+    const body : NearStoresReq= req.body 
     const params :NearStoresService = {
-        ln: query.ln,
-        latitudes:  query.latitudes,
-        logitudes:  query.logitudes,
-        locationCode:  query.locationCode,
-        limit:  query.limit,
-        offset:  query.offset,
+        ln: body.ln,
+        latitudes:  body.latitudes,
+        logitudes:  body.logitudes,
+        locationCode:  body.locationCode,
+        limit:  body.limit,
+        offset:  body.offset,
     }
     const result = await storesServices.getNearStoresService(params);
     res.send(result)
 },
 getNearStoresByTag: async   (req, res)=>{
-    const query :NearStoresByTagReq = req.body  ; 
+    const body :NearStoresByTagReq = req.body  ; 
     const params :NearStoresBytagService = {
-        ln: query.ln,
-        latitudes: query.latitudes,
-        logitudes: query.logitudes,
-        locationCode: query.locationCode,
-        limit: query.limit,
-        offset: query.offset,
-        tagId:  query.tagId
+        ln: body.ln,
+        latitudes: body.latitudes,
+        logitudes: body.logitudes,
+        locationCode: body.locationCode,
+        limit: body.limit,
+        offset: body.offset,
+        tagId:  body.tagId
     }
     const result = await storesServices.getNearStoresByTagService(params);
     res.send(result)
 },
 getNearStoresByCategory: async   (req, res)=>{
-     const query :NearStoresByCategoryReq =  req.body  ; 
+     const body :NearStoresByCategoryReq =  req.body  ; 
         const params :NearStoresByCategoryService = {
-        ln: query.ln,
-        latitudes: query.latitudes,
-        logitudes: query.logitudes,
-        locationCode: query.locationCode,
-        limit: query.limit,
-        offset: query.offset,
-        categoryId:  query.categoryId
+        ln: body.ln,
+        latitudes: body.latitudes,
+        logitudes: body.logitudes,
+        locationCode: body.locationCode,
+        limit: body.limit,
+        offset: body.offset,
+        categoryId:  body.categoryId
     }
     const result = await storesServices.getNearStoresByCategoryService(params);
     res.send(result)
@@ -116,15 +116,15 @@ getNearTrendStoresByCategory: async   (req, res)=>{
 },
 */
 searchForStore: async   (req, res)=>{
-    const query :SearchForStoreReq = req.body ; 
+    const body :SearchForStoreReq = req.body ; 
     const params :SearchForStoreService = {
-               ln: query.ln,
-        latitudes: query.latitudes,
-        logitudes: query.logitudes,
-        locationCode: query.locationCode,
-        limit: query.limit,
-        offset: query.offset,
-        storeName: query.storeName
+               ln: body.ln,
+        latitudes: body.latitudes,
+        logitudes: body.logitudes,
+        locationCode: body.locationCode,
+        limit: body.limit,
+        offset: body.offset,
+        storeName: body.storeName
     }
     const result = await storesServices.SearchForStoreService(params);
     res.send(result)
