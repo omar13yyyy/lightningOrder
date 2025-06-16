@@ -96,7 +96,7 @@ CREATE SERVER IF NOT EXISTS dashboard_server
    ) THEN
     CREATE USER MAPPING FOR CURRENT_USER
     SERVER dashboard_server
-    OPTIONS (user 'postgres', password 'omar');
+    OPTIONS (user 'postgres', password '12345');
      END IF;
 END $$;
 IMPORT FOREIGN SCHEMA public
@@ -120,7 +120,7 @@ CREATE SERVER IF NOT EXISTS delivery_server
    ) THEN
     CREATE USER MAPPING FOR CURRENT_USER
     SERVER delivery_server
-    OPTIONS (user 'postgres', password 'omar');
+    OPTIONS (user 'postgres', password '12345');
      END IF;
 END $$;
 IMPORT FOREIGN SCHEMA public
@@ -145,7 +145,7 @@ CREATE SERVER IF NOT EXISTS orders_server
    ) THEN
     CREATE USER MAPPING FOR CURRENT_USER
     SERVER orders_server
-    OPTIONS (user 'postgres', password 'omar');
+    OPTIONS (user 'postgres', password '12345');
      END IF;
 END $$;
 IMPORT FOREIGN SCHEMA public

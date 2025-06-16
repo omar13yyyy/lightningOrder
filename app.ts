@@ -7,10 +7,10 @@ import dotenv from 'dotenv';
 dotenv.config()
 
 
-await seederGenerateCSV()
+// await seederGenerateCSV()
 
-await createDatabases()
-await seeder()
+// await createDatabases()
+// await seeder()
  
   server()
 

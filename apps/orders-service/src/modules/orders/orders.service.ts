@@ -1,120 +1,182 @@
-import { ordersRepository } from './orders.repository';
-import { partnerClient } from "../../../index"
+import { ordersRepository } from "./orders.repository";
+import { partnerClient } from "../../../index";
 //import bcryptjs from "bcryptjs";
 //import jwt from 'jsonwebtoken';
 //------------------------------------------------------------------------------------------
 
- export const ordersService = {
+export const ordersService = {
+  //------------------------------------------------------------------------------------------
 
-//------------------------------------------------------------------------------------------
-
-
-/*
   partnergetCurrentStatisticsService: async (
-    partnerId: string,
-    internal_id:number
+    partnerId: number,
+    store_id: string
   ): Promise<{
- accepted : number, 
- rejected : number,
- with_driver :number,
- delivered : number,
-  returned : number
-    
+    accepted: number;
+    rejected: number;
+    with_driver: number;
+    delivered: number;
+    returned: number;
+    driver_not_Received: number;
+    customer_not_Received: number;
   }> => {
-    if (internal_id > 0) {
+    if (store_id) {
+      const { internal_id } = await partnerClient.getStoreId(store_id);
+
       return await ordersRepository.getCurrentStatistics(internal_id);
     }
-   const stores = await partnerClient.geInfoByStoreIds(partnerId);
+    const stores = await partnerClient.geInfoByStoreIds(partnerId);
     const storeIds = stores.map((row) => row.internal_id);
-    console.log(storeIds+"lllllllllllllllllllllllllll")
+    console.log(storeIds + "storeIds");
     return await ordersRepository.getCurrentStatistics(storeIds);
   },
   //------------------------------------------------------------------------------------------
 
-previousOrderService: async (
-  internal_id: number,
-  state: string,
-  paymentMethod: number,
-  fromPrice: number,
-  toPrice: number,
-  fromDate: number,
-  toDate: number,
-  limit: number,
-  offset: number
-): Promise<{
+  previousOrderService: async (
+    partnerId: number,
+    storeId: string,
+    state: string,
+    paymentMethod: string,
+    fromPrice: number,
+    toPrice: number,
+    fromDate: Date,
+    toDate: Date,
+    pageSize: number ,
+      page: number,
+  ) => {
+          const offset = (page - 1) * pageSize;
 
-  order_id: string,
-  created_at: string,
-  store_name: string,
-  customer_name: string,
-  customer_phone_number: string,
-  driver_name: string,
-  driver_phone_number: string, 
-  type: string,
-  related_rating: number,
-  payment_method: string,
-  order_details_text: string 
+    if (storeId) {
+      const { internal_id } = await partnerClient.getStoreId(storeId);
+ const [rows, total] = await Promise.all([
 
+     ordersRepository.previousOrder(
+        internal_id,
+          pageSize,
+      offset,
+        state,
+        paymentMethod,
+        fromPrice,
+        toPrice,
+        fromDate,
+        toDate,
 
-}[]> => {
-  // TODO: تأكد أن المتجر ينتمي لنفس الشريك
+      ),
+ 
+          ordersRepository.getprevorderCountstore(internal_id),
+   ]);
+          console.log(total)
 
-  return await ordersRepository.previousOrder(
-    internal_id,
-    state,
-    paymentMethod,
-    fromPrice,
-    toPrice,
-    fromDate,
-    toDate,
-    limit,
-    offset
-  );
-},
+     return {
+    data: {
+      pastorder: rows,
+      pagination: {
+    total: total,
+    page: Number(page),
+    pageSize: Number(pageSize),
+    totalPages: Math.ceil(total / pageSize),
+  },
+    }
+  };
+
+   } 
+    const stores = await partnerClient.geInfoByStoreIds(partnerId);
+    const storeIds = stores.map((row) => row.internal_id);
+    console.log(storeIds + "storeIds");
+ const [rows, total] = await Promise.all([
+
+    ordersRepository.previousOrder(
+      storeIds, 
+        pageSize,
+      offset,
+      state,
+      paymentMethod,
+      fromPrice,
+      toPrice,
+      fromDate,
+      toDate,
+  
+    ),
+              ordersRepository.getprevorderCountstore(storeIds),
+
+       ]);
+       console.log(total)
+         return {
+    data: {
+      pastorder: rows,
+      pagination: {
+    total: total,
+    page: Number(page),
+    pageSize: Number(pageSize),
+    totalPages: Math.ceil(total / pageSize),
+  },
+    }
+  };
+       
+  },
 
   //------------------------------------------------------------------------------------------
 
-getCurrentOrders: async (
-  storeId: number,
-  limit: number,
-  offset: number
-): Promise<{
-  order_id: string,
-  created_at: string,
-  store_name: string,
-  type: string,
-  payment_method: string,
-  order_details_text: number
-}[]> => {
-  return await ordersRepository.getCurrentOrders(storeId, limit, offset);
-},
-//-----------------------------------------------------------------------------------------
-getBillPastOrdersService: async ( 
-   orderId: string
-): Promise<{
+  getCurrentOrders: async (
+    partnerId: number,
+    storeId: string,
+    limit: number,
+    lastCursor?: string
+  ): Promise<{
+    orders: {
+      order_id: string;
+      created_at: string;
+      store_name: string;
+      type: string;
+      payment_method: string;
+      order_details_text: string;
+    }[];
+    hasNextPage: boolean;
+    nextCursor?: string;
+  }> => {
+    if (storeId) {
+      const { internal_id } = await partnerClient.getStoreId(storeId);
+      return await ordersRepository.getCurrentOrders(
+        internal_id,
+        limit,
+        lastCursor
+      );
+    }
+    const stores = await partnerClient.geInfoByStoreIds(partnerId);
+    const storeIds = stores.map((row) => row.internal_id);
+    return await ordersRepository.getCurrentOrders(storeIds, limit, lastCursor);
+  },
+  //-----------------------------------------------------------------------------------------
+  getBillPastOrdersService: async (
+    orderId: string
+  ): Promise<{
     order_details_text: string;
-  
-}> => {
-   return await ordersRepository.getBillPastOrders(orderId)
-},
-//------------------------------------------------------------------------------------------
-getBillCurrentOrdersService: async ( 
-   orderId: string
-): Promise<{
+  }> => {
+    return await ordersRepository.getBillPastOrders(orderId);
+  },
+  //------------------------------------------------------------------------------------------
+  getBillCurrentOrdersService: async (
+    orderId: string
+  ): Promise<{
     order_details_text: string;
-  
-}> => {
-   return await ordersRepository.getBillPastOrders(orderId)
-},
-//------------------------------------------------------------------------------------------
+  }> => {
+    return await ordersRepository.getBillPastOrders(orderId);
+  },
+  //------------------------------------------------------------------------------------------
 
- }
+  getCurrentStatisticsStore: async (
+    store_id: string
+  ): Promise<{
+    accepted: number;
+    rejected: number;
+    with_driver: number;
+    delivered: number;
+    returned: number;
+    driver_not_Received: number;
+    customer_not_Received: number;
+  }> => {
+    const { internal_id } = await partnerClient.getStoreId(store_id);
 
-
-
-
-
-*/
-
-
- }
+    return await ordersRepository.getCurrentStatistics(internal_id);
+  },
+  //------------------------------------------------------------------------------------------
+};

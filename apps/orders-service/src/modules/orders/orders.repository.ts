@@ -1,97 +1,117 @@
-import { query   as ordersQuery ,query} from '../../../../../modules/database/commitOrdersSQL';
+import {
+  query as ordersQuery,
+  query,
+} from "../../../../../modules/database/commitOrdersSQL";
 //------------------------------------------------------------------------------------------
 
 export const ordersRepository = {
   //------------------------------------------------------------------------------------------
 
- getCurrentStatistics: async (
-    storeId: string[] | number,
+  getCurrentStatistics: async (
+    storeId: number[] | number
   ): Promise<{
- accepted : number, 
- rejected : number,
- with_driver :number,
- delivered : number,
-  returned : number
-  }> => { 
-    console.log(storeId,'storeid')
+    accepted: number;
+    rejected: number;
+    with_driver: number;
+    delivered: number;
+    returned: number;
+    driver_not_Received: number;
+    customer_not_Received: number;
+  }> => {
+    console.log(storeId, "storeid");
     const idsArray = Array.isArray(storeId) ? storeId : [storeId];
 
-    const placeholders = idsArray.map((_, i) => `$${i + 1}`).join(', ');
+    const placeholders = idsArray.map((_, i) => `$${i + 1}`).join(", ");
 
-console.log(placeholders+"placeholders",idsArray)
-const sql = `
+    console.log(placeholders + "placeholders", idsArray);
+    const sql = `
   SELECT
     count(*) FILTER (WHERE os.status = 'accepted') AS accepted_orders,
     count(*) FILTER (WHERE os.status = 'rejected') AS rejected_orders,
     count(*) FILTER (WHERE os.status = 'with_driver') AS with_driver_orders,
     count(*) FILTER (WHERE os.status = 'delivered') AS delivered_orders,
-    count(*) FILTER (WHERE os.status = 'returned') AS returned_orders
+    count(*) FILTER (WHERE os.status = 'customer_not_Received') AS customer_not_Received,
+        count(*) FILTER (WHERE os.status = 'driver_not_Received') AS driver_not_Received
+
   FROM order_status os
   WHERE
-    os.store_internal_id IN (${placeholders})
+    os.store_id IN (${placeholders})
 `;
-
-
 
     const { rows } = await ordersQuery(sql, idsArray);
     const row = rows[0];
 
     return {
-       accepted : Number(row.accepted_orders || 0),
- rejected :Number(row.rejected_orders || 0),
- with_driver :Number(row.with_driver_order || 0),
- delivered : Number(row.delivered_orders || 0),
-  returned : Number(row.returned || 0),
- 
+      accepted: Number(row.accepted_orders || 0),
+      rejected: Number(row.rejected_orders || 0),
+      with_driver: Number(row.with_driver_order || 0),
+      delivered: Number(row.delivered_orders || 0),
+      returned: Number(row.returned || 0),
+      driver_not_Received: Number(row.driver_not_Received || 0),
+      customer_not_Received: Number(row.customer_not_Received || 0),
     };
-  }
-  ,
+  },
   //------------------------------------------------------------------------------------------
   previousOrder: async (
-  internal_id: number,
-  state?: string,
-  paymentMethod?: number,
-  fromPrice?: number,
-  toPrice?: number,
-  fromDate?: number,
-  toDate?: number,
-  limit: number = 10,
-  offset: number = 0
-): Promise<{
-  order_id: string;
-  created_at: string;
-  store_name: string;
-  type: string;
-  related_rating: number;
-  payment_method: string;
-  order_details_text: string;
-  customer_name: string;
-  customer_phone_number: string;
-  driver_name: string;
-  driver_phone_number: string;
-}[]> => {
-  const conditions: string[] = ['o.store_id = $1'];
-  const values: any[] = [internal_id];
-  let paramIndex = 2;
+    storeId: number[] | number,
+        pageSize:number,
+    offset:number,
+    state?: string,
+    paymentMethod?: string,
+    fromPrice?: number,
+    toPrice?: number,
+    fromDate?: Date,
+    toDate?: Date,
+ 
+  ): Promise<
+    {
+      order_id: string;
+      created_at: string;
+      store_name: string;
+      type: string;
+      related_rating: number;
+      payment_method: string;
+      order_details_text: string;
+      customer_name: string;
+      customer_phone_number: string;
+      driver_name: string;
+      driver_phone_number: string;
+    }[]
+  > => {
+    const idsArray = Array.isArray(storeId) ? storeId : [storeId];
+    const placeholdersstoreid = idsArray.map((_, i) => `$${i + 1}`).join(", ");
+    const conditions: string[] = [
+      `o.internal_store_id IN (${placeholdersstoreid})`,
+    ];
+    const values: any[] = [...idsArray];
 
-  if (state) {
-    conditions.push(`o.orders_type = $${paramIndex++}`);
-    values.push(state);
-  }
+    let paramIndex = idsArray.length + 1;
 
-  if (paymentMethod !== undefined) {
-    conditions.push(`o.payment_method = $${paramIndex++}`);
-    values.push(paymentMethod);
-  }
+    if (state) {
+      conditions.push(`o.orders_type = $${paramIndex++}`);
+      values.push(state);
+    }
 
-  if (fromDate && toDate) {
-    conditions.push(`o.created_at BETWEEN $${paramIndex} AND $${paramIndex + 1}`);
-    values.push(new Date(fromDate));
-    values.push(new Date(toDate));
-    paramIndex += 2;
-  }
+    if (paymentMethod) {
+      conditions.push(`o.payment_method = $${paramIndex++}`);
+      values.push(paymentMethod);
+    }
 
-  const sql = `
+    if (fromPrice && toPrice) {
+      conditions.push(`o.amount BETWEEN $${paramIndex} AND $${paramIndex + 1}`);
+      values.push(fromPrice, toPrice);
+      paramIndex += 2;
+    }
+
+    if (fromDate && toDate) {
+      conditions.push(
+        `o.created_at BETWEEN $${paramIndex} AND $${paramIndex + 1}`
+      );
+      values.push(fromDate, toDate);
+      paramIndex += 2;
+    }
+
+    const sql = `
     SELECT
       o.order_id,
       o.created_at,
@@ -105,123 +125,159 @@ const sql = `
       d.full_name AS driver_name,
       d.phone_number AS driver_phone_number
     FROM past_orders o
-    JOIN customers c ON c.customer_id = o.customer_id
-    JOIN drivers d ON d.driver_id = o.driver_id
-    WHERE ${conditions.join(' AND ')}
+    JOIN remotely.customers c ON c.customer_id = o.customer_id
+    JOIN remotely.drivers d ON d.driver_id = o.driver_id
+    WHERE ${conditions.join(" AND ")}
     ORDER BY o.created_at DESC
     LIMIT $${paramIndex++} OFFSET $${paramIndex}
   `;
 
-  values.push(limit, offset);
+    values.push(pageSize, offset);
 
-  const { rows } = await ordersQuery(sql, values);
-  return rows;
-}
-,
-//---------------------------------------------------------------------------------------------
-getCurrentOrders: async (
-  storeId: string[] | number,
-  limit: number,
-  offset: number
-): Promise<{
-  order_id: string;
-  created_at: string;
-  store_name: string;
-  type: string;
-  payment_method: string;
-  order_details_text: number;
-}[]> => {
-  const sql = `
+    const { rows } = await ordersQuery(sql, values);
+    return rows;
+  },
+  //---------------------------------------------------------------------------------------------
+   getprevorderCountstore : async (storeIds) => {
+  console.log(storeIds, "storeid");
+    const idsArray = Array.isArray(storeIds) ? storeIds : [storeIds];
+
+    const placeholders = idsArray.map((_, i) => `$${i + 1}`).join(", ");
+
+    console.log(placeholders + "placeholders", idsArray);
+
+  let query = `
+    SELECT COUNT(*) AS total
+    FROM past_orders
+    WHERE internal_store_id IN (${placeholders})
+  `;
+
+
+
+  const {rows} = await ordersQuery(query, idsArray);
+
+  console.log(rows)
+
+  return parseInt(rows[0].total);
+},
+
+  //---------------------------------------------------------------------------------------------
+  getCurrentOrders: async (
+    storeId: number[] | number,
+    limit: number,
+    lastCursor?: string
+  ): Promise<{
+    orders: {
+      order_id: string;
+      created_at: string;
+      store_name: string;
+      type: string;
+      payment_method: string;
+      order_details_text: string;
+    }[];
+    hasNextPage: boolean;
+    nextCursor?: string;
+  }> => {
+    const idsArray = Array.isArray(storeId) ? storeId : [storeId];
+    const placeholders = idsArray.map((_, i) => `$${i + 1}`).join(", ");
+
+    const values: any[] = [...idsArray, limit];
+    let whereClause = `internal_store_id IN (${placeholders})`;
+
+    const isValid = (v: any): boolean =>
+      typeof v === "string" && v.trim() !== "";
+
+    if (isValid(lastCursor)) {
+      values.push(lastCursor);
+      whereClause += ` AND created_at < $${values.length}`;
+    }
+
+    const sql = `
     SELECT
       order_id,
       created_at,
-store_name_ar,      
-orders_type,
+      store_name_ar,
+      orders_type,
       payment_method,
       order_details_text
     FROM past_orders
-    WHERE store_id = $1
+    WHERE ${whereClause}
     ORDER BY created_at DESC
-    LIMIT $2 OFFSET $3
+    LIMIT $${idsArray.length + 1}
   `;
 
-  const { rows } = await ordersQuery(sql, [storeId, limit, offset]);
+    const { rows } = await ordersQuery(sql, values);
 
-  return rows.map((row) => ({
-    order_id: row.order_id,
-    created_at: row.created_at,
-    store_name: row.store_name,
-    type: row.type,
-    payment_method: row.payment_method,
-    order_details_text: row.order_details_text
-  }));
-},
-//------------------------------------------------------------------------------------------
-getBillPastOrders: async (
-  orderId: string
-): Promise<{
-  order_details_text: string;
-}> => {
-  const sql = `
+    const hasNextPage = rows.length === limit;
+    const nextCursor = hasNextPage ? rows[rows.length - 1].created_at : null;
+
+    return {
+      orders: rows.map((row) => ({
+        order_id: row.order_id,
+        created_at: row.created_at,
+        store_name: row.store_name_ar,
+        type: row.orders_type,
+        payment_method: row.payment_method,
+        order_details_text: row.order_details_text,
+      })),
+      hasNextPage,
+      nextCursor,
+    };
+  },
+
+  //------------------------------------------------------------------------------------------
+  getBillPastOrders: async (
+    orderId: string
+  ): Promise<{
+    order_details_text: string;
+  }> => {
+    const sql = `
     SELECT order_details_text
     FROM past_orders
     WHERE order_id = $1
     LIMIT 1
   `;
 
-  const { rows } = await ordersQuery(sql, [orderId]);
+    const { rows } = await ordersQuery(sql, [orderId]);
 
-  if (rows.length === 0) {
-    throw new Error("Order not found");
-  }
+    if (rows.length === 0) {
+      throw new Error("Order not found");
+    }
 
-  return {
-    order_details_text: rows[0].order_details_text
-  };
-},
+    return {
+      order_details_text: rows[0].order_details_text,
+    };
+  },
 
-//-----------------------------------------------------------------------------------------------------------
-getBillCurrentOrders: async (
-  orderId: string
-): Promise<{
-  order_details_text: string;
-}> => {
-  const sql = `
+  //-----------------------------------------------------------------------------------------------------------
+  getBillCurrentOrders: async (
+    orderId: string
+  ): Promise<{
+    order_details_text: string;
+  }> => {
+    const sql = `
     SELECT order_details_text
     FROM current_orders
     WHERE order_id = $1
     LIMIT 1
   `;
 
-  const { rows } = await ordersQuery(sql, [orderId]);
+    const { rows } = await ordersQuery(sql, [orderId]);
 
-  if (rows.length === 0) {
-    throw new Error("Order not found");
-  }
+    if (rows.length === 0) {
+      throw new Error("Order not found");
+    }
 
-  return {
-    order_details_text: rows[0].order_details_text
-  };
-},
-//-----------------------------------------------------------------------------------------------------------
+    return {
+      order_details_text: rows[0].order_details_text,
+    };
+  },
+  //-----------------------------------------------------------------------------------------------------------
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-//--------------------------OMAR------------------------------------------
-getCurrentOrder : async (customer_id) => {
-    const { rows }= await query(` 
+  //--------------------------OMAR------------------------------------------
+  getCurrentOrder: async (customer_id) => {
+    const { rows } = await query(
+      ` 
       
 SELECT
     co.order_id,
@@ -242,14 +298,17 @@ JOIN
     where customer_id =$1  
     ORDER BY created_at DESC
 
-    `,[customer_id])
+    `,
+      [customer_id]
+    );
 
-        return rows ;
-},
+    return rows;
+  },
 
-//------------------------------------------------------
-getPreviousOrder : async (customer_id,limit,offset) => {
-    const { rows }= await query(` 
+  //------------------------------------------------------
+  getPreviousOrder: async (customer_id, limit, offset) => {
+    const { rows } = await query(
+      ` 
       
 SELECT
     po.order_id,
@@ -270,44 +329,56 @@ JOIN
     where customer_id =$1 
     ORDER BY created_at DESC
     LIMIT $2 OFFSET $3 
-    `,[customer_id,limit,offset])
+    `,
+      [customer_id, limit, offset]
+    );
 
-        return rows ;
-},
+    return rows;
+  },
 
-//------------------------------------------------------------
+  //------------------------------------------------------------
 
-//TODO : update past_orders
-addRating : async (order_id,customer_id,
-  driver_rating,  order_rating,comment) => {
- query(` 
+  //TODO : update past_orders
+  addRating: async (
+    order_id,
+    customer_id,
+    driver_rating,
+    order_rating,
+    comment
+  ) => {
+    query(
+      ` 
       
 SELECT add_rating_if_delivered($1,$2,$3,$4,$5)
 
 
-    `,[order_id,customer_id,driver_rating,order_rating,comment])
-
-},
-//------------------------------------------------------------
-getPreviousDriverOrder : async (driverId,limit,offset) => {
- query(` 
+    `,
+      [order_id, customer_id, driver_rating, order_rating, comment]
+    );
+  },
+  //------------------------------------------------------------
+  getPreviousDriverOrder: async (driverId, limit, offset) => {
+    query(
+      ` 
       
 SELECT get_past_deriver_orders($1,$2,$3)
 
 
-    `,[driverId,limit,offset])
+    `,
+      [driverId, limit, offset]
+    );
+  },
 
-},
-
-//-----------------------------------------------------------------------------------------------------------
-driverDeliveOrder : async (driverId,limit,offset) => {
- query(` 
+  //-----------------------------------------------------------------------------------------------------------
+  driverDeliveOrder: async (driverId, limit, offset) => {
+    query(
+      ` 
       
 SELECT get_past_deriver_orders($1,$2,$3)
 
 
-    `,[driverId,limit,offset])
-
-},
-
-}
+    `,
+      [driverId, limit, offset]
+    );
+  },
+};

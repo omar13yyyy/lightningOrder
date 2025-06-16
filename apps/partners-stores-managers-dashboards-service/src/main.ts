@@ -2,7 +2,7 @@
 export const services = { fun1, fun2 };
 
 */
-//import { userHyperdAuth } from '../../app-geteway/src/middleware/userHyperdAuth.middleware';
+import auth from '../../app-geteway/src/middleware/auth.middleware';
 
 import { storesController } from "./modules/stores/stores.controler";
 import { partnersController } from "./modules/partners/partners.controler";
@@ -11,25 +11,42 @@ import { get } from "http";
 import checkStoreOwnership from "../../app-geteway/src/middleware/checkStoreOwnership";
 export const visitorStoreRouter= express.Router()
 export const partnerRouter= express.Router()
+export const storeRouter= express.Router()
 
-
-visitorStoreRouter.route('/getCategoryTags').get(storesController.getCategoryTag)
+visitorStoreRouter.route('/getCategoryTags').get(auth,storesController.getCategoryTag)
 visitorStoreRouter.route('/getStoreCategories').get(storesController.getStoreCategories)
 visitorStoreRouter.route('/getStoreProducts').get(storesController.getStoreProducts)
 visitorStoreRouter.route('/getCouponDetails').get(storesController.getCouponDetails)
 
+
+storeRouter.route('/StoreLogin').post(storesController.StoreLogin)
+storeRouter.route('/getStoreProducts').get(auth,storesController.getStoreProducts)
+storeRouter.route('/changeItemState').post(auth,storesController.changeItemState)
+storeRouter.route('/changeModifiersItemState').post(auth,storesController.changeModifiersItemState)
+
+
+
+
 partnerRouter.route('/partnerLogin').post(partnersController.partnerLogin)
 //partnerRouter.use(userHyperdAuth);
+partnerRouter.use(auth);
+
 partnerRouter.route('/partnergetAllStors').get(partnersController.partnergetAllStores)
-partnerRouter.route('/partnerInfo').get(partnersController.partnerInfo)
+partnerRouter.route('/geInfoByStoreIds').get(partnersController.geInfoByStoreIds)
+
+partnerRouter.route('/partnerInfo').get(auth,partnersController.partnerInfo)
 partnerRouter.route('/getStatistics').get(partnersController.getStatistics)
 
 partnerRouter.route('/partnergetAllStores').get(partnersController.partnergetAllStores)
 partnerRouter.route('/bestSeller').get(partnersController.bestSeller)
 partnerRouter.route('/profile').get(partnersController.profile)
 partnerRouter.route('/changeStoreState').post(partnersController.changeStoreState)
-partnerRouter.route('/getStoreProfile').post(partnersController.getStoreProfile)
+partnerRouter.route('/getStoreProfile').get(partnersController.getStoreProfile)
 partnerRouter.route('/getSpecialCustomers').get(partnersController.getSpecialCustomers)
+partnerRouter.route('/walletTransferHistorystore').get(partnersController.walletTransferHistorystore)
+partnerRouter.route('/walletTransferHistory').get(partnersController.walletTransferHistory)
+partnerRouter.route('/gePartnerBalance').get(partnersController.gePartnerBalance)
+partnerRouter.route('/BalanceWithdrawalRequest').post(partnersController.BalanceWithdrawalRequest)
 
 //partnerRouter.route('/getCurrentStatistics').get(partnersController.getCurrentStatistics)
 
