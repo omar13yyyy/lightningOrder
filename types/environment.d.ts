@@ -30,7 +30,10 @@ declare global {
         Host: string;
         TOKEN_SECRET: string;
         TOKEN_SECRET_ADMIN: string;
-        WSPORT:string
+      
+      
+        WEB_SOCKET_PORT:string;
+        NATS_URL:string;
       }
     }
   }

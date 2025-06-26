@@ -84,6 +84,8 @@ export const customersController = {
         .status(400)
         .send({ success: false, message: "Not Valid Code for phone number" });
   },
+  
+  //-----------------------------------------------------
   resetPassword: async (req, res) => {
     const body: ResetPasswordReqBody = req.body;
     let isReset = await customersServices.customerResetPasswordService({
@@ -101,4 +103,7 @@ export const customersController = {
         message: "code not valid or  phone number not exist ",
       });
   },
+  
+  
+  
 };

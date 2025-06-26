@@ -1,71 +1,82 @@
-import dayjs from 'dayjs'
+import dayjs from "dayjs";
 import { query } from "../../../../../modules/database/commitDashboardSQL";
 import { generateNeighbors } from "../../../../../modules/geo/geohash";
-import { CategoryRepo, CouponDetailsRepo, LanguageRepo, NearStoresByCategoryRepo, NearStoresBytagRepo, NearStoresByTagReq, NearStoresRepo, NearStoresReq, SearchForStoreRepo, StoreIdRepo, StoreRepo, TagRepo } from "../../types/stores";
+import {
+  CategoryRepo,
+  CouponDetailsRepo,
+  LanguageRepo,
+  NearStoresByCategoryRepo,
+  NearStoresBytagRepo,
+  NearStoresByTagReq,
+  NearStoresRepo,
+  NearStoresReq,
+  SearchForStoreRepo,
+  StoreDistance,
+  StoreIdRepo,
+  StoreRepo,
+  TagRepo,
+} from "../../types/stores";
 
 export const storesRepository = {
   //---------------------------------------------------------------------------------------
   fetchStoreIdPasswordByUserName: async (
     userName: string
-  ): Promise<{store_id: string; encrypted_password: string }[]> => {
+  ): Promise<{ store_id: string; encrypted_password: string }[]> => {
     const { rows } = await query(
       "SELECT store_id, encrypted_password,store_name_ar,store_name_en FROM stores WHERE store_name_ar = $1",
       [userName]
     );
     return rows;
   },
-//----------------------------------------------------------------------------------------
-    updateProductDataByStoreId: async (ln,storeId: string, newProductData: any) => {
-          if (ln == "ar") {
-console.log({newProductData}+'new')
-    await query(
-      `UPDATE products SET product_data_ar_jsonb = $1 WHERE store_id = $2`,
-      [newProductData, storeId]
-    );}
-    else if (ln == "en") {
-         await query(
-      `UPDATE products SET product_data_en_jsonb = $1 WHERE store_id = $2`,
-      [newProductData, storeId]
-    );}
-  },
-
-
-
-
-
-//----------------------------------------------------------------------------------------------
-  fetchCategoryTags: async (tag :TagRepo) => {
-    //TODO after login or first reques save token in redis
-      const { rows } = await query(
-        `select tag_id,tag_name_${tag.ln} as tag_name from tags where category_id=$1 `,
-        [tag.categoryId]
+  //----------------------------------------------------------------------------------------
+  updateProductDataByStoreId: async (
+    ln,
+    storeId: string,
+    newProductData: any
+  ) => {
+    if (ln == "ar") {
+      console.log({ newProductData } + "new");
+      await query(
+        `UPDATE products SET product_data_ar_jsonb = $1 WHERE store_id = $2`,
+        [newProductData, storeId]
       );
-      return rows;
-
-  },
-  fetchStoreCategories: async (language :LanguageRepo) => {
-    //TODO after login or first reques save token in redis
-
-      const { rows } = await query(
-        `select category_id,category_name_${language.ln} as category_name,category_image from store_categories `,
-        []
+    } else if (ln == "en") {
+      await query(
+        `UPDATE products SET product_data_en_jsonb = $1 WHERE store_id = $2`,
+        [newProductData, storeId]
       );
-      return rows;
     }
-  ,
-  fetchStoreProduct: async (param:StoreRepo) => {
-      //TODO make server return url with ip
-      const { rows, rowCount } = await query(
-        `select product_data_${param.ln}_jsonb as products from products where store_id = $1 LIMIT 1 `,
-        [param.storeId]
-      );
-      if (rowCount > 0) {
-        return rows[0];
-      }
-       else return {};
-   
   },
-  fetchCouponStore: async (coupon : CouponDetailsRepo) => {
+
+  //----------------------------------------------------------------------------------------------
+  fetchCategoryTags: async (tag: TagRepo) => {
+    //TODO after login or first reques save token in redis
+    const { rows } = await query(
+      `select tag_id,tag_name_${tag.ln} as tag_name from tags where category_id=$1 `,
+      [tag.categoryId]
+    );
+    return rows;
+  },
+  fetchStoreCategories: async (language: LanguageRepo) => {
+    //TODO after login or first reques save token in redis
+
+    const { rows } = await query(
+      `select category_id,category_name_${language.ln} as category_name,category_image from store_categories `,
+      []
+    );
+    return rows;
+  },
+  fetchStoreProduct: async (param: StoreRepo) => {
+    //TODO make server return url with ip
+    const { rows, rowCount } = await query(
+      `select product_data_${param.ln}_jsonb as products from products where store_id = $1 LIMIT 1 `,
+      [param.storeId]
+    );
+    if (rowCount > 0) {
+      return rows[0];
+    } else return {};
+  },
+  fetchCouponStore: async (coupon: CouponDetailsRepo) => {
     //TODO : check order coupon if end
     //TODO : get round from setting
     const { rows, rowCount } = await query(
@@ -77,7 +88,7 @@ console.log({newProductData}+'new')
       return rows[0];
     }
   },
-  fetchWorkingHours: async (param :StoreIdRepo) => {
+  fetchWorkingHours: async (param: StoreIdRepo) => {
     //TODO after login or first reques save token in redis
 
     const { rows } = await query(
@@ -100,14 +111,12 @@ FROM (
 
     return rows[0];
   },
-//-------------------------------------------------------
-  getNearStores: async (
-   param: NearStoresRepo
-  ) => {
+  //-------------------------------------------------------
+  getNearStores: async (param: NearStoresRepo) => {
     const precision = 20;
     const locationCodeLength = 14; //عدد الاسطر
     const neighbors = generateNeighbors(param.locationCode);
-    let sql = getStoreSql(param.ln, "",'',"WHERE  s.status = 'open'",'','');
+    let sql = getStoreSql(param.ln, "", "", "", "", "");
 
     const { rows } = await query(sql, [
       neighbors,
@@ -122,14 +131,19 @@ FROM (
     return rows;
   },
   // ------------------------------------------------------------------
-  getNearStoresbyCategory: async (
-   param: NearStoresByCategoryRepo
-  ) => {
+  getNearStoresbyCategory: async (param: NearStoresByCategoryRepo) => {
     const locationCodeLength = 14; //عدد الاسطر
 
     const precision = 20;
     const neighbors = generateNeighbors(param.locationCode);
-    let sql = getStoreSql(param.ln, " AND swd.category_id =$8","WHERE  s.status = 'open'",'',"",'');
+    let sql = getStoreSql(
+      param.ln,
+      " AND swd.category_id =$8",
+      "",
+      "",
+      "",
+      ""
+    );
     const { rows } = await query(sql, [
       neighbors,
       param.latitudes,
@@ -142,14 +156,19 @@ FROM (
     ]);
     return rows;
   },
-  getNearStoresbyTag: async (
-    param :NearStoresBytagRepo
-  ) => {
+  getNearStoresbyTag: async (param: NearStoresBytagRepo) => {
     const locationCodeLength = 14; //عدد الاسطر
 
     const precision = 20;
     const neighbors = generateNeighbors(param.locationCode);
-    const sql = getStoreSql(param.ln, " AND st.tag_id =$8","WHERE  s.status = 'open'",'','','');
+    const sql = getStoreSql(
+      param.ln,
+      " AND st.tag_id =$8",
+      "",
+      "",
+      "",
+      ""
+    );
 
     const { rows } = await query(sql, [
       neighbors,
@@ -163,15 +182,19 @@ FROM (
     ]);
     return rows;
   },
-//-------------------------------------------------------------
-  getNearTrendStores: async (
-    param:NearStoresRepo
-  ) => {
+  //-------------------------------------------------------------
+  getNearTrendStores: async (param: NearStoresRepo) => {
     const precision = 20;
     const locationCodeLength = 14; //عدد الاسطر
     const neighbors = generateNeighbors(param.locationCode);
-    let sql = getStoreSql(param.ln, "",
-      'JOIN trends tr ON s.internal_id = tr.internal_store_id',"WHERE  s.status = 'open'",'','');
+    let sql = getStoreSql(
+      param.ln,
+      "",
+      "JOIN trends tr ON s.internal_id = tr.internal_store_id",
+      "",
+      "",
+      ""
+    );
 
     const { rows } = await query(sql, [
       neighbors,
@@ -186,15 +209,19 @@ FROM (
     return rows;
   },
   // ------------------------------------------------------------------
-  getNearTrendStoresbyCategory: async (
-    param :NearStoresByCategoryRepo
-  ) => {
+  getNearTrendStoresbyCategory: async (param: NearStoresByCategoryRepo) => {
     const locationCodeLength = 14; //عدد الاسطر
 
     const precision = 20;
     const neighbors = generateNeighbors(param.locationCode);
-    let sql = getStoreSql(param.ln, " AND swd.category_id =$8",
-      'JOIN trends tr ON s.internal_id = tr.internal_store_id',"WHERE  s.status = 'open'",'','');
+    let sql = getStoreSql(
+      param.ln,
+      " AND swd.category_id =$8",
+      "JOIN trends tr ON s.internal_id = tr.internal_store_id",
+      "",
+      "",
+      ""
+    );
     const { rows } = await query(sql, [
       neighbors,
       param.latitudes,
@@ -207,15 +234,19 @@ FROM (
     ]);
     return rows;
   },
-  getNearTrendStoresbyTag: async (
-    param:NearStoresBytagRepo
-  ) => {
+  getNearTrendStoresbyTag: async (param: NearStoresBytagRepo) => {
     const locationCodeLength = 14; //عدد الاسطر
 
     const precision = 20;
     const neighbors = generateNeighbors(param.locationCode);
-    const sql = getStoreSql(param.ln, " AND st.tag_id =$8",
-      'JOIN trends tr ON s.internal_id = tr.internal_store_id',"WHERE  s.status = 'open'",'','');
+    const sql = getStoreSql(
+      param.ln,
+      " AND st.tag_id =$8",
+      "JOIN trends tr ON s.internal_id = tr.internal_store_id",
+      "",
+      "",
+      ""
+    );
 
     const { rows } = await query(sql, [
       neighbors,
@@ -223,20 +254,18 @@ FROM (
       param.logitudes,
       param.distanceKm,
       param.limit,
-     param. offset,
+      param.offset,
       locationCodeLength,
       param.tagId,
     ]);
     return rows;
   },
-  SearchForStore: async (
-    param :SearchForStoreRepo
-  ) => {
+  SearchForStore: async (param: SearchForStoreRepo) => {
     const locationCodeLength = 14; //عدد الاسطر
 
     const precision = 20;
     const neighbors = generateNeighbors(param.locationCode);
-    const sql = searchForStoreSql(param.ln,'','','','','')
+    const sql = searchForStoreSql(param.ln, "", "", "", "", "");
 
     const { rows } = await query(sql, [
       neighbors,
@@ -250,37 +279,62 @@ FROM (
     ]);
     return rows;
   },
-  async getOrderItems(param :StoreIdRepo){
-       const { rows } = await query(
-        "SELECT product_data_ar_jsonb as ar, product_data_en_jsonb as en  FROM public.products where store_id = $1 LIMIT 1",
-        [param.storeId]
-      );
-      return rows[0];
-},
-  async isOpenNow(param :StoreIdRepo){
-    const dayOfWeek = dayjs().format('ddd').toLowerCase()
-    const currentTime = dayjs().format('HH:mm:ss');
+  async getOrderItems(param: StoreIdRepo) {
+    const { rows } = await query(
+      "SELECT product_data_ar_jsonb as ar, product_data_en_jsonb as en  FROM public.products where store_id = $1 LIMIT 1",
+      [param.storeId]
+    );
+    return rows[0];
+  },
+  async isOpenNow(param: StoreIdRepo) {
+    const dayOfWeek = dayjs().format("ddd")
+    const currentTime = dayjs().format("HH:mm:ss");
 
-       const { rows } = await query(
-`SELECT 1 FROM working_hours where store_id =$1 AND day_of_week $2 AND $3::time BETWEEN opening_time AND closing_time`,
-          [param.storeId,dayOfWeek,currentTime]
-      );
-      return rows[0];
-}
+    const { rows ,rowCount} = await query(
+      `SELECT 1 FROM working_hours where store_id =$1 AND day_of_week = $2 AND $3::time BETWEEN opening_time AND closing_time`,
+      [param.storeId, dayOfWeek, currentTime]
+    );
+    return rowCount;
+  },
 
+  async storeDistance(param: StoreDistance) {
+
+
+    const { rows } = await query(
+      `SELECT haversine_distance_km(
+      $1,              -- user_lat
+      $2,              -- user_lng
+      s.latitude::double precision,
+      s.longitude::double precision
+    ) AS distance_km FROM stores s where store_id = $3
+     `,[(param.latitudes, param.logitudes, param.storeId)]
+    );
+    return rows[0];
+  },
 };
 
 
-
-function getStoreSql(ln, and,join,where,searchParamScore,searchParamOrder) {
+function getStoreSql(ln, and, join, SWCAnd, searchParamScore, searchParamOrder) {
+     const dayOfWeek = dayjs().format("ddd")
+    const currentTime = dayjs().format("HH:mm:ss");
   let sql = `
-WITH nearby_codes AS (
+  WITH nearby_codes AS (
   SELECT unnest($1::text[]) AS prefix
 ),
-stores_with_distance AS (
+  stores_with_distance AS (
   SELECT 
-     s.preparation_time,s.store_id, s.internal_id,s.store_name_${ln},s.status,${searchParamScore}
-    s.min_order_price,s.logo_image_url,s.cover_image_url,s.orders_type,s.category_id,
+    s.preparation_time,
+    s.store_id,
+    s.internal_id,
+    s.store_name_en,
+    s.store_name_ar,
+    s.store_name_ar_clean,
+    s.status,
+    s.min_order_price,
+    s.logo_image_url,
+    s.cover_image_url,
+    s.orders_type,
+    s.category_id,
     haversine_distance_km(
       $2,              -- user_lat
       $3,              -- user_lng
@@ -289,8 +343,14 @@ stores_with_distance AS (
     ) AS distance_km
   FROM stores s 
   JOIN nearby_codes nc ON LEFT(s.location_code, $7) = LEFT(nc.prefix, $7)
-  ${join} ${where}
-)
+  JOIN working_hours wh ON wh.internal_store_id = s.internal_id
+  ${join}
+  WHERE 
+   s.status = 'open' 
+    AND wh.day_of_week = '${dayOfWeek}'
+    AND '${currentTime}' BETWEEN wh.opening_time AND wh.closing_time    ${SWCAnd}
+
+) 
 SELECT 
   sr.rating_previous_day,
   sr.number_of_raters,
@@ -299,7 +359,7 @@ SELECT
  swd.store_name_${ln} as title,swd.status,swd.min_order_price,swd.logo_image_url,swd.cover_image_url,swd.orders_type,swd.preparation_time,
  cop.discount_value_percentage,cop.delivery_discount_percentage,cop.code,cop.min_order_value as coupon_min_order_value,
   COALESCE(
-  ARRAY_AGG(DISTINCT t.tag_name_en) FILTER (WHERE t.tag_name_en IS NOT NULL),
+  ARRAY_AGG(DISTINCT t.tag_name_${ln}) FILTER (WHERE t.tag_name_${ln} IS NOT NULL),
   ARRAY[]::text[]
 ) AS tags
 FROM stores_with_distance swd
@@ -319,9 +379,17 @@ ORDER BY  ${searchParamOrder} swd.store_id, swd.distance_km
 LIMIT $5
 OFFSET $6
  `;
-  return sql;
+  if (ln == "ar" || ln == "en") return sql;
+  else return "";
 }
-function searchForStoreSql(ln, and, join, where, searchParamScore, searchParamOrder) {
+function searchForStoreSql(
+  ln,
+  and,
+  join,
+  where,
+  searchParamScore,
+  searchParamOrder
+) {
   const sql = `
 WITH nearby_codes AS (
   SELECT unnest($1::text[]) AS prefix
@@ -387,7 +455,7 @@ SELECT
   cop.code,
   cop.min_order_value AS coupon_min_order_value,
   COALESCE(
-    ARRAY_AGG(DISTINCT t.tag_name_en) FILTER (WHERE t.tag_name_en IS NOT NULL),
+    ARRAY_AGG(DISTINCT t.tag_name_${ln}) FILTER (WHERE t.tag_name_${ln} IS NOT NULL),
     ARRAY[]::text[]
   ) AS tags
 FROM fuzzy_filtered swd
@@ -408,6 +476,7 @@ ORDER BY  swd.store_id, swd.distance_km
 LIMIT $5
 OFFSET $6;
 `;
-  return sql;
+  if (ln == "ar" || ln == "en") return sql;
+  else return "";
 }
 //-------------------------------------------------

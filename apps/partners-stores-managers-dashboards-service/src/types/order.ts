@@ -2,6 +2,8 @@ interface OrderItem {
   item_id: string;
   size_id: string;
   modifiers: ModifierOrderInput[];
+  count :number;
+  note : String;
 }
 
 interface ModifierOrderInput {
@@ -13,7 +15,11 @@ interface ModifierItemOrderInput {
   modifiers_item_id: string;
   number: number;
 }
-export type OrderInput = OrderItem[];
+export interface OrderInput {
+OrderInputs : OrderItem[],
+total_price : number,
+delivery_note : String
+}
 //------------------------
 export interface ResolvedModifierItem {
   name: string;

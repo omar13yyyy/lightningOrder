@@ -1,26 +1,12 @@
-<<<<<<< HEAD
-import { ordersRepository } from './orders.repository';
-import { partnerClient } from "../../../index"
-import bcryptjs from "bcryptjs";
-import jwt from 'jsonwebtoken';
-=======
+
 import { ordersRepository } from "./orders.repository";
 import { partnerClient } from "../../../index";
-//import bcryptjs from "bcryptjs";
-//import jwt from 'jsonwebtoken';
->>>>>>> laila
-//------------------------------------------------------------------------------------------
 
 export const ordersService = {
   //------------------------------------------------------------------------------------------
 
-<<<<<<< HEAD
-//------------------------------------------------------------------------------------------
 
 
-
-=======
->>>>>>> laila
   partnergetCurrentStatisticsService: async (
     partnerId: number,
     store_id: string
@@ -190,16 +176,68 @@ export const ordersService = {
   }> => {
     const { internal_id } = await partnerClient.getStoreId(store_id);
 
-<<<<<<< HEAD
-
-
-
-
-
- 
-=======
     return await ordersRepository.getCurrentStatistics(internal_id);
   },
   //------------------------------------------------------------------------------------------
+
+
+//---------------------------omar-------------------------------------
+
+
+
+
+
+
+  getCurrentCustomerOrdersService: async (
+    customerId: string,
+    dateOffset:string,
+    limit :number
+  )=> {
+
+       let rows =  await ordersRepository.getCurrentCustomerOrders(customerId,limit,dateOffset);
+
+
+    return {
+      hasNext: rows.length > limit,
+      order : rows
+    }
+    
+  },
+
+
+
+  previousCustomerOrderService: async (
+    customerId: string,
+    dateOffset:string,
+    limit :number
+  )=> {
+
+   let rows =  await ordersRepository.previousCustomerOrder(customerId,limit,dateOffset);
+
+
+        return {
+      hasNext: rows.length > limit,
+      order : rows
+    } 
+    
+  },
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 };
->>>>>>> laila

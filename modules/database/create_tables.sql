@@ -634,38 +634,4 @@ CREATE TABLE IF NOT EXISTS public.admins
 
 
 
-
-COPY address FROM 'E:\lightningOrder/modules/database/seeder/CSV/address.csv' DELIMITER ',' CSV HEADER;
-COPY customers FROM 'E:\lightningOrder/modules/database/seeder/CSV/customers.csv' DELIMITER ',' CSV HEADER;
-COPY customer_wallets_previous_day FROM 'E:\lightningOrder/modules/database/seeder/CSV/customer_wallets_previous_day.csv' DELIMITER ',' CSV HEADER;
-COPY drivers FROM 'E:\lightningOrder/modules/database/seeder/CSV/drivers.csv' DELIMITER ',' CSV HEADER;
-COPY trust_points_log FROM 'E:\lightningOrder/modules/database/seeder/CSV/trust_points_log.csv' DELIMITER ',' CSV HEADER;
-COPY partners FROM 'E:\lightningOrder/modules/database/seeder/CSV/partners.csv' DELIMITER ',' CSV HEADER;
-COPY store_categories FROM 'E:\lightningOrder/modules/database/seeder/CSV/store_categories.csv' DELIMITER ',' CSV HEADER;
-COPY tags FROM 'E:\lightningOrder/modules/database/seeder/CSV/tags.csv' DELIMITER ',' CSV HEADER;
-COPY store_tags FROM 'E:\lightningOrder/modules/database/seeder/CSV/store_tags.csv' DELIMITER ',' CSV HEADER;
-COPY stores FROM 'E:\lightningOrder/modules/database/seeder/CSV/stores.csv' DELIMITER ',' CSV HEADER;
-COPY trends FROM 'E:\lightningOrder/modules/database/seeder/CSV/trends.csv' DELIMITER ',' CSV HEADER;
-COPY working_hours FROM 'E:\lightningOrder/modules/database/seeder/CSV/working_hours.csv' DELIMITER ',' CSV HEADER;
-COPY products FROM 'E:\lightningOrder/modules/database/seeder/CSV/products.csv' DELIMITER ',' CSV HEADER;
-COPY coupons FROM 'E:\lightningOrder/modules/database/seeder/CSV/coupons.csv' DELIMITER ',' CSV HEADER;
-COPY order_status FROM 'E:\lightningOrder/modules/database/seeder/CSV/order_status.csv' DELIMITER ',' CSV HEADER;
-COPY current_orders FROM 'E:\lightningOrder/modules/database/seeder/CSV/current_orders.csv' DELIMITER ',' CSV HEADER;
-COPY past_orders FROM 'E:\lightningOrder/modules/database/seeder/CSV/past_orders.csv' DELIMITER ',' CSV HEADER;
-COPY ratings FROM 'E:\lightningOrder/modules/database/seeder/CSV/ratings.csv' DELIMITER ',' CSV HEADER;
-COPY store_ratings_previous_day FROM 'E:\lightningOrder/modules/database/seeder/CSV/store_ratings_previous_day.csv' DELIMITER ',' CSV HEADER;
-COPY store_transactions FROM 'E:\lightningOrder/modules/database/seeder/CSV/store_transactions.csv' DELIMITER ',' CSV HEADER;
-COPY store_wallets FROM 'E:\lightningOrder/modules/database/seeder/CSV/store_wallets.csv' DELIMITER ',' CSV HEADER;
-COPY driver_wallets_previous_day FROM 'E:\lightningOrder/modules/database/seeder/CSV/driver_wallets_previous_day.csv' DELIMITER ',' CSV HEADER;
-COPY products_sold FROM 'E:\lightningOrder/modules/database/seeder/CSV/products_sold.csv' DELIMITER ',' CSV HEADER;
-COPY driver_points FROM 'E:\lightningOrder/modules/database/seeder/CSV/driver_points.csv' DELIMITER ',' CSV HEADER;
-COPY customer_transactions FROM 'E:\lightningOrder/modules/database/seeder/CSV/customer_transactions.csv' DELIMITER ',' CSV HEADER;
-COPY order_financial_logs FROM 'E:\lightningOrder/modules/database/seeder/CSV/order_financial_logs.csv' DELIMITER ',' CSV HEADER;
-COPY electronic_payment FROM 'E:\lightningOrder/modules/database/seeder/CSV/electronic_payment.csv' DELIMITER ',' CSV HEADER;
-COPY statistics_previous_day FROM 'E:\lightningOrder/modules/database/seeder/CSV/statistics_previous_day.csv' DELIMITER ',' CSV HEADER;
-COPY system_settings FROM 'E:\lightningOrder/modules/database/seeder/CSV/system_settings.csv' DELIMITER ',' CSV HEADER;
-COPY daily_statistics FROM 'E:\lightningOrder/modules/database/seeder/CSV/daily_statistics.csv' DELIMITER ',' CSV HEADER;
-COPY document_images FROM 'E:\lightningOrder/modules/database/seeder/CSV/document_images.csv' DELIMITER ',' CSV HEADER;
-COPY driver_transactions FROM 'E:\lightningOrder/modules/database/seeder/CSV/driver_transactions.csv' DELIMITER ',' CSV HEADER;
-
 END;

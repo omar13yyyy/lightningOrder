@@ -9,9 +9,10 @@ from "../../../../../modules/config/settingConfig";
 import bcryptjs from "bcryptjs";
 import jwt from "jsonwebtoken";
 import { CategoryService, CouponDetailsRepo, CouponDetailsService, LanguageService, NearStoresByCategoryRepo, NearStoresByCategoryReq, NearStoresBytagRepo, NearStoresBytagService, NearStoresRepo,
-   NearStoresService, OrderInputWithStoreId, SearchForStoreRepo, SearchForStoreService, StoreIdRepo, StoreIdService, StoreItem, StoreProductsReq, StoreRepo, StoreService, StoresResponse, TagService } from "../../types/stores";
+   NearStoresService, OrderInputWithStoreId, SearchForStoreRepo, SearchForStoreService, StoreDistance, StoreIdRepo, StoreIdService, StoreItem, StoreProductsReq, StoreRepo, StoreService, StoresResponse, TagService } from "../../types/stores";
 import { MenuData, OrderInput, ResolvedModifier, ResolvedModifierItem, ResolvedOrderItem, TotalResolved } from "../../types/order";
 import { serverHost, storeImagePath } from "../../../../../modules/config/urlConfig";
+import { threadId } from "worker_threads";
 function roundUpToNearestThousand(num) : number {
   return Math.ceil(num / 1000) * 1000;
 }
@@ -19,13 +20,14 @@ function roundUpToNearestten(num) :number{
   return Math.ceil(num / 1000) * 1000;
 }
 
-function processRow(row) : StoreItem{
+async function processRow(row) : Promise<StoreItem>{
 const delivery_price = roundUpToNearestThousand(DeliveryConfig.costPerKM * row.distance_km)
  const result : StoreItem = {
    store_id: row.store_id,
    title: row.title,
    tags: row.tags,
    status: row.status,
+   isOpen :true,
    delivery_price: delivery_price > DeliveryConfig.MinDeliveryCost?delivery_price :DeliveryConfig.MinDeliveryCost,
    min_order_price: row.min_order_price,
    distance_km: Math.round(row.distance_km * 10) / 10,
@@ -46,7 +48,7 @@ const delivery_price = roundUpToNearestThousand(DeliveryConfig.costPerKM * row.d
  }
 return result
 }
-function rowsJson(storeRows,trendRows,limit): StoresResponse {
+async function rowsJson(storeRows,trendRows,limit): Promise<StoresResponse> {
   let hasNext = storeRows.length > limit || trendRows.length > limit/2
     const stores: StoreItem[] = [];
     const trendStores: StoreItem[] = [];
@@ -57,11 +59,11 @@ const rowsAfterFilter = storeRows.filter(item => !idsToRemove.has(item.store_id)
 
 
 for (let i = 0; i < trendRows.length - 1; i++) {
-  trendStores.push(processRow(trendRows[i]))
+  trendStores.push(await processRow(trendRows[i]))
 
 }
 for (let i = 0; i < rowsAfterFilter.length - 1; i++) {
-  stores.push(processRow(rowsAfterFilter[i]))
+  stores.push(await processRow(rowsAfterFilter[i]))
 
 }
 
@@ -72,7 +74,61 @@ for (let i = 0; i < rowsAfterFilter.length - 1; i++) {
 
   };
 }
+async function searchProcessRow(row) : Promise<StoreItem>{
+const isOpen= await storesServices.isOpenNowService({storeId : row.store_id}as StoreIdRepo)
+const delivery_price = roundUpToNearestThousand(DeliveryConfig.costPerKM * row.distance_km)
+ const result : StoreItem = {
+   store_id: row.store_id,
+   title: row.title,
+   tags: row.tags,
+   status: row.status,
+   isOpen :isOpen,
+   delivery_price: delivery_price > DeliveryConfig.MinDeliveryCost?delivery_price :DeliveryConfig.MinDeliveryCost,
+   min_order_price: row.min_order_price,
+   distance_km: Math.round(row.distance_km * 10) / 10,
+   preparation_time: roundUpToNearestten(
+     row.preparation_time + DeliveryConfig.timePerKM * row.distance_km
+   ),
+   rating_previous_day: row.rating_previous_day,
+   number_of_raters: row.number_of_raters,
+   logo_image_url: serverHost+storeImagePath+row.logo_image_url,
+   cover_image_url:serverHost+storeImagePath+ row.cover_image_url,
+   orders_type: row.orders_type,
+   couponCode :row.code,
+    discount_value_percentage :row.discount_value_percentage,
+   coupon_min_order_value :row.coupon_min_order_value,
+    delivery_discount_percentage :row.delivery_discount_percentage
 
+
+ }
+return result
+}
+async function searchRowsJson(storeRows,trendRows,limit): Promise<StoresResponse> {
+  let hasNext = storeRows.length > limit || trendRows.length > limit/2
+    const stores: StoreItem[] = [];
+    const trendStores: StoreItem[] = [];
+
+const idsToRemove = new Set(trendRows.map(item => item.store_id));
+
+const rowsAfterFilter = storeRows.filter(item => !idsToRemove.has(item.store_id));
+
+
+for (let i = 0; i < trendRows.length - 1; i++) {
+  trendStores.push(await searchProcessRow(trendRows[i]))
+
+}
+for (let i = 0; i < rowsAfterFilter.length - 1; i++) {
+  stores.push(await searchProcessRow(rowsAfterFilter[i]))
+
+}
+
+  return {
+    hasNext : hasNext,
+    trendStores:trendStores,
+    stores:stores
+
+  };
+}
 export const storesServices = {
 
  loginService: async (
@@ -98,29 +154,30 @@ console.log(store_id+'stooooreeeid')
   //----------------------------------------------------------------------------------------------
   changeItemState : async (itemId,store_id, newState)=>{
           const productDataar= await storesRepository.fetchStoreProduct({ln:"ar", storeId:store_id}as StoreRepo )
-                    const productDataen= await storesRepository.fetchStoreProduct({ln:"an", storeId:store_id}as StoreRepo )
+                    const productDataen= await storesRepository.fetchStoreProduct({ln:"en", storeId:store_id}as StoreRepo )
+console.log("store_id : ",store_id)
 
   if (!productDataar||!productDataen) {
       throw new Error("Store not found or product data missing");
     }
 console.log(productDataar.products.items,newState)
 
-const itemsar = productDataar.products.products.items;
-const itemsen = productDataen.products.products.items;
+const itemsar = productDataar.products.items;
+const itemsen = productDataen.products.items;
 
     if (!Array.isArray(itemsar)||!Array.isArray(itemsen)) {
       throw new Error("Items list not found in product data");
     }
 
     const updatedItemsar = itemsar.map((item: any) =>
-      item.id === itemId ? { ...item, is_activated: newState } : item
+      item.item_id === itemId ? { ...item, is_activated: newState } : item
     );
 
-productDataar.products.products.items = updatedItemsar;
+productDataar.products.items = updatedItemsar;
   const updatedItemsen = itemsen.map((item: any) =>
-      item.id === itemId ? { ...item, is_activated: newState } : item
+      item.item_id === itemId ? { ...item, is_activated: newState } : item
     );
-productDataen.products.products.items = updatedItemsen;
+productDataen.products.items = updatedItemsen;
 
 
 
@@ -137,7 +194,6 @@ productDataen.products.products.items = updatedItemsen;
 ) => {
   const productDataAr = await storesRepository.fetchStoreProduct({ln:"ar", storeId:storeId}as StoreRepo );
   const productDataEn = await storesRepository.fetchStoreProduct({ln:"en", storeId:storeId}as StoreRepo );
-console.log(productDataAr)
   if (!productDataAr.products || !productDataEn.products) {
     throw new Error('Store not found or product data missing');
   }
@@ -151,22 +207,35 @@ console.log(productDataAr)
   if (!Array.isArray(modifiersAr) || !Array.isArray(modifiersEn)) {
     throw new Error('Modifiers list not found in product data');
   }
-
   const updatedModifiersAr = modifiersAr.map((modifier) => {
-    const updatedItems = modifier.items.map((item) =>
-      item.modifiers_item_id === modifierItemId
+    const updatedItems = modifier.items.map((item) =>{
+       console.log("item.modifiers_item_id : ",item.modifiers_item_id)
+              console.log("modifierItemId : ",modifierItemId)
+
+
+      if(item.modifiers_item_id == modifierItemId)
+      {
+       console.log("item : ",item)
+       console.log("item.modifiers_item_id : ",item.modifiers_item_id)
+      }
+      return item.modifiers_item_id === modifierItemId
         ? { ...item, is_enable: newState }
         : item
-    );
+    });
+    
     return { ...modifier, items: updatedItems };
   });
 
   const updatedModifiersEn = modifiersEn.map((modifier) => {
     const updatedItems = modifier.items.map((item) =>
+      
       item.modifiers_item_id === modifierItemId
         ? { ...item, is_enable: newState }
         : item
+
+
     );
+
     return { ...modifier, items: updatedItems };
   });
 
@@ -370,7 +439,7 @@ console.log(productDataAr)
       storeName :params.storeName
     } as SearchForStoreRepo
     );
-        return rowsJson(rows,[],params.limit) 
+        return searchRowsJson(rows,[],params.limit) 
 
   },
   getStoreProductsService: async (params :StoreService) => {
@@ -406,11 +475,26 @@ console.log(productDataAr)
      // en :enOrder,
     }
   },
+
+  storeDistanceService: async (params :StoreDistance) => {
+    return await storesRepository.storeDistance({  latitudes: params.latitudes,
+  logitudes: params.logitudes,
+  storeId: params.storeId}as StoreDistance) <= DeliveryConfig.maxDistance
+
+
+
+  },
+isOpenNowService: async (param: StoreIdRepo) => {
+    return await storesRepository.isOpenNow(param) > 0
+  },
+
+
 };
 //--------------------------------------------------------
+
 export function resolveOrderDetails(menu: MenuData, order: OrderInput): TotalResolved {
   let totalPrice =0 ;
-  let orderResolves :ResolvedOrderItem[] =  order.map(orderItem => {
+  let orderResolves :ResolvedOrderItem[] =  order.OrderInputs.map(orderItem => {
   
     const item = menu.items.find(i => i.item_id === orderItem.item_id);
     if (!item) throw new Error(`Item not found: ${orderItem.item_id}`);
@@ -449,8 +533,21 @@ export function resolveOrderDetails(menu: MenuData, order: OrderInput): TotalRes
       modifiers: resolvedModifiers
     };
   });
+  if(totalPrice==order.total_price){
   return {
           order :orderResolves,
           total_price:totalPrice
   }
+}else 
+  throw "totalPrice is change "
+
+
+  //--------------------------------------------------------
+
+
+
+
+
+
+  
 }

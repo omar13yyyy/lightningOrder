@@ -106,7 +106,7 @@ ALTER TABLE IF EXISTS public.driver_points
     ON DELETE NO ACTION
     NOT VALID;
 
-
+--todo user_id ??
 ALTER TABLE IF EXISTS public.driver_transactions
     ADD FOREIGN KEY (user_id)
     REFERENCES public.drivers (driver_id) MATCH SIMPLE

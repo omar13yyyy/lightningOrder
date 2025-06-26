@@ -306,7 +306,8 @@ CREATE TABLE store_ratings_previous_day (
 ALTER SEQUENCE store_ratings_previous_day_store_internal_id_seq RESTART WITH 1000;
 
 CREATE TABLE products_sold ( 
-    create_at text, --todo data+;+id
+	
+    product_sold_id text,--todo data+;+id
     order_id text,
     customer_id bigint,
     store_internal_id bigint,
@@ -314,13 +315,14 @@ CREATE TABLE products_sold (
     product_name_ar text,
     internal_store_id bigint,
     product_internal_id bigint,
-     product_id text,
+    product_id text,
     size_name_en text,
     size_name_ar text,
     price DOUBLE PRECISION,
     full_price DOUBLE PRECISION, -- قيمة الفاتورة الاجمالية يلي داخلها العنصر 
     coupon_code text,
-      PRIMARY KEY (create_at)
+    create_at text,
+    PRIMARY KEY (create_at)
 );
 
 --For Admin 

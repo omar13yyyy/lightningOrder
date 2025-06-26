@@ -18,9 +18,11 @@ import {
 
 export const customersServices = {
   getCustomerTokenByIdService: async (params: CustomerServeceParams) => {
-    userRepository.fetchCustomerTokenById({
+    return userRepository.fetchCustomerTokenById({
       customerId: params.customerId,
     } as CustomerRepoParams);
+
+     
   },
 
   loginService: async (params: LoginServeceParams) => {
@@ -32,8 +34,9 @@ export const customersServices = {
       if (await bcrypt.compare(params.reqPassword, encrypted_password)) {
         const token = jwt.sign(
           { customer_id: customer_id },
-          process.env.TOKEN_SECRET_ADMIN
+          process.env.TOKEN_SECRET_CUSTOMER
         );
+        console.log(process.env.TOKEN_SECRET_CUSTOMER)
         await userRepository.updateEffectiveToken({
           token: token,
           customerId: customer_id,

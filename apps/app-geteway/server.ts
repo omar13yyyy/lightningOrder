@@ -11,7 +11,7 @@ app.listen(PORT,'0.0.0.0', () => {
 // WebSocket Server
 
 
-const wsPORT: number = parseInt(process.env.WSPORT || '3001');
+const wsPORT: number = parseInt(process.env.WEB_SOCKET_PORT || '8002');
 
 wsServer.listen(4000, () => 
     console.log(`Web socket running on port ${wsPORT}`)

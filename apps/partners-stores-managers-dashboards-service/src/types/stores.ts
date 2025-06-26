@@ -20,8 +20,8 @@ export interface StoreItem {
   couponCode:String;
   discount_value_percentage :number,
   coupon_min_order_value :number,
-  delivery_discount_percentage :number
-
+  delivery_discount_percentage :number,
+  isOpen:Boolean
 
 }
 
@@ -283,6 +283,16 @@ export interface StoreIdService {
 export interface StoreIdRepo{
   storeId: string;
 }
+
+
+//-----------------------------
+
+export interface StoreDistance{
+  latitudes: string;
+  logitudes: string;
+  storeId: string;
+}
+
 
 
 //-----------------------------

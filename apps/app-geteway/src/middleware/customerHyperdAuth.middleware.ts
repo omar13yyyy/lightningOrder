@@ -11,25 +11,36 @@ export const customerHyperdAuth= (req, res, next) => {
     if (!authHeader) {
     return res.status(401).send({ message: 'Unauthorized' });
   } 
+  try{
+      console.log(authHeader)
 
-
-      jwt.verify(authHeader, process.env.TOKEN_SECRET_USER, async (error, decoded) => {
+      jwt.verify(authHeader, process.env.TOKEN_SECRET_CUSTOMER, async (error, decoded) => {
       const customer_id = decoded.customer_id; 
       let result = await customersServices.fetchTokenEffective(customer_id);
-      if(result != null)
+                   console.log("saved token is : ",result)
+
+      if(result != null){
+
       if(authHeader ==result){
       req.customer_id = customer_id;
+      console.log(customer_id)
+
       next(); 
-
 }
+}else 
+    return res.status(401).send({ message: 'Unauthorized' });
+
     }); 
+  
+  
+}catch {
+    res.status(403).json({ message: 'Invalid token' });
   }
-  return res.status(401).send({ message: 'Unauthorized' });
+  
 
-
-  ;
+  
 }
 }
- 
-
+ }
+export default customerHyperdAuth;
 

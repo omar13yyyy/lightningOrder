@@ -54,15 +54,14 @@ export const ordersRepository = {
   //------------------------------------------------------------------------------------------
   previousOrder: async (
     storeId: number[] | number,
-        pageSize:number,
-    offset:number,
+    pageSize: number,
+    offset: number,
     state?: string,
     paymentMethod?: string,
     fromPrice?: number,
     toPrice?: number,
     fromDate?: Date,
-    toDate?: Date,
- 
+    toDate?: Date
   ): Promise<
     {
       order_id: string;
@@ -138,28 +137,26 @@ export const ordersRepository = {
     return rows;
   },
   //---------------------------------------------------------------------------------------------
-   getprevorderCountstore : async (storeIds) => {
-  console.log(storeIds, "storeid");
+  getprevorderCountstore: async (storeIds) => {
+    console.log(storeIds, "storeid");
     const idsArray = Array.isArray(storeIds) ? storeIds : [storeIds];
 
     const placeholders = idsArray.map((_, i) => `$${i + 1}`).join(", ");
 
     console.log(placeholders + "placeholders", idsArray);
 
-  let query = `
+    let query = `
     SELECT COUNT(*) AS total
     FROM past_orders
     WHERE internal_store_id IN (${placeholders})
   `;
 
+    const { rows } = await ordersQuery(query, idsArray);
 
+    console.log(rows);
 
-  const {rows} = await ordersQuery(query, idsArray);
-
-  console.log(rows)
-
-  return parseInt(rows[0].total);
-},
+    return parseInt(rows[0].total);
+  },
 
   //---------------------------------------------------------------------------------------------
   getCurrentOrders: async (
@@ -275,68 +272,6 @@ export const ordersRepository = {
   //-----------------------------------------------------------------------------------------------------------
 
   //--------------------------OMAR------------------------------------------
-  getCurrentOrder: async (customer_id) => {
-    const { rows } = await query(
-      ` 
-      
-SELECT
-    co.order_id,
-    os.status,
-    co.store_name_ar,
-    co.store_name_en,
-    co.order_details_text,
-    co.location_latitude,
-    co.location_longitude,
-    co.orders_type,
-    co.payment_method,
-    co.created_at
-FROM
-    current_orders co
-JOIN
-    order_status os
-    ON co.order_id = os.order_id  
-    where customer_id =$1  
-    ORDER BY created_at DESC
-
-    `,
-      [customer_id]
-    );
-
-    return rows;
-  },
-
-  //------------------------------------------------------
-  getPreviousOrder: async (customer_id, limit, offset) => {
-    const { rows } = await query(
-      ` 
-      
-SELECT
-    po.order_id,
-    os.status,
-    po.store_name_ar,
-    po.store_name_en,
-    po.order_details_text,
-    po.location_latitude,
-    po.location_longitude,
-    po.orders_type,
-    po.payment_method,
-    po.created_at
-FROM
-    past_orders po
-JOIN
-    order_status os
-    ON co.order_id = po.order_id  
-    where customer_id =$1 
-    ORDER BY created_at DESC
-    LIMIT $2 OFFSET $3 
-    `,
-      [customer_id, limit, offset]
-    );
-
-    return rows;
-  },
-
-  //------------------------------------------------------------
 
   //TODO : update past_orders
   addRating: async (
@@ -380,5 +315,72 @@ SELECT get_past_deriver_orders($1,$2,$3)
     `,
       [driverId, limit, offset]
     );
+  },
+
+  //----------------------------------------------------------------------------------------------
+
+  //------------------------------------------------------------------------------------------
+  previousCustomerOrder: async (
+    customerId: String,
+    limit: number,
+    dateOffset: string
+  ) => {
+    const sql = `
+    SELECT 
+    po.order_id,
+    os.status,
+    po.store_name_ar,
+    po.store_name_en,
+    po.order_details_text,
+    po.location_latitude,
+    po.location_longitude,
+    po.orders_type,
+    po.payment_method,
+    po.created_at
+FROM 
+    past_orders po
+JOIN 
+    order_status os ON po.order_id = os.order_id
+WHERE 
+    po.customer_id = $1 AND po.created_at <=$2 
+        ORDER BY po.created_at DESC
+
+    Limit $3
+    `;
+
+    let { rows } = await ordersQuery(sql, [customerId, dateOffset, limit + 1]);
+    return rows;
+  },
+
+  getCurrentCustomerOrders: async (
+    customerId: string,
+    limit: number,
+    dateOffset: string
+  ) => {
+    const sql = `
+    SELECT 
+    co.order_id,
+    os.status,
+    co.store_name_ar,
+    co.store_name_en,
+    co.order_details_text,
+    co.location_latitude,
+    co.location_longitude,
+    co.orders_type,
+    co.payment_method,
+    co.created_at
+FROM 
+    current_orders co
+JOIN 
+    order_status os ON co.order_id = os.order_id
+WHERE 
+    co.customer_id = $1 AND co.created_at <=$2
+        ORDER BY co.created_at DESC
+
+     Limit $3
+    `;
+
+    let { rows } = await ordersQuery(sql, [customerId, dateOffset, limit + 1]);
+    return rows;
   },
 };

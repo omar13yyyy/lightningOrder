@@ -13,7 +13,7 @@ export const visitorStoreRouter= express.Router()
 export const partnerRouter= express.Router()
 export const storeRouter= express.Router()
 
-visitorStoreRouter.route('/getCategoryTags').get(auth,storesController.getCategoryTag)
+visitorStoreRouter.route('/getCategoryTags').get(/* auth ,*/storesController.getCategoryTag)
 visitorStoreRouter.route('/getStoreCategories').get(storesController.getStoreCategories)
 visitorStoreRouter.route('/getStoreProducts').get(storesController.getStoreProducts)
 visitorStoreRouter.route('/getCouponDetails').get(storesController.getCouponDetails)

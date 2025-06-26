@@ -12,8 +12,8 @@ export const handleOrderEvents=  (socket) => {
         errors: validate.errors
       });
     }
-
-    // تابع معالجة الطلب
+    
+    
     console.log("طلب جديد:", data);
   });
 };

@@ -1,14 +1,9 @@
+import { printOrderInput } from "../../../../../dev/modules/printOrderInput";
+import { query } from "../../../../../modules/database/commitOrdersSQL";
+import { OrderInput } from "../../../../partners-stores-managers-dashboards-service/src/types/order";
 import { ordersService } from "./orders.service";
 
-<<<<<<< HEAD
 
-  //------------------------------------------------------------------------------------------
-
-export const ordersControler = {
-
-
-=======
->>>>>>> laila
 //------------------------------------------------------------------------------------------
 
 export const ordersControler = {
@@ -18,7 +13,6 @@ export const ordersControler = {
     try {
       const partnerId =req.user.partner_id; 
       const { storeId } = req.query;
-
       const stats = await ordersService.partnergetCurrentStatisticsService(
         partnerId,
         storeId
@@ -165,6 +159,53 @@ export const ordersControler = {
     }
   },
   //-------------------------------------------------------------------------------------------
-
+  sendUserOrder: async (req, res) => {
+    try {
+      const body = req.body;
+      printOrderInput(body.items as OrderInput)
+      return res.status(200).json({
+        success: true,
+      });
+    } catch (error) {
+      console.error(error);
+      return res.status(500).json({
+        success: false,
+        message: "Internal server error",
+      });
+    }
+  },
   //------------------------------------------------------------------------------------------
-};
+  
+  previousCustomerOrder: async (req, res) => {
+    try {
+      const {
+        dateOffset ,limit} = req.query
+        let customerId =req.customer_id
+      const result = await ordersService.previousCustomerOrderService(
+        customerId,dateOffset,limit)
+
+      return res.send(result)
+    } catch (error) {
+      return res.status(500).json({
+        success: false,
+        message: "Internal server error",
+      });
+    }
+  },
+  //------------------------------------------------------------------------------------------
+
+   getCurrentCustomerOrders: async (req, res) => {
+  
+      const {
+        dateOffset ,limit} = req.query
+        console.log("dateOffset ",dateOffset)
+        let customerId =req.customer_id
+      const result = await ordersService.previousCustomerOrderService(
+        customerId,dateOffset,limit)
+
+      return res.send(result)
+
+  },
+  //------------------------------------------------------------------------------------------
+}
+

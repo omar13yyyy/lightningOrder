@@ -155,12 +155,12 @@ function generateAddress(addressId) {
 //---Array---
 
 const customersArray :any= [];
-
+let secret = process.env.TOKEN_SECRET_CUSTOMER
 async function generateCustomer(id, address) {
   customersArray.push({
     customer_id: id,
     full_name: faker.person.fullName(),
-    phone_number: faker.phone.number({style:"international"}),
+    phone_number: `093659840${id}`,
     email: faker.internet.email(),
     encrypted_password: await bcrypt.hash("1234567890", 10),
     is_confirmed: faker.datatype.boolean(),
@@ -627,7 +627,7 @@ function generateSoldProduct(id,pastOrder) {
 
   let price = faker.number.int({ min: 1000, max: 1000000 })
   soldProductsArray.push({
-    create_at: `${faker.date.recent().toISOString()};${id}`,
+	product_sold_id:faker.string.uuid(),  
     order_id: pastOrder.id,
     customer_id: pastOrder.customer_id,
     store_internal_id:pastOrder.internal_store_id,
@@ -636,14 +636,14 @@ function generateSoldProduct(id,pastOrder) {
     internal_store_id :faker.number.int({ min: 1, max: 10000 }),
     product_internal_id: faker.number.int({ min: 1, max: 10000 }),
     product_id:faker.string.uuid(),
-
     size_name_en: faker.helpers.arrayElement(enum_sizes_ar),
     size_name_ar: faker.helpers.arrayElement(enum_sizes_ar),
-
     price: price,
     //full_price is :without discount
     full_price: price * 1.2,
     coupon_code: pastOrder.coupon_code,
+        create_at: faker.date.recent().toISOString()
+
   });
 }
 

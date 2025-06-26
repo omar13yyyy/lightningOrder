@@ -50,7 +50,7 @@ export const storesController ={
   changeModifiersItemState: async (req, res) => {
     try {   const storeId = resolveStoreId(req);
 
-      const {  modifiers_item_id, state } = req.query;
+      const {  modifiers_item_id, state } = req.body;
       const stats = await storesServices.changeModifierItemState(
         storeId,
         modifiers_item_id,
