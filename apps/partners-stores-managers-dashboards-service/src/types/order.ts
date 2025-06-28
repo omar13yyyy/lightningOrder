@@ -38,9 +38,13 @@ export interface ResolvedOrderItem {
   size_name: string;
   size_price: number;
   modifiers: ResolvedModifier[];
+  count :number;
+  note : String;
 }
 export interface TotalResolved {
-  order :ResolvedOrderItem[];
+  orderAR :ResolvedOrderItem[];
+  orderEn :ResolvedOrderItem[];
+  delivery_note : string,
   total_price: number;
 
 }
@@ -97,3 +101,21 @@ export interface ModifierItem {
   modifiers_item_id: string;
 }
 
+
+export interface RateRepoParams {
+  order_id: string;
+  internal_order_id: number;
+  internal_store_id: number;
+  customer_id: boolean;
+  driver_rating: boolean;
+  order_rating: string;
+  comment :string
+}
+
+
+export interface RateControlerParams {
+  orderId: string;
+  orderRate: number;
+  driverRate: number;
+
+}

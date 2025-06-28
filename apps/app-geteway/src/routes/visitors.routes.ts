@@ -6,7 +6,7 @@ import {visitorStoreRouter} from '../../../partners-stores-managers-dashboards-s
 export const visitorRouter = Router();
 
 
-visitorRouter.use('/customer', visitorCustomerRouter);      // /admin/user/...
+visitorRouter.use('/customer', visitorCustomerRouter);     
 visitorRouter.use('/customer', visitorStoreRouter); 
 
 /*

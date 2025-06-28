@@ -80,7 +80,7 @@ $$;
 ----------------------------------------
 
 CREATE OR REPLACE FUNCTION add_rating_if_delivered(
-    p_order_id TEXT,
+    p_order_id Text,
     p_customer_id BIGINT,
     p_driver_rating INTEGER,
     p_order_rating INTEGER,
@@ -88,7 +88,10 @@ CREATE OR REPLACE FUNCTION add_rating_if_delivered(
 ) RETURNS void AS $$
 DECLARE
     last_status TEXT;
-    v_enternal_order_id BIGINT;
+    v_internal_order_id Text;
+    v_internal_customer_id BIGINT;
+    v_internal_store_id BIGINT;
+
 BEGIN
     -- التأكد من آخر حالة للطلب
     SELECT status
@@ -99,27 +102,38 @@ BEGIN
     LIMIT 1;
 
     -- التحقق أن الطلب تم توصيله
-    IF last_status = 'delivered' THEN
+
+
+    IF last_status = p_customer_id THEN
 
         -- جلب internal_id من past_orders
         SELECT internal_id
         INTO v_enternal_order_id
+        intecustomer_id
+        INTO v_internal_customer_id
+        internal_store_id
+        INTO v_internal_store_id
         FROM past_orders
         WHERE order_id = p_order_id;
+
+
+        IF v_internal_order_id = 'delivered' THEN
 
         -- إدراج التقييم
         INSERT INTO ratings (
             order_id,
             enternal_order_id,
             customer_id,
+            internal_store_id,
             driver_rating,
             order_rating,
             comment,
             rating_at
         ) VALUES (
             p_order_id,
-            v_enternal_order_id,
-            p_customer_id,
+            v_internal_order_id,
+            v_internal_customer_id,
+            v_internal_store_id
             p_driver_rating,
             p_order_rating,
             p_comment,
@@ -128,6 +142,11 @@ BEGIN
 
         RETURN;
     ELSE
+        RETURN;
+    END IF;
+
+
+        ELSE
         RETURN;
     END IF;
 END;

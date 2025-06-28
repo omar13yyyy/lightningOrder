@@ -1,6 +1,6 @@
 import { printOrderInput } from "../../../../../dev/modules/printOrderInput";
 import { query } from "../../../../../modules/database/commitOrdersSQL";
-import { OrderInput } from "../../../../partners-stores-managers-dashboards-service/src/types/order";
+import { OrderInput, RateControlerParams } from "../../../../partners-stores-managers-dashboards-service/src/types/order";
 import { ordersService } from "./orders.service";
 
 
@@ -207,5 +207,19 @@ export const ordersControler = {
 
   },
   //------------------------------------------------------------------------------------------
+
+    //Test
+     rate: async (req, res) => {
+  
+      const {
+        orderId ,orderRate,driverRate} = req.body
+        let customerId =req.customer_id
+      const result = await ordersService.addRateService(
+        {orderId:orderId,orderRate:orderRate,driverRate:driverRate}as RateControlerParams,
+        customerId)
+
+      return res.send(result)
+
+  },
 }
 

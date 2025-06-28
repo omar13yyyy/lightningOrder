@@ -1,6 +1,7 @@
 
 import { ordersRepository } from "./orders.repository";
 import { partnerClient } from "../../../index";
+import { RateControlerParams, RateRepoParams } from "../../../../partners-stores-managers-dashboards-service/src/types/order";
 
 export const ordersService = {
   //------------------------------------------------------------------------------------------
@@ -220,7 +221,24 @@ export const ordersService = {
       order : rows
     } 
     
+
   },
+    //------------------------------------
+    
+  addRateService: async (
+    params :RateControlerParams,customerId : number
+  )=> {
+
+    await ordersRepository.addRating(  params.orderId,
+    customerId,
+    params.driverRate,
+    params.orderRate,
+    "");
+
+  },
+
+
+
 
 
 

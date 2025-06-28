@@ -21,6 +21,7 @@ orderRouter.route('/getBillPastOrders').get(auth,ordersControler.getBillPastOrde
 orderRouter.route('/sendUserOrder').post(customerHyperdAuth,ordersControler.sendUserOrder)
 orderRouter.route('/currentCustomerOrder').get(customerHyperdAuth,ordersControler.getCurrentCustomerOrders)
 orderRouter.route('/previousCustomerOrder').get(customerHyperdAuth,ordersControler.previousCustomerOrder)
+orderRouter.route('/rate').get(customerHyperdAuth,ordersControler.rate)
 
 
 

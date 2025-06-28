@@ -150,4 +150,18 @@ export const customersServices = {
     }
     return false;
   },
+    getCustomerProfileService : async (params : CustomerServeceParams)=> {
+    return userRepository.getCustomerProfile(params);
+
+  },
+  getCustomerWalletService : async (params : CustomerServeceParams)=> {
+    return userRepository.getCustomerWallet(params);
+
+  },
+  logoutService : async (params : CustomerServeceParams)=> {
+    return userRepository.logout(params);
+
+  }
+
+
 };

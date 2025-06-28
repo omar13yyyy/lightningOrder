@@ -9,6 +9,7 @@ import {
   CodeValidationServeceParams,
   ResetPasswordReqBody,
   ResetPasswordServeceParams,
+  CustomerServeceParams,
 } from "../../../types/customers";
 import { customersServices } from "./customers.service";
 
@@ -84,7 +85,7 @@ export const customersController = {
         .status(400)
         .send({ success: false, message: "Not Valid Code for phone number" });
   },
-  
+
   //-----------------------------------------------------
   resetPassword: async (req, res) => {
     const body: ResetPasswordReqBody = req.body;
@@ -103,7 +104,29 @@ export const customersController = {
         message: "code not valid or  phone number not exist ",
       });
   },
-  
-  
-  
+
+  logout: async (req, res) => {
+    const customerId: number = req.customer_id;
+
+    await customersServices.logoutService({
+      customerId: customerId,
+    } as CustomerServeceParams);
+    res.status(200).send({ success: true, message: "Done" });
+  },
+  customerProfile: async (req, res) => {
+    const customerId: number = req.customer_id;
+
+    let result= await customersServices.getCustomerProfileService({
+      customerId: customerId,
+    } as CustomerServeceParams);
+    res.status(200).send(result);
+  },
+  walletBalance: async (req, res) => {
+    const customerId: number = req.customer_id;
+
+    let result =await customersServices.getCustomerWalletService({
+      customerId: customerId,
+    } as CustomerServeceParams);
+    res.status(200).send(result);
+  },
 };

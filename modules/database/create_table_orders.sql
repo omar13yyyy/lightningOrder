@@ -9,6 +9,7 @@ past_orders,ratings,electronic_payment;
 
 
 CREATE TABLE ratings (
+    
         order_id text,
         internal_order_id bigint,
         internal_store_id bigint,
@@ -16,7 +17,7 @@ CREATE TABLE ratings (
         driver_rating integer CHECK (driver_rating >= 1 AND driver_rating <= 5),
         order_rating integer  CHECK (order_rating >= 1 AND order_rating <= 5),
         comment text,
-        rating_at timestamp with time zone,
+        rating_at timestamp with time zone DEFAULT now(),
         PRIMARY KEY(order_id)
 
     );

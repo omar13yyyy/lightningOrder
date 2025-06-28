@@ -36,14 +36,16 @@ public.roles,public.permisions,store_transactions,store_wallets,customers_visite
 --For STORES and Partner
 
 CREATE TABLE customers_visited (
-    visit_id bigserial,
+    visit_id Text,
     customer_id bigint,
     store_id  bigint,
     create_at timestamp with time zone
 );
 ALTER SEQUENCE customers_visited_visit_id_seq RESTART WITH 1000;
+
+--change partner_id to text
 CREATE TABLE partners (
-    partner_id bigserial,
+    partner_id Text,
     partner_name text,
     phone_number text,
     company_name_ar text,
@@ -100,7 +102,7 @@ CREATE TABLE address (
 
 CREATE TABLE IF NOT EXISTS public.admins
 (
-    id serial,
+    id text,
     email text,
     role_id integer,
     name text,
@@ -112,7 +114,7 @@ CREATE TABLE IF NOT EXISTS public.admins
 
 CREATE TABLE IF NOT EXISTS public.role_permission
 (
-    id serial,
+    id integer,
     role_id integer,
     permission_id integer,
     create_at timestamp with time zone,
@@ -164,7 +166,7 @@ CREATE TABLE store_transactions (
 );
 CREATE TABLE IF NOT EXISTS public.permisions
 (
-    id serial,
+    id text,
     title text,
     create_at timestamp with time zone,
     PRIMARY KEY (id)
@@ -172,7 +174,7 @@ CREATE TABLE IF NOT EXISTS public.permisions
 
 CREATE TABLE IF NOT EXISTS public.roles
 (
-    id serial,
+    id text,
     title text,
     create_at timestamp with time zone,
     PRIMARY KEY (id)
@@ -334,9 +336,9 @@ CREATE TABLE daily_statistics (
     new_customers_count integer,
     last_updated_at timestamp with time zone
 );
-
+--change document_id to text
 CREATE TABLE document_images (
-    document_id bigserial,
+    document_id Text,
     document_description text,
     user_id bigint,
     user_type enum_user_type NOT NULL DEFAULT 'NULL',
@@ -348,7 +350,7 @@ CREATE TABLE document_images (
 ALTER SEQUENCE document_images_document_id_seq RESTART WITH 1000;
 
 CREATE TABLE withdrawal_document_images (
-document_id bigserial,
+document_id Text,
 userId bigint,
     document_description text,
    user_type enum_withdrawal_user NOT NULL DEFAULT 'NULL',
@@ -362,7 +364,7 @@ ALTER SEQUENCE withdrawal_document_images_document_id_seq RESTART WITH 1000;
 
 CREATE TABLE withdrawal_requests (
     withdrawal_id text,
-    partner_id bigint,
+    partner_id text,
     withdrawal_status enum_withdrawal_status NOT NULL DEFAULT 'NULL',
     withdrawal_user enum_withdrawal_user NOT NULL DEFAULT 'NULL',
     uploaded_at timestamp with time zone,

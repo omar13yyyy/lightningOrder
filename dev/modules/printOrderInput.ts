@@ -2,14 +2,12 @@ import { OrderInput } from "../../apps/partners-stores-managers-dashboards-servi
 
 export function printOrderInput(order: OrderInput) {
   console.log("Total Price:", order.total_price);
-    console.log("Delivery Note:", order.delivery_note);
+  console.log("Delivery Note:", order.delivery_note);
 
   order.OrderInputs.forEach((item, index) => {
     console.log(`Item ${index + 1}:`);
     console.log("item_id:", item.item_id);
     console.log("size_id:", item.size_id);
-    console.log("count:", item.count);
-    console.log("note:", item.note);
 
     item.modifiers.forEach((modifier, modIndex) => {
       console.log(`  Modifier ${modIndex + 1}:`);
@@ -21,5 +19,7 @@ export function printOrderInput(order: OrderInput) {
         console.log("number:", modItem.number);
       });
     });
+    console.log("count:", item.count);
+    console.log("note:", item.note);
   });
 }

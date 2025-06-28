@@ -468,11 +468,13 @@ productDataen.products.items = updatedItemsen;
     const {ar,en} =await storesRepository.getOrderItems({storeId : params.storeId}as StoreIdRepo);
     const arOrder =resolveOrderDetails(ar,params.order)
     //TODO Enable english 
-    //const enOrder= resolveOrderDetails(en,params.order)
-  
+    const enOrder= resolveOrderDetails(en,params.order)
+    //TODO if enOrder.total_price, ==arOrder.total_price,
     return{
-      ar :arOrder,
-     // en :enOrder,
+      ar :arOrder.order,
+      en :enOrder.order,
+      total_price :enOrder.total_price,
+
     }
   },
 
@@ -492,7 +494,7 @@ isOpenNowService: async (param: StoreIdRepo) => {
 };
 //--------------------------------------------------------
 
-export function resolveOrderDetails(menu: MenuData, order: OrderInput): TotalResolved {
+export function resolveOrderDetails(menu: MenuData, order: OrderInput) {
   let totalPrice =0 ;
   let orderResolves :ResolvedOrderItem[] =  order.OrderInputs.map(orderItem => {
   
@@ -530,7 +532,9 @@ export function resolveOrderDetails(menu: MenuData, order: OrderInput): TotalRes
       size_name: size.name,
       size_price: size.price,
       size_calories: size.calories,
-      modifiers: resolvedModifiers
+      modifiers: resolvedModifiers,
+      count :orderItem.count,
+      note : orderItem.note,
     };
   });
   if(totalPrice==order.total_price){

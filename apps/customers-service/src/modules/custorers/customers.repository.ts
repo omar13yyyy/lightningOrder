@@ -37,7 +37,9 @@ export const userRepository = {
   updateEffectiveToken: async (params: updateEffectiveTokenRepoParams) => {
     //TODO after login or first reques save token in redis
 
-    await query("UPDATE effective_tokens SET token =$1 where user_id =$2 ", [
+    await query(`INSERT INTO effective_tokens (user_id, token)
+VALUES ($2, $1)
+ON CONFLICT (user_id) DO UPDATE SET token = EXCLUDED.token;`, [
       params.token,
       params.customerId,
     ]);
@@ -142,11 +144,13 @@ SELECT full_name,phone_number,email,birth_date,address From customers where
     const { rows } = await query(
       ` 
       
-        get_customer_wallet_balance($1); 
+       select  get_customer_wallet_balance($1); 
 
     `,
       [params.customerId]
     );
-    return rows[0];
+    console.log(rows)
+    return rows[0].get_customer_wallet_balance;
   },
+  
 };

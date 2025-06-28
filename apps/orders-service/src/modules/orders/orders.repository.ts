@@ -2,6 +2,7 @@ import {
   query as ordersQuery,
   query,
 } from "../../../../../modules/database/commitOrdersSQL";
+import { RateRepoParams } from "../../../../partners-stores-managers-dashboards-service/src/types/order";
 //------------------------------------------------------------------------------------------
 
 export const ordersRepository = {
@@ -336,6 +337,9 @@ SELECT get_past_deriver_orders($1,$2,$3)
     po.location_longitude,
     po.orders_type,
     po.payment_method,
+    po.amount,
+    po.coupon_code,
+    po.delivery_fee,
     po.created_at
 FROM 
     past_orders po
@@ -347,8 +351,9 @@ WHERE
 
     Limit $3
     `;
+    let limitPlus = Number(limit) + 1;
 
-    let { rows } = await ordersQuery(sql, [customerId, dateOffset, limit + 1]);
+    let { rows } = await ordersQuery(sql, [customerId, dateOffset, limitPlus]);
     return rows;
   },
 
@@ -368,6 +373,9 @@ WHERE
     co.location_longitude,
     co.orders_type,
     co.payment_method,
+    co.amount,
+    co.coupon_code,
+    co.delivery_fee,
     co.created_at
 FROM 
     current_orders co
@@ -379,8 +387,32 @@ WHERE
 
      Limit $3
     `;
+    let limitPlus = Number(limit) + 1;
 
-    let { rows } = await ordersQuery(sql, [customerId, dateOffset, limit + 1]);
+    let { rows } = await ordersQuery(sql, [customerId, dateOffset, limitPlus]);
     return rows;
+  },
+
+  //--------------------------------------------------------------
+
+
+  //--------------------------------------------------------------
+  getInternalsPastOrder : async (orderId :string ) => {
+   let {rows} = await query(
+      ` 
+      
+SELECT customer_id, store_name_ar, store_name_en
+FROM past_orders where order_id = $!
+LIMIT 1;
+
+
+    `,
+      [
+        orderId
+     
+      ]
+    );
+
+    return rows[0]
   },
 };

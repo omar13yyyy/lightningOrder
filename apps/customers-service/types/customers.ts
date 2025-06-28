@@ -2,10 +2,10 @@ export interface CustomerReqBody {
   customerId: string;
 }
 export interface CustomerServeceParams {
-  customerId: string;
+  customerId: number;
 }
 export interface CustomerRepoParams {
-  customerId: string;
+  customerId: number;
 }
 
 //-----------------------------

@@ -3,7 +3,7 @@
 import { customersController } from "./modules/custorers/customers.controler";
 import express from 'express';
 export const visitorCustomerRouter= express.Router()
-import {customerHyperdAuth} from '../../app-geteway/src/middleware/customerHyperdAuth.middleware'
+import  customerHyperdAuth  from '../../app-geteway/src/middleware/customerHyperdAuth.middleware';
 
 
 
@@ -14,6 +14,10 @@ visitorCustomerRouter.route('/confirmation').post(customersController.confirmati
 visitorCustomerRouter.route('/resetConfirmation').post(customersController.resetConfirmation)
 visitorCustomerRouter.route('/resetPassword').post(customersController.resetPassword)
 
+
+visitorCustomerRouter.route('/logout').post(customerHyperdAuth,customersController.logout)
+visitorCustomerRouter.route('/customerProfile').get(customerHyperdAuth,customersController.customerProfile)
+visitorCustomerRouter.route('/walletBalance').get(customerHyperdAuth,customersController.walletBalance)
 
 
 /*

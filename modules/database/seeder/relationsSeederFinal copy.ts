@@ -8,13 +8,16 @@ import path, { dirname } from 'path';
 import bcrypt from 'bcryptjs'
 import { encodeToQuadrants } from "../../geo/geohash";
 import {BtuidGenerator} from 'btuid'
-import { MenuData, ResolvedModifier, TotalResolved } from "../../../apps/partners-stores-managers-dashboards-service/src/types/order";
 export async function seederGenerateCSV(){
 
 const rootPath: string =process.env.ROOT_LOCATION ||""
 
 const filePath = path.join(rootPath,"testBtuidData", 'seeder');
+
+
 const btuid = new BtuidGenerator({ path: filePath })
+
+
   const ADDRESSESCOUNT = 100;
   const STORECATEGORIESCOUNT = 3;
   const TAGSCOUNT = 21;
@@ -455,7 +458,7 @@ function generateCurrentOrder(
   amount,
   couponCode,
   storeNameAr,storeNameEn,
-  menu: string
+  order_details_text
 ) {
   currentOrdersArray.push({
     order_id: orderUUID,
@@ -467,7 +470,7 @@ function generateCurrentOrder(
     internal_store_id: internalStoreId,
     driver_id: driverId,
     amount: amount,
-    order_details_text: JSON.stringify(resolveRandomOrder(menu)),
+    order_details_text: order_details_text,
     created_at: faker.date.recent().toISOString(),
     payment_method: randomEnum(enumPaymentMethodTypes),
     orders_type: randomEnum(enumOrdersType),
@@ -502,8 +505,8 @@ function generatePastOrder(
   amount,
   PaymentMethod,
   relatedRating,
-  couponCode,storeNameAr,storeNameEn,
-  menu: string
+  couponCode,storeNameAr,storeNameEn
+  ,order_details_text
 ) {
   pastOrdersArray.push({
     order_id: orderId,
@@ -514,7 +517,7 @@ function generatePastOrder(
     store_name_en :storeNameEn,
     internal_store_id: internalStoreId,
     driver_id: driverId,
-    order_details_text:  JSON.stringify(resolveRandomOrder(menu)),
+    order_details_text: order_details_text,
     amount: amount,
     created_at: faker.date.recent().toISOString(),
     payment_method: PaymentMethod,
@@ -873,106 +876,6 @@ function generateDriverTransactions(id,driver_id) {
     driver_earnings:driver_earnings,
   });
 }
-//-------------------------------------------------------------------------
-function getRandomInt(min: number, max: number): number {
-  return Math.floor(Math.random() * (max - min + 1)) + min;
-}
-
-function pickRandom<T>(array: T[]): T {
-  return array[Math.floor(Math.random() * array.length)];
-}
-
-function resolveRandomOrder(menuString: string): TotalResolved {
-
-const menu :MenuData = JSON.parse(menuString);
-
-  console.log(menu)
-  if(menu.items){
-  if(menu.items.length > 0){
-  const item = pickRandom(menu.items);
-    if(item.sizes.length > 0){
-
-  const size = pickRandom(item.sizes);
-
-  const resolvedModifiers: ResolvedModifier[] = size.modifiers_id.map((modId) => {
-    const modifier = menu.modifiers.find(m => m.modifiers_id === modId);
-    if (!modifier) return null;
-
-    const maxSelectable = Math.min(modifier.max, modifier.items.length);
-    const minSelectable = modifier.min;
-    const count = getRandomInt(minSelectable, maxSelectable);
-
-    const shuffledItems = modifier.items.sort(() => 0.5 - Math.random());
-    const selectedItems = shuffledItems.slice(0, count).map(mi => ({
-      name: mi.name,
-      price: mi.price,
-      number: 1, 
-    }));
-
-    return {
-      title: modifier.title,
-      items: selectedItems,
-    };
-  }).filter(Boolean) as ResolvedModifier[];
-
-  const modifiersTotal = resolvedModifiers.flatMap(m => m.items).reduce((sum, i) => sum + i.price * i.number, 0);
-
-  return {
-    orderAR: [
-      {
-        item_name: item.name,
-        size_name: size.name,
-        size_price: size.price,
-        modifiers: resolvedModifiers,
-        count: 1,
-        note:"note"
-
-      }
-    ],
-    orderEn: [
-      {
-        item_name: item.name,
-        size_name: size.name,
-        size_price: size.price,
-        modifiers: resolvedModifiers,
-        count: 1,
-        note:"note"
-
-      }
-    ],
-    delivery_note:"delivery_note",
-    total_price: size.price + modifiersTotal,
-  };
-  }
-}
-}
- return {
-    orderAR: [
-      {
-        item_name: "item.name",
-        size_name: "size.name",
-        size_price: 0,
-        modifiers: [],
-        count: 1,
-        note:"note"
-
-      }
-    ],
-    orderEn: [
-            {
-        item_name: "item.name",
-        size_name: "size.name",
-        size_price: 0,
-        modifiers: [],
-        count: 1,
-        note:"note"
-
-      }
-    ],
-    delivery_note:"delivery_note",
-    total_price: 0,
-  };
-  }
 
 //--------------------------------------------------------------------------
 
@@ -1157,8 +1060,8 @@ function generateJsonbDataEnAr(ln, uuidObject) {
 
   let modifierItemsArray :any = [];
   let categoriesCount = faker.number.int({ min: 1, max: 10 });
-  let itemsCount = faker.number.int({ min: 2, max: 10 });
-  let modifiersCount = faker.number.int({ min: 1, max: 5 });
+  let itemsCount = faker.number.int({ min: 0, max: 10 });
+  let modifiersCount = faker.number.int({ min: 0, max: 5 });
     let modifierArray :any = [];
 
   for (let mc = 0; mc < modifiersCount; mc++) {
@@ -1371,7 +1274,7 @@ function ordersMultiGenerator(count) {
       couponsArray[couponIndex].code,
       storesArray[storeIndex].store_name_ar,
       storesArray[storeIndex].store_name_en,
-      productsArray[storeIndex].product_data_ar_jsonb,
+      "order_html_text"
     );
 
 
@@ -1475,8 +1378,7 @@ function ordersMultiGenerator(count) {
         couponsArray[couponIndex].code,
         storesArray[storeIndex].store_name_ar,
         storesArray[storeIndex].store_name_en,
-        productsArray[storeIndex].product_data_ar_jsonb,
-
+        "order_html_text"
       );
       currentOrdersArray.pop();
       generateRating(
@@ -1484,8 +1386,7 @@ function ordersMultiGenerator(count) {
         orderId,i,
         orderRating,
         driverRating,
-        storesArray[storeIndex].internal_id,
-        
+        storesArray[storeIndex].internal_id
       );
       store_internal_id++
       generateStoreTransactions(

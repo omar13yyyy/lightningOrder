@@ -15,7 +15,7 @@ CREATE TABLE effective_tokens_delivery (
 );
 
 CREATE TABLE drivers (
-    driver_id bigserial,
+    driver_id Text,
     full_name text,
     phone_number text,
     email text,
@@ -37,7 +37,7 @@ CREATE TABLE drivers (
 ALTER SEQUENCE drivers_driver_id_seq RESTART WITH 1000;
 
 CREATE TABLE delivery_document_images (
-    document_id bigserial,
+    document_id text,
     document_description text,
     user_id bigint,
     image_url text,
@@ -48,7 +48,7 @@ CREATE TABLE delivery_document_images (
 ALTER SEQUENCE delivery_document_images_document_id_seq RESTART WITH 1000;
 
 CREATE TABLE driver_transactions (
-    transaction_id bigserial,
+    transaction_id Text,
     user_id bigint,
     transaction_type enum_driver_transaction_type NOT NULL DEFAULT 'NULL',
     amount DOUBLE PRECISION,
@@ -62,7 +62,7 @@ CREATE TABLE driver_transactions (
 ALTER SEQUENCE driver_transactions_transaction_id_seq RESTART WITH 1000;
 
 CREATE TABLE driver_points (
-    driver_id bigint,
+    driver_id Text,
     completed_orders_previous_day bigint,
     average_rating_previous_day DOUBLE PRECISION,
     trust_points_previous_day DOUBLE PRECISION,
@@ -74,7 +74,7 @@ CREATE TABLE driver_points (
 
 
 CREATE TABLE driver_wallets_previous_day (
-    driver_wallet_orders_id  bigint,
+    driver_wallet_orders_id  Text,
     balance_previous_day DOUBLE PRECISION,
     order_count integer,
     last_updated_at timestamp with time zone
@@ -82,7 +82,7 @@ CREATE TABLE driver_wallets_previous_day (
 
 CREATE TABLE trust_points_log (
     log_id text,
-    driver_id bigint,
+    driver_id text,
     operation_type enum_trust_points_operation_type NOT NULL DEFAULT 'NULL',
     points integer,
     reason text,
