@@ -1,22 +1,26 @@
 import { Request } from 'express';
 
-export function resolveStoreId(req: Request): string {
-  const user = req.user as {  store_id?: string };
+export function resolveStoreId(req: Request): string  {
+  const user = req.user as { store_id?: string; role?: string };
 
-  if (user.store_id) {
-    console.log(user.store_id+'stooooreidfromresolvestoreid')
-    return user.store_id;
+  if (user?.role === 'manager') {
+    if (user.store_id) {
+      console.log(user.store_id + ' << store_id from resolveStoreId [manager]');
+      return user.store_id;
+    } else {
+      throw new Error('store_id is required for manager');
+    }
   }
 
   const storeId =
-    req.query.storeId ||
-    req.params.storeId ||
-    req.body.storeId;
+    (req.query?.storeId as string) ||
+    (req.params?.storeId as string) ||
+    (req.body?.storeId as string);
 
   if (!storeId || typeof storeId !== 'string') {
-    throw new Error('store_id مفقود أو غير صالح');
+    console.warn('resolveStoreId: storeId is empty (allowed for non-manager)');
+    return undefined;
   }
 
   return storeId;
 }
-0

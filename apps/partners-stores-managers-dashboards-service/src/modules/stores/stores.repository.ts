@@ -2,6 +2,7 @@ import dayjs from 'dayjs'
 import { query } from "../../../../../modules/database/commitDashboardSQL";
 import { generateNeighbors } from "../../../../../modules/geo/geohash";
 import { CategoryRepo, CouponDetailsRepo, LanguageRepo, NearStoresByCategoryRepo, NearStoresBytagRepo, NearStoresByTagReq, NearStoresRepo, NearStoresReq, SearchForStoreRepo, StoreIdRepo, StoreRepo, TagRepo } from "../../types/stores";
+import { off } from 'process';
 
 export const storesRepository = {
   //---------------------------------------------------------------------------------------
@@ -9,7 +10,7 @@ export const storesRepository = {
     userName: string
   ): Promise<{store_id: string; encrypted_password: string }[]> => {
     const { rows } = await query(
-      "SELECT store_id, encrypted_password,store_name_ar,store_name_en FROM stores WHERE store_name_ar = $1",
+      "SELECT store_id, encrypted_password,store_name_ar,store_name_en FROM stores WHERE user_name = $1",
       [userName]
     );
     return rows;
@@ -34,6 +35,77 @@ console.log({newProductData}+'new')
 
 
 //----------------------------------------------------------------------------------------------
+getCouponsCountstore: async (
+  storeIds:number|number[],
+) => {
+    const idsArray = Array.isArray(storeIds) ? storeIds : [storeIds];
+
+  const placeholders = idsArray.map((_, i) => `$${i + 1}`).join(", ");
+
+  const { rows } = await query(
+    `SELECT COUNT(*) AS total FROM  coupons where internal_store_id IN (${placeholders})`,
+    [...idsArray]
+  );
+  return parseInt(rows[0].total);
+},
+
+  //-------------------------------------------------------------------------------------------
+getCoupons: async (
+  storeIds: number | number[],
+  limit: number,
+  offset: number
+): Promise<
+  Array<{
+    code: string;
+    description: string;
+    discount_value_percentage: number;
+    on_expense: string;
+    min_order_value: number;
+    expiration_date: Date;
+    max_usage: number;
+    real_usage: number;
+    coupon_type: string;
+    store_name: string;
+  }>
+> => {
+  const idsArray = Array.isArray(storeIds) ? storeIds : [storeIds];
+
+  const placeholders = idsArray.map((_, i) => `$${i + 1}`).join(", ");
+
+  const limitIndex = idsArray.length + 1;
+  const offsetIndex = idsArray.length + 2;
+
+  const sql = `
+    SELECT code, description, discount_value_percentage, on_expense,
+           min_order_value, expiration_date, max_usage, real_usage,
+           coupon_type
+    FROM coupons
+    WHERE internal_store_id IN (${placeholders})
+    LIMIT $${limitIndex} OFFSET $${offsetIndex}
+  `;
+
+  const values = [...idsArray, limit, offset];
+
+  const { rows } = await query(sql, values);
+  return rows;
+},
+
+  //----------------------------------------------------------------------------------------------------------------
+
+  //----------------------------------------------------------------------------------------------------------------
+    fetchStoreProductstore: async (param:StoreRepo) => {
+      //TODO make server return url with ip
+      const { rows, rowCount } = await query(
+        `select product_data_${param.ln}_jsonb as products from products where store_id = $1 LIMIT 1 `,
+        [param.storeId]
+      );
+      if (rowCount > 0) {
+        return rows[0];
+      }
+       else return {};
+   
+  },
+  //---------------------------------------------------------------------------
   fetchCategoryTags: async (tag :TagRepo) => {
     //TODO after login or first reques save token in redis
       const { rows } = await query(

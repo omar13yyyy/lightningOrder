@@ -1,14 +1,8 @@
+import { resolvepartnerId } from "../../../../partners-stores-managers-dashboards-service/src/utils/resolvepartnerId";
+import { resolveStoreId } from "../../../../partners-stores-managers-dashboards-service/src/utils/resolveStoreId";
 import { ordersService } from "./orders.service";
 
-<<<<<<< HEAD
 
-  //------------------------------------------------------------------------------------------
-
-export const ordersControler = {
-
-
-=======
->>>>>>> laila
 //------------------------------------------------------------------------------------------
 
 export const ordersControler = {
@@ -16,8 +10,8 @@ export const ordersControler = {
 
   getCurrentStatistics: async (req, res) => {
     try {
-      const partnerId =req.user.partner_id; 
-      const { storeId } = req.query;
+      const partnerId = resolvepartnerId(req); 
+      const storeId =  resolveStoreId(req);
 
       const stats = await ordersService.partnergetCurrentStatisticsService(
         partnerId,
@@ -40,9 +34,11 @@ export const ordersControler = {
 
   previousOrder: async (req, res) => {
     try {
-      const partnerId = req.user.partner_id; 
+      const partnerId = resolvepartnerId(req); 
+            const storeId =  resolveStoreId(req);
+
       const {
-        storeId,
+     
         state,
         paymentMethod,
         fromPrice,
@@ -80,8 +76,10 @@ export const ordersControler = {
 
   getCurrentOrders: async (req, res) => {
     try {
-      const partnerId = req.user.partner_id; 
-      const { storeId, limit, lastCursor } = req.query;
+      
+      const partnerId = resolvepartnerId(req); 
+      const {  limit, lastCursor } = req.query;
+      const storeId =  resolveStoreId(req);
 
       const stats = await ordersService.getCurrentOrders(
         partnerId,
@@ -148,7 +146,7 @@ export const ordersControler = {
 
   getCurrentStatisticsStore: async (req, res) => {
     try {
-      const { storeId } = req.query;
+      const storeId =  resolveStoreId(req);
 
       const stats = await ordersService.getCurrentStatisticsStore(storeId);
 
@@ -167,4 +165,4 @@ export const ordersControler = {
   //-------------------------------------------------------------------------------------------
 
   //------------------------------------------------------------------------------------------
-};
+}

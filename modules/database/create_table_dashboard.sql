@@ -48,7 +48,7 @@ CREATE TABLE partners (
     phone_number text,
     company_name_ar text,
     company_name_en text,
-    user_name text,
+    last_updated_wallet_at text,
     encrypted_password text ,
     bank_name text,
     iban text,

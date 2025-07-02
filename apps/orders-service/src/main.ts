@@ -2,14 +2,14 @@
 export const services = { fun1, fun2 };
 
 */
-import  auth  from '../../app-geteway/src/middleware/auth.middleware';
+import  {auth}  from '../../app-geteway/src/middleware/auth.middleware';
 
 import { ordersControler } from "./modules/orders/orders.controler";
 import express from 'express';
 import { get } from "http";
 export const orderRouter= express.Router()
 
-orderRouter.use(auth);
+orderRouter.use(auth(['partner','manager','admin']));
 
 orderRouter.route('/getCurrentStatistics').get(ordersControler.getCurrentStatistics)
 orderRouter.route('/getCurrentOrders').get(ordersControler.getCurrentOrders)
