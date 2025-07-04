@@ -1,6 +1,6 @@
 BEGIN;
 
-
+/*
 COPY products FROM '/home/omar/project3/coding/backend/modules/database/seeder/CSV/products.csv' DELIMITER ',' CSV HEADER;
 COPY products_sold FROM '/home/omar/project3/coding/backend/modules/database/seeder/CSV/products_sold.csv' DELIMITER ',' CSV HEADER;
 COPY store_wallets FROM '/home/omar/project3/coding/backend/modules/database/seeder/CSV/store_wallets.csv' DELIMITER ',' CSV HEADER;
@@ -13,6 +13,7 @@ COPY coupons FROM '/home/omar/project3/coding/backend/modules/database/seeder/CS
 COPY withdrawal_requests FROM '/home/omar/project3/coding/backend/modules/database/seeder/CSV/withdrawal_requests.csv' DELIMITER ',' CSV HEADER;
 COPY withdrawal_document_images FROM '/home/omar/project3/coding/backend/modules/database/seeder/CSV/withdrawal_document_images.csv' DELIMITER ',' CSV HEADER;
 COPY system_settings FROM '/home/omar/project3/coding/backend/modules/database/seeder/CSV/system_settings.csv' DELIMITER ',' CSV HEADER;
+*/
 
 
 
