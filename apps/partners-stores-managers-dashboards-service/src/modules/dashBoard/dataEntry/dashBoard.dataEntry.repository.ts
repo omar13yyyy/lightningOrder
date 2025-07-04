@@ -236,8 +236,8 @@ category_id:string
   ): Promise<void> => {
     const query = `
       UPDATE products
-      SET product_data_ar_jsonb = update_category_and_items(product_data_ar_jsonb, $1,$2,$3,$4),
-          product_data_en_jsonb = update_category_and_items(product_data_en_jsonb, $1,$2,$3,$4)
+      SET product_data_ar_jsonb = update_category(product_data_ar_jsonb, $1,$2,$3,$4),
+          product_data_en_jsonb = update_category(product_data_en_jsonb, $1,$2,$3,$4)
       WHERE store_id = $5
     `;
     await dashboardQuery(query, [category_id,name_ar,name_en,order,store_id]);
@@ -247,104 +247,451 @@ category_id:string
 //--------------------------------------------------------------------------------------------------------------------deleteCategory: async (
 addCategory: async (
   store_id: string,
+  category_id: string, 
+  name_ar: string,
+  name_en: string,
+  order: number
+): Promise<void> => {
+  const baseJson = {
+    category: [],
+    items: [],
+    modifiers: [],
+  };
 
-category_id:string
-,name_ar:string,name_en:string,order:number
-  ): Promise<void> => {
-    const query = `
-      insert products
-      SET product_data_ar_jsonb = add_category_and_items(product_data_ar_jsonb, $1,$2,$3,$4),
-          product_data_en_jsonb = add_category_and_items(product_data_en_jsonb,  $1,$2,$3,$4)
-      WHERE store_id = $2
-    `;
-    await dashboardQuery(query, [1,name_ar,name_en,order,store_id]);
-   // await dashboardQuery(query, [generator.getExtraBtuid(),name_ar,name_en,order,store_id]);
-  },
+  const query = `
+    INSERT INTO products (
+      store_id,
+      product_data_ar_jsonb,
+      product_data_en_jsonb
+    ) VALUES (
+      $1,
+      add_category($5::jsonb, $2, $3, $4),
+      add_category($5::jsonb, $2, $3, $4)
+    )
+    ON CONFLICT (store_id)
+    DO UPDATE SET
+      product_data_ar_jsonb = add_category(products.product_data_ar_jsonb, $2, $3, $4),
+      product_data_en_jsonb = add_category(products.product_data_en_jsonb, $2, $3, $4);
+  `;
+
+  await dashboardQuery(query, [store_id, name_ar, name_en, order, JSON.stringify(baseJson)]);
+},
+
 
 //--------------------------------------------------------------------------------------------------------------------
-addNewItem: async (req, res) => {
-  try {
-    const {
-  category_id
-    } = req.body;
 
-    await dataEntryService.addNewItem(
-category_id
-    );
+deleteItem: async (
+store_id:string,
+item_id:string
+  ): Promise<void> => {
+    const query = `
+      UPDATE products
+      SET product_data_ar_jsonb = delete_item_from_jsonb(product_data_ar_jsonb, $1),
+          product_data_en_jsonb = delete_item_from_jsonb(product_data_en_jsonb, $1)
+      WHERE store_id = $2
+    `;
+    await dashboardQuery(query, [item_id, store_id]);
+  },
 
-    return res.status(200).json({ success: true });
-  } catch (error) {
-    console.error("Error :", error);
-    return res.status(500).json({
-      success: false,
-      message: error.message || "Internal server error",
-    });
+//------------------------------------------------------------------------------------
+addNewItem: async (
+  store_id: string,
+  category_id: string,
+  name_en: string,
+  name_ar: string,
+  description_en: string,
+  description_ar: string,
+  is_best_seller: boolean,
+  is_activated: boolean,
+  order: number,
+  allergens: string[],
+  sizes: {
+    name: string;
+    order: number;
+    price: number;
+    size_id: string;
+    calories: number;
+    modifiers_id: string[];
+  }[], 
+  image_path: string
+): Promise<void> => {
+  const query = `
+    UPDATE products
+    SET 
+      product_data_ar_jsonb = add_item_from_jsonb(
+        product_data_ar_jsonb, 
+        $1, $2, $3, $4, $5, $6, $7, $8, $9::jsonb, $10::jsonb, $11
+      ),
+      product_data_en_jsonb = add_item_from_jsonb(
+        product_data_en_jsonb, 
+        $1, $2, $3, $4, $5, $6, $7, $8, $9::jsonb, $10::jsonb, $11
+      )
+    WHERE store_id = $12
+  `;
+
+  const values = [
+    category_id,               
+    name_en,                   
+    name_ar,                   
+    description_en,            
+    description_ar,           
+    is_best_seller,           
+    is_activated,             
+    order,                     
+    JSON.stringify(allergens), 
+    JSON.stringify(sizes),     
+    image_path,                
+    store_id                   
+  ];
+
+  const result = await dashboardQuery(query, values);
+
+  if (result.rowCount === 0) {
+    throw new Error(` No products found for store_id = ${store_id}`);
   }
-}
-,
-
+},
 //---------------------------------------------------------------------------------------------------------
-EditItem: async (req, res) => {
-  try {
-    const {
-  category_id,
-    } = req.body;
-
-    await dataEntryService.EditItem(
-category_id
-    );
-
-    return res.status(200).json({ success: true });
-  } catch (error) {
-    console.error("Error :", error);
-    return res.status(500).json({
-      success: false,
-      message: error.message || "Internal server error",
-    });
-  }
-}
-,
-//------------------------------------------------------------------------------------------
-deleteItem: async (req, res) => {
-  try {
-    const {
-  category_id,
-    } = req.body;
-
-    await dataEntryService.deleteItem(
-category_id
-    );
-
-    return res.status(200).json({ success: true });
-  } catch (error) {
-    console.error("Error :", error);
-    return res.status(500).json({
-      success: false,
-      message: error.message || "Internal server error",
-    });
-  }
-}
-,
+EditItem: async (
+store_id,
+      category_id,
+      item_id,
+      internal_item_id,
+      name_en,
+      name_ar,
+      description_en,
+      description_ar,
+      is_best_seller,
+      is_activated,
+      order,
+      allergens: string[],
+  sizes: {
+    name: string;
+    order: number;
+    price: number;
+    size_id: string;
+    calories: number;
+    modifiers_id: string[];
+  }[], 
+  ): Promise<void> => {
+    const query = `
+      UPDATE products
+      SET product_data_ar_jsonb = edit_item_from_jsonb(product_data_ar_jsonb,  $1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11::jsonb,$12::jsonb),
+          product_data_en_jsonb = edit_item_from_jsonb(product_data_en_jsonb,  $1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11::jsonb,$12::jsonb)
+      WHERE store_id = $13
+    `;
+    await dashboardQuery(query, [
+      category_id,
+      item_id,
+      internal_item_id,
+      name_en,
+      name_ar,
+      description_en,
+      description_ar,
+      is_best_seller,
+      is_activated,
+      order,
+        JSON.stringify(allergens), 
+    JSON.stringify(sizes), store_id]);
+  },
 //-----------------------------------------------------------------------------
-EditItemWithImage: async (req, res) => {
-  try {
-    const {
-  category_id,
-    } = req.body;
+EditItemWithImage: async (
+  store_id,
+      category_id,
+          item_id,
+      internal_item_id,
+      name_en,
+      name_ar,
+      description_en,
+      description_ar,
+      is_best_seller,
+      is_activated,
+      order,
+       allergens: string[],
+  sizes: {
+    name: string;
+    order: number;
+    price: number;
+    size_id: string;
+    calories: number;
+    modifiers_id: string[];
+  }[], 
+      image_path
+  ): Promise<void> => {
+    const query = `
+      UPDATE products
+      SET product_data_ar_jsonb = editwithimage_item_from_jsonb(product_data_ar_jsonb,  $1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11::jsonb,$12::jsonb,$13),
+          product_data_en_jsonb = editwithimage_item_from_jsonb(product_data_en_jsonb,  $1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11::jsonb,$12::jsonb,$13)
+      WHERE store_id = $14
+    `;
+    await dashboardQuery(query, [  
+      category_id,
+          item_id,
+      internal_item_id,
+      name_en,
+      name_ar,
+      description_en,
+      description_ar,
+      is_best_seller,
+      is_activated,
+      order,
+         JSON.stringify(allergens), 
+    JSON.stringify(sizes),
+      image_path, store_id]);
+  },
+//----------------------------------------------------------------------------------------------
 
-    await dataEntryService.EditItemWithImage(
-category_id
-    );
+//------------------------------------------------------------------------------------
+addModifier: async (
+    store_id,
+        max,
+        min,
+        enTille,
+        arTitle,
+  items: {
+     name: string;
+     order:number;
+    price: number;
+    is_enable: boolean;
+    is_default?: boolean;
+  }[], 
+): Promise<void> => {
+  const query = `
+    UPDATE products
+    SET 
+      product_data_ar_jsonb = add_Modifier_from_jsonb(
+        product_data_ar_jsonb, 
+         $2, $3, $4, $5, $6::jsonb,$7
+      ),
+      product_data_en_jsonb = add_Modifier_from_jsonb(
+        product_data_en_jsonb, 
+         $2, $3, $4, $5, $6::jsonb,$7
+      )
+    WHERE store_id = $1
+  `;
 
-    return res.status(200).json({ success: true });
-  } catch (error) {
-    console.error("Error :", error);
-    return res.status(500).json({
-      success: false,
-      message: error.message || "Internal server error",
-    });
+  const values = [
+    store_id,
+        max,
+        min,
+        enTille,
+        arTitle,         
+                     
+    JSON.stringify(items), 
+    1  //  tooodooo :::it is the modifier id         
+  ];
+
+  const result = await dashboardQuery(query, values);
+
+  if (result.rowCount === 0) {
+    throw new Error(` No products found for store_id = ${store_id}`);
   }
-}
+},
+//---------------------------------------------------------------------------------------------------------
+editModifier: async (
+    store_id,modifier_id,
+        max,
+        min,
+        enTille,
+        arTitle,
+  items: {
+     name: string;
+     order:number;
+    price: number;
+    is_enable: boolean;
+    is_default?: boolean;
+  }[], 
+  ): Promise<void> => {
+    const query = `
+      UPDATE products
+      SET product_data_ar_jsonb = edit_Modifier_from_jsonb(product_data_ar_jsonb,  $2,$3,$4,$5,$6,$7,$8,$9,$10,$11::jsonb,$12::jsonb),
+          product_data_en_jsonb = edit_Modifier_from_jsonb(product_data_en_jsonb,  $2,$3,$4,$5,$6,$7,$8,$9,$10,$11::jsonb,$12::jsonb)
+      WHERE store_id = $13
+    `;
+    await dashboardQuery(query, [
+     store_id,modifier_id,
+        max,
+        min,
+        enTille,
+        arTitle,
+        JSON.stringify(items), 
+   ]);
+  },
+//-----------------------------------------------------------------------------
+deleteModifier: async (
+ store_id, modifier_id
+  ): Promise<void> => {
+    const query = `
+      UPDATE products
+      SET product_data_ar_jsonb = deleteModifier_from_jsonb(product_data_ar_jsonb, $2),
+          product_data_en_jsonb = deleteModifier_from_jsonb(product_data_en_jsonb, $2)
+      WHERE store_id = $1
+    `;
+    await dashboardQuery(query, [ store_id, modifier_id]);
+  },
+//------------------------------------------------------------------------------------
+addModifierItem: async (
+ store_id,
+        ModifierId,
+        arTitle,
+        enTitle,
+        price,
+        isDefault,
+        isEnable,
+): Promise<void> => {
+  const query = `
+    UPDATE products
+    SET 
+      product_data_ar_jsonb = addModifierItem_from_jsonb(
+        product_data_ar_jsonb, 
+         $2, $3, $4, $5, $6,$7
+      ),
+      product_data_en_jsonb = addModifierItem_from_jsonb(
+        product_data_en_jsonb, 
+         $2, $3, $4, $5, $6,$7
+      )
+    WHERE store_id = $1
+  `;
+
+  const values = [
+  store_id,
+        ModifierId,
+        arTitle,
+        enTitle,
+        price,
+        isDefault,
+        isEnable,
+    1    //  tooodooo :::it is the modifier item id         
+  ];
+
+  const result = await dashboardQuery(query, values);
+
+  if (result.rowCount === 0) {
+    throw new Error(` No products found for store_id = ${store_id}`);
+  }
+},
+//---------------------------------------------------------------------------------------------------------
+editModifiersItem: async (
+      store_id,
+        ModifierId,
+        ModifieritemId,
+        arTitle,
+        enTitle,
+        price,
+        isDefault,
+        isEnable 
+  ): Promise<void> => {
+    const query = `
+      UPDATE products
+      SET product_data_ar_jsonb = editModifiersItem_from_jsonb(product_data_ar_jsonb,  $2,$3,$4,$5,$6,$7,$8),
+          product_data_en_jsonb = editModifiersItem_from_jsonb(product_data_en_jsonb,  $2,$3,$4,$5,$6,$7,$8)
+      WHERE store_id = $1
+    `;
+    await dashboardQuery(query, [
+    store_id,
+        ModifierId,
+        ModifieritemId,
+        arTitle,
+        enTitle,
+        price,
+        isDefault,
+        isEnable 
+   ]);
+  },
+//-----------------------------------------------------------------------------
+deleteModifierItem: async (
+ store_id, modifier_id, ModifierItemId
+  ): Promise<void> => {
+    const query = `
+      UPDATE products
+      SET product_data_ar_jsonb = deleteModifierItem_from_jsonb(product_data_ar_jsonb, $2,$3),
+          product_data_en_jsonb = deleteModifierItem_from_jsonb(product_data_en_jsonb, $2,$3)
+      WHERE store_id = $1
+    `;
+    await dashboardQuery(query, [ store_id, modifier_id, ModifierItemId]);
+  },
+  //-------------------------------------------------------------------------------------------
+
+//------------------------------------------------------------------------------------
+addSize: async (
+{
+        store_id,
+        itemId,
+        arSize,
+        enSize,
+        price,
+        calories,
+        modifierid
+  }: {
+          store_id,
+        itemId,
+        arSize,
+        enSize,
+        price,
+        calories,
+        modifierid:any[]
+  }
+): Promise<void> => {
+  const query = `
+    UPDATE products
+    SET 
+      product_data_ar_jsonb = addSize_from_jsonb(
+        product_data_ar_jsonb, 
+         $2, $3, $4, $5, $6,$7::jsonb
+      ),
+      product_data_en_jsonb = addSize_from_jsonb(
+        product_data_en_jsonb, 
+         $2, $3, $4, $5, $6,$7::jsonb
+      )
+    WHERE store_id = $1
+  `;
+
+  const values = [
+  store_id,
+       store_id,
+        itemId,
+        arSize,
+        enSize,
+        price,
+        calories,
+              JSON.stringify(modifierid), 
 ,
+    1    //  tooodooo :::it is the size       
+  ];
+
+  const result = await dashboardQuery(query, values);
+
+  if (result.rowCount === 0) {
+    throw new Error(` No products found for store_id = ${store_id}`);
+  }
+},
+//---------------------------------------------------------------------------------------------------------
+editSize: async (
+store_id,sizeId, itemId, arSize, enSize, price, calories ,modifierid:any[]
+  ): Promise<void> => {
+    const query = `
+      UPDATE products
+      SET product_data_ar_jsonb =editSize_from_jsonb(product_data_ar_jsonb,  $2,$3,$4,$5,$6,$7,$8),
+          product_data_en_jsonb = editSize_from_jsonb(product_data_en_jsonb,  $2,$3,$4,$5,$6,$7,$8)
+      WHERE store_id = $1
+    `;
+    await dashboardQuery(query, [
+   store_id,sizeId, itemId, arSize, enSize, price, calories ,modifierid
+   ]);
+  },
+//-----------------------------------------------------------------------------
+deleteSize: async (
+ store_id, sizeId   ): Promise<void> => {
+    const query = `
+      UPDATE products
+      SET product_data_ar_jsonb = deleteSize_from_jsonb(product_data_ar_jsonb, $2),
+          product_data_en_jsonb = deleteSize_from_jsonb(product_data_en_jsonb, $2)
+      WHERE store_id = $1
+    `;
+    await dashboardQuery(query, [  store_id, sizeId ]);
+  },
+  //-------------------------------------------------------------------------------------------
+
 }
-};
+
+
+;
