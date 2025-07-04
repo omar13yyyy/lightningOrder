@@ -41,7 +41,6 @@ CREATE TABLE customers_visited (
     store_id  bigint,
     create_at timestamp with time zone
 );
-ALTER SEQUENCE customers_visited_visit_id_seq RESTART WITH 1000;
 
 --change partner_id to text
 CREATE TABLE partners (
@@ -50,7 +49,7 @@ CREATE TABLE partners (
     phone_number text,
     company_name_ar text,
     company_name_en text,
-    last_updated_wallet_at text,
+    user_name text,
     encrypted_password text ,
     bank_name text,
     iban text,
@@ -61,11 +60,11 @@ CREATE TABLE partners (
     -- نحدثها بس يطلبها 
     wallet_balance DOUBLE PRECISION,
     last_updated_wallet_at timestamp with time zone,
+    
     PRIMARY KEY (partner_id),
     UNIQUE("user_name")
     
 );
-ALTER SEQUENCE partners_partner_id_seq RESTART WITH 1000;
 
 CREATE TABLE coupons (
     code text ,
@@ -137,7 +136,7 @@ CREATE TABLE statistics_previous_day (
 CREATE TABLE store_wallets (
     store_id  text,--ا بتشيليو هاد و يلي تحتو ليصير لكل شريك و وقتا بدكن تتذكرو تحدثو كمان مع كل طلب 
     internal_store_id bigint,
-    partner_id bigint,
+    partner_id text,
 
     balance_previous_day DOUBLE PRECISION,
     last_updated_at timestamp with time zone,
@@ -150,7 +149,7 @@ CREATE TABLE store_wallets (
 
 CREATE TABLE store_transactions (
     transaction_id text,
-    partner_id bigint,
+    partner_id text,
     store_id text,
     internal_store_id bigint ,
     transaction_type enum_store_transaction_type NOT NULL DEFAULT 'NULL',
@@ -230,7 +229,7 @@ CREATE TABLE tags (
 CREATE TABLE stores (
     store_id text,
     internal_id bigserial,
-    partner_id bigint,
+    partner_id text,
     store_name_ar text,
     store_name_en text,
     store_name_ar_clean text,
@@ -340,14 +339,13 @@ CREATE TABLE daily_statistics (
 CREATE TABLE document_images (
     document_id Text,
     document_description text,
-    user_id bigint,
+    user_id text,
     user_type enum_user_type NOT NULL DEFAULT 'NULL',
     image_url text,
     uploaded_at timestamp with time zone,
     expired boolean 
 
 );
-ALTER SEQUENCE document_images_document_id_seq RESTART WITH 1000;
 
 CREATE TABLE withdrawal_document_images (
 document_id Text,
@@ -360,7 +358,6 @@ userId bigint,
     expired boolean 
 
 );
-ALTER SEQUENCE withdrawal_document_images_document_id_seq RESTART WITH 1000;
 
 CREATE TABLE withdrawal_requests (
     withdrawal_id text,

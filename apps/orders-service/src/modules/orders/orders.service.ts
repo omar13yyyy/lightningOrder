@@ -1,10 +1,7 @@
 
 import { ordersRepository } from "./orders.repository";
 import { partnerClient } from "../../../index";
-<<<<<<< HEAD
 import { RateControlerParams, RateRepoParams } from "../../../../partners-stores-managers-dashboards-service/src/types/order";
-=======
->>>>>>> laila
 
 export const ordersService = {
   //------------------------------------------------------------------------------------------
@@ -183,7 +180,6 @@ export const ordersService = {
     return await ordersRepository.getCurrentStatistics(internal_id);
   },
   //------------------------------------------------------------------------------------------
-<<<<<<< HEAD
 
 
 //---------------------------omar-------------------------------------
@@ -263,6 +259,3 @@ export const ordersService = {
 
 
 };
-=======
-};
->>>>>>> laila

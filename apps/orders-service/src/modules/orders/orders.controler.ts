@@ -1,11 +1,8 @@
-<<<<<<< HEAD
 import { printOrderInput } from "../../../../../dev/modules/printOrderInput";
 import { query } from "../../../../../modules/database/commitOrdersSQL";
 import { OrderInput, RateControlerParams } from "../../../../partners-stores-managers-dashboards-service/src/types/order";
-=======
 import { resolvepartnerId } from "../../../../partners-stores-managers-dashboards-service/src/utils/resolvepartnerId";
 import { resolveStoreId } from "../../../../partners-stores-managers-dashboards-service/src/utils/resolveStoreId";
->>>>>>> laila
 import { ordersService } from "./orders.service";
 
 
@@ -16,14 +13,9 @@ export const ordersControler = {
 
   getCurrentStatistics: async (req, res) => {
     try {
-<<<<<<< HEAD
-      const partnerId =req.user.partner_id; 
-      const { storeId } = req.query;
-=======
       const partnerId = resolvepartnerId(req); 
       const storeId =  resolveStoreId(req);
 
->>>>>>> laila
       const stats = await ordersService.partnergetCurrentStatisticsService(
         partnerId,
         storeId
@@ -190,7 +182,6 @@ export const ordersControler = {
     }
   },
   //------------------------------------------------------------------------------------------
-<<<<<<< HEAD
   
   previousCustomerOrder: async (req, res) => {
     try {
@@ -239,6 +230,3 @@ export const ordersControler = {
   },
 }
 
-=======
-}
->>>>>>> laila

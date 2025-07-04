@@ -2,7 +2,7 @@
 export const services = { fun1, fun2 };
 
 */
-import  auth  from '../../app-geteway/src/middleware/auth.middleware';
+import  {auth}  from '../../app-geteway/src/middleware/auth.middleware';
 import  customerHyperdAuth  from '../../app-geteway/src/middleware/customerHyperdAuth.middleware';
 
 import { ordersControler } from "./modules/orders/orders.controler";

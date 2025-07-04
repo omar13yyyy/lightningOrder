@@ -886,7 +886,6 @@ function resolveRandomOrder(menuString: string): TotalResolved {
 
 const menu :MenuData = JSON.parse(menuString);
 
-  console.log(menu)
   if(menu.items){
   if(menu.items.length > 0){
   const item = pickRandom(menu.items);

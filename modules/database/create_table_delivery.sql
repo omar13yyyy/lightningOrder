@@ -34,22 +34,20 @@ CREATE TABLE drivers (
 
         PRIMARY KEY (driver_id)
 );
-ALTER SEQUENCE drivers_driver_id_seq RESTART WITH 1000;
 
 CREATE TABLE delivery_document_images (
     document_id text,
     document_description text,
-    user_id bigint,
+    user_id text,
     image_url text,
     uploaded_at timestamp with time zone,
     expired boolean 
 
 );
-ALTER SEQUENCE delivery_document_images_document_id_seq RESTART WITH 1000;
 
 CREATE TABLE driver_transactions (
     transaction_id Text,
-    user_id bigint,
+    user_id Text,
     transaction_type enum_driver_transaction_type NOT NULL DEFAULT 'NULL',
     amount DOUBLE PRECISION,
     transaction_at timestamp with time zone,
@@ -59,7 +57,6 @@ CREATE TABLE driver_transactions (
           PRIMARY KEY (transaction_id)
 
 );
-ALTER SEQUENCE driver_transactions_transaction_id_seq RESTART WITH 1000;
 
 CREATE TABLE driver_points (
     driver_id Text,
@@ -91,12 +88,12 @@ CREATE TABLE trust_points_log (
 
 );
 
-ALTER TABLE IF EXISTS public.delivery_document_images
-    ADD FOREIGN KEY (user_id)
-    REFERENCES public.drivers (driver_id) MATCH SIMPLE
-    ON UPDATE NO ACTION
-    ON DELETE NO ACTION
-    NOT VALID;
+-- ALTER TABLE IF EXISTS public.delivery_document_images
+--     ADD FOREIGN KEY (user_id)
+--     REFERENCES public.drivers (driver_id) MATCH SIMPLE
+--     ON UPDATE NO ACTION
+--     ON DELETE NO ACTION
+--     NOT VALID;
 
 
 ALTER TABLE IF EXISTS public.driver_points
@@ -107,12 +104,12 @@ ALTER TABLE IF EXISTS public.driver_points
     NOT VALID;
 
 --todo user_id ??
-ALTER TABLE IF EXISTS public.driver_transactions
-    ADD FOREIGN KEY (user_id)
-    REFERENCES public.drivers (driver_id) MATCH SIMPLE
-    ON UPDATE NO ACTION
-    ON DELETE NO ACTION
-    NOT VALID;
+-- ALTER TABLE IF EXISTS public.driver_transactions
+--     ADD FOREIGN KEY (user_id)
+--     REFERENCES public.drivers (driver_id) MATCH SIMPLE
+--     ON UPDATE NO ACTION
+--     ON DELETE NO ACTION
+--     NOT VALID;
 
 
 ALTER TABLE IF EXISTS public.driver_wallets_previous_day
@@ -124,12 +121,12 @@ ALTER TABLE IF EXISTS public.driver_wallets_previous_day
 
 
 
-ALTER TABLE IF EXISTS public.effective_tokens
-    ADD FOREIGN KEY (user_id)
-    REFERENCES public.drivers (driver_id) MATCH SIMPLE
-    ON UPDATE NO ACTION
-    ON DELETE NO ACTION
-    NOT VALID;
+-- ALTER TABLE IF EXISTS public.effective_tokens
+--     ADD FOREIGN KEY (user_id)
+--     REFERENCES public.drivers (driver_id) MATCH SIMPLE
+--     ON UPDATE NO ACTION
+--     ON DELETE NO ACTION
+--     NOT VALID;
 
 
 ALTER TABLE IF EXISTS public.driver_points

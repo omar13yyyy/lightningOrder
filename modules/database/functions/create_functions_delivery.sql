@@ -40,12 +40,12 @@ $$;
 
 -----------------------------------------
 CREATE OR REPLACE FUNCTION get_driver_transactions(
-    driver_id_param INT,
+    driver_id_param TEXT,
     offset_value INT DEFAULT 0,
     limit_params INT DEFAULT 10
 )
 RETURNS TABLE (
-    transaction_id INT,
+    transaction_id TEXT,
     transaction_type TEXT,
     amount NUMERIC,
     transaction_date TIMESTAMP,
