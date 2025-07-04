@@ -11,6 +11,7 @@ import { CategoryReq, CategoryService, CouponDetailsReq, StoreProductsReq, Langu
      CouponDetailsService} from '../../types/stores';
 import { storesServices } from './stores.service';
 import { resolveStoreId } from '../../utils/resolveStoreId';
+import { resolvepartnerId } from '../../utils/resolvepartnerId';
 
 export const storesController ={
 
@@ -21,13 +22,12 @@ export const storesController ={
       const { userName, password } = req.body;
     console.log(userName+'ussssseeeeeeeeeeeerrrrrrrr name')
       try {
-        const token = await storesServices.loginService(userName, password);
+        const stats = await storesServices.loginService(userName, password);
     
-        if (token != null) {
+        if (stats != null) {
           res.send({
-           data:{ token,
-            username: userName, 
-          }});
+                data: stats,
+});
         } else {
           res.status(401).send({ message: "The phone number or password is incorrect." });
         }
@@ -69,6 +69,29 @@ export const storesController ={
       });
     }
   },
+
+    //-------------------------------------------------------------------------------------------------------
+  
+    getCoupons: async (req, res) => {
+      try {
+      const partnerId = resolvepartnerId(req); 
+
+          const storeId = resolveStoreId(req);
+        const {  page, pageSize } = req.query;
+        const stats = await storesServices.getCoupons(partnerId,storeId, page, pageSize);
+  
+        return res.status(200).json({
+          success: true,
+          ...stats,
+        });
+      } catch (error) {
+        console.error("Error in partnerInfo:", error);
+        return res.status(500).json({
+          success: false,
+          message: "Internal server error",
+        });
+      }
+    },
   //-------------------------------------------------------------------------------------------------
     getCategoryTag : async    (req, res)=>{
         const ln = req.query.ln; 
@@ -198,11 +221,14 @@ getStoreProducts: async   (req, res)=>{
     const query : StoreProductsReq = req.query 
      const params :StoreProductsService ={
          ln: query.ln,
-         storeId: query.storeId
+         storeId: resolveStoreId(req)
      }
-    const result = await storesServices.getStoreProductsService(params);
-    res.send(result)
-},
+    const stats = await storesServices.getStoreProductsServicestore(params);
+
+      return res.status(200).json({
+        success: true,
+        data: stats,
+      });},
 getCouponDetails: async   (req, res)=>{
     const body :CouponDetailsReq = req.body 
 const params :CouponDetailsService ={

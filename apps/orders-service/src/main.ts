@@ -10,6 +10,7 @@ import express from 'express';
 import { get } from "http";
 export const orderRouter= express.Router()
 
+orderRouter.use(auth(['partner','manager','admin']));
 
 orderRouter.route('/getCurrentStatistics').get(auth,ordersControler.getCurrentStatistics)
 orderRouter.route('/getCurrentOrders').get(auth,ordersControler.getCurrentOrders)

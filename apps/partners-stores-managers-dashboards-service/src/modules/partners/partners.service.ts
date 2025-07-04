@@ -7,9 +7,9 @@ export const partnersService = {
   //------------------------------------------------------------------------------------------
 
   loginService: async (
-    userName: string,
-    reqPassword: string
-  ): Promise<string | null> => {
+    userName,
+    reqPassword
+  )=> {
     const result = await partnersRepository.fetchPartnerIdPasswordByUserName(
       userName
     );
@@ -18,10 +18,12 @@ console.log(partner_id+'paaaaaaaaaaaarrrrrrrrtnerid')
     const isMatch = await bcryptjs.compare(reqPassword, encrypted_password);
     if (isMatch) {
       const token = jwt.sign(
-        { partner_id: partner_id },
+        { partner_id: partner_id  , role: "partner"},
         process.env.TOKEN_SECRET_ADMIN as string
       );
-      return token;
+      return {token,
+          role: 'partner',
+    partner_id: partner_id,}
     }
 
     return null;
@@ -152,20 +154,9 @@ console.log(partner_id+'paaaaaaaaaaaarrrrrrrrtnerid')
     state: string,
     partnerId: number
   ): Promise<{ success: boolean; message: string }> => {
-    // تحقق من ملكية المتجر
-    const store = await partnersRepository.getStoreByIdAndPartner(
-      storeId,
-      partnerId
-    );
+  console.log(storeId,state)
+     const store = await partnersRepository.getStoreId(storeId);
 
-    if (!store) {
-      return {
-        success: false,
-        message: "هذا المتجر لا يتبع لك",
-      };
-    }
-
-    // نفّذ التحديث
     const result = await partnersRepository.updateStoreState(
       store.internal_id,
       state
@@ -200,6 +191,8 @@ console.log(partner_id+'paaaaaaaaaaaarrrrrrrrtnerid')
     cover_image_url: string;
     store_description: string;
     platform_commission: number;
+        status:string;
+
     category_name_ar: string;
     category_name_en: string;
     tag_name_ar: string;
@@ -267,11 +260,10 @@ console.log(partner_id+'paaaaaaaaaaaarrrrrrrrtnerid')
  const [rows, total] = await Promise.all([
        partnersRepository.walletTransferHistorystore(
       store_id,
-      partner_id,
       pageSize,
       offset
     ),
-        partnersRepository.getWalletTransferHistoryCountstore(partner_id,store_id),
+        partnersRepository.getWalletTransferHistoryCountstore(store_id),
   ]);
    return {
     data: {
@@ -320,74 +312,7 @@ walletTransferHistory: async (
   },
 
   //-----------------------------------------------------------------------------------------
-  changeItemState: async (
-    storeId: string,
-    itemId: number,
-    newState: boolean
-  ) => {
-    const productData = await partnersRepository.getProductDataByStoreId(
-      storeId
-    );
-
-    if (!productData) {
-      throw new Error("Store not found or product data missing");
-    }
-
-    const items = productData.items;
-
-    if (!Array.isArray(items)) {
-      throw new Error("Items list not found in product data");
-    }
-
-    const updatedItems = items.map((item: any) =>
-      item.id === itemId ? { ...item, state: newState } : item
-    );
-
-    productData.items = updatedItems;
-
-    await partnersRepository.updateProductDataByStoreId(storeId, productData);
-
-    return { success: true };
-  },
-  //-----------------------------------------------------------------------------------------
-  getModifiers: async (
-    storeId: string
-  ): Promise<{ modifiers_in_stores: string[] }> => {
-    return await partnersRepository.getModifiers(storeId);
-  },
-
-  //----------------------------------------------------------------------------------------
-  changeModifiersItemState: async (
-    storeId: string,
-    modifiersId: number,
-    newState: boolean
-  ) => {
-    const productData = await partnersRepository.getProductDataByStoreId(
-      storeId
-    );
-
-    if (!productData) {
-      throw new Error("Store not found or product data missing");
-    }
-
-    const modifiers = productData.modifier;
-
-    if (!Array.isArray(modifiers)) {
-      throw new Error("modifiers list not found in product data");
-    }
-
-    const updatedmodifiers = modifiers.map((modifiers: any) =>
-      modifiers.id === modifiersId
-        ? { ...modifiers, state: newState }
-        : modifiers
-    );
-
-    productData.items = updatedmodifiers;
-
-    await partnersRepository.updateProductDataByStoreId(storeId, productData);
-
-    return { success: true };
-  },
+  
   //----------------------------------------------------------------------
   changeStoreStatemanger: async (
     storeId: number,
@@ -481,27 +406,6 @@ walletTransferHistory: async (
 
     return await partnersRepository.getStatistics(store_id);
   },
-  //------------------------------------------------------------------------------------------
 
-  getCoupons: async (
-    storeId: string,
-    limit: number,
-    offset: number
-  ): Promise<
-    Array<{
-      code: string;
-      description: string;
-      discount_value_percentage: number;
-      on_expense: string;
-      min_order_value: number;
-      expiration_date: Date;
-      max_usage: number;
-      real_usage: number;
-      coupon_type: string;
-      store_name: string;
-    }>
-  > => {
-    return await partnersRepository.getCoupons(storeId, limit, offset);
-  },
   //------------------------------------------------------------------------------------------
 };

@@ -50,7 +50,7 @@ CREATE TABLE partners (
     phone_number text,
     company_name_ar text,
     company_name_en text,
-    user_name text,
+    last_updated_wallet_at text,
     encrypted_password text ,
     bank_name text,
     iban text,
@@ -312,9 +312,7 @@ CREATE TABLE products_sold (
     product_sold_id text,--todo data+;+id
     order_id text,
     customer_id bigint,
-    customer_location_code text,
     store_internal_id bigint,
-    tag_internal_id bigint,
     product_name_en text,
     product_name_ar text,
     internal_store_id bigint,

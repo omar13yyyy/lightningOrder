@@ -6,7 +6,7 @@ export const partnersRepository = {
     userName: string
   ): Promise<{ partner_id: string; encrypted_password: string }[]> => {
     const { rows } = await dashboardQuery(
-      "SELECT partner_id, encrypted_password,partner_name FROM partners WHERE partner_name = $1",
+      "SELECT partner_id, encrypted_password,partner_name FROM partners WHERE user_name = $1",
       [userName]
     );
     return rows;
@@ -118,15 +118,10 @@ export const partnersRepository = {
       s.min_order_price,
       s.logo_image_url,
       sr.rating_previous_day,
-<<<<<<< HEAD
-     get_store_wallet_balance(s.store_id) AS wallet_balance
-    FROM remotely.stores s
-    LEFT JOIN store_wallets sw ON s.internal_id = sw.internal_store_id
-=======
+
      st.balance_previous_day AS wallet_balance
     FROM stores s
     LEFT JOIN statistics_previous_day st ON s.store_id = st.store_id
->>>>>>> laila
     LEFT JOIN store_ratings_previous_day sr ON s.internal_id = sr.store_internal_id
     WHERE s.partner_id = $1
   `;
@@ -311,6 +306,7 @@ export const partnersRepository = {
     cover_image_url: string;
     store_description: string;
     platform_commission: number;
+    status:string;
     category_name_ar: string;
     category_name_en: string;
     tag_name_ar: string;
@@ -329,6 +325,7 @@ export const partnersRepository = {
       s.cover_image_url,
       s.store_description,
       s.platform_commission,
+      s.status,
       sc.category_name_ar,
       sc.category_name_en,
       t.tag_name_ar,
@@ -337,10 +334,10 @@ export const partnersRepository = {
     left JOIN store_categories  sc ON sc.category_id = s.category_id
      left JOIN category_tags ct ON sc.internal_id = ct.internal_category_id 
      left JOIN tags t ON t.tag_id = ct.tag_id
-    WHERE s.store_id = $1 AND s.partner_id = $2
+    WHERE s.store_id = $1 
   `;
 
-    const { rows } = await dashboardQuery(sql, [storeId, partnerId]);
+    const { rows } = await dashboardQuery(sql, [storeId]);
 
     if (rows.length === 0) {
       throw new Error("المتجر غير موجود أو لا يتبع هذا الشريك");
@@ -407,7 +404,7 @@ export const partnersRepository = {
     wallet_balance: number;
   }> => {
     const { rows } = await dashboardQuery(
-      "SELECT  balance_previous_day FROM statistics_previous_day WHERE store_id = $1",
+      "SELECT  balance_previous_day as wallet_balance FROM statistics_previous_day WHERE store_id = $1",
       [store_id]
     );
     return rows[0];
@@ -416,7 +413,6 @@ export const partnersRepository = {
   //-----------------------------------------------------------------------------------
   walletTransferHistorystore: async (
     store_id: string,
-    partner_id:number,
     pageSize:number,
     offset:number,
   ): Promise<
@@ -442,11 +438,11 @@ export const partnersRepository = {
       amount + amount_platform_commission AS sales_with_commission,
       s.store_name_ar AS store_name
     FROM store_transactions st 
-    JOIN stores s ON s.store_id = st.store_id 
-    WHERE st.store_id = $1  and st.partner_id=$2     
-      LIMIT $3 OFFSET $4
+      JOIN stores s ON s.store_id = st.store_id 
+    WHERE st.store_id = $1     
+      LIMIT $2 OFFSET $3
 `,
-      [store_id, partner_id, pageSize, offset]
+      [store_id, pageSize, offset]
     );
 
     return rows;
@@ -480,12 +476,11 @@ getWalletTransferHistoryRows: async (
 //-------------------------------------------------------------------------------------------
 
 getWalletTransferHistoryCountstore: async (
-  partnerId: number,
   storeId:string,
 ) => {
   const { rows } = await dashboardQuery(
-    `SELECT COUNT(*) AS total FROM store_transactions WHERE partner_id = $1 and store_id=$2`,
-    [partnerId,storeId]
+    `SELECT COUNT(*) AS total FROM store_transactions WHERE store_id=$1`,
+    [storeId]
   );
   return parseInt(rows[0].total);
 },
@@ -553,20 +548,6 @@ getWalletTransferHistoryCount: async (
 
   //---------------------------------------------------------------------------------------
 
-  getModifiers: async (
-    storeId: string
-  ): Promise<{
-    modifiers_in_stores: string[];
-  }> => {
-    const sql = `
-SELECT product_data_ar_jsonb->'modifier' AS modifiers
-FROM products
-WHERE store_id = $1;
-    `;
-
-    const { rows } = await dashboardQuery(sql, [storeId]);
-    return rows;
-  },
   //-------------------------------------------------------------------------------------------
   getStoreProfilemanger: async (
     storeId: number
@@ -665,29 +646,6 @@ WHERE store_id = $1;
     return rows;
   },
   //-------------------------------------------------------------------------------------------
-  getCoupons: async (
-    storeId: string,
-    limit: number,
-    offset: number
-  ): Promise<
-    Array<{
-      code: string;
-      description: string;
-      discount_value_percentage: number;
-      on_expense: string;
-      min_order_value: number;
-      expiration_date: Date;
-      max_usage: number;
-      real_usage: number;
-      coupon_type: string;
-      store_name: string;
-    }>
-  > => {
-    const { rows } = await dashboardQuery(
-      "SELECT  code,description,discount_value_percentage,on_expense,min_order_value,expiration_date,max_usage,real_usage,coupon_type FROM coupons WHERE store_id = $1",
-      [storeId]
-    );
-    return rows[0];
-  },
+ 
   //------------------------------------------------------------------------------------------------
 };

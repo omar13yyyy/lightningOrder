@@ -2,29 +2,37 @@ import { Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
 
 interface JwtPayload {
-  id: string;
+  store_id?: string;
+  partner_id?: string;
   role: string;
-  [key: string]: any;
+  iat?: number;
+  exp?: number;
 }
 
-const auth = (req: Request, res: Response, next: NextFunction): void => {
-  const authHeader = req.headers['authorization'];
-  const token = authHeader?.split(' ')[1];
+export const auth = (allowedRoles: string[]) => { 
+  return (req: Request, res: Response, next: NextFunction) => {
+    console.log('auth middleware')
+    const authHeader = req.headers.authorization;
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      return res.status(401).json({ message: 'غير مصرح: لا يوجد توكن' });
+    }
 
-  if (!token) {
-    res.status(401).json({ message: 'No token provided' });
-    return;
-  }
+    const token = authHeader.split(' ')[1];
 
-  try {
-const decoded = jwt.verify(token, process.env.TOKEN_SECRET_ADMIN || 'secret') as JwtPayload;
-    req.user = decoded;
-    console.log('Decoded token:', decoded);
+    try {
+      const decoded = jwt.verify(token, process.env.TOKEN_SECRET_ADMIN as string) as JwtPayload;
 
-    next();
-  } catch {
-    res.status(403).json({ message: 'Invalid token' });
-  }
+      if (!decoded.role || !allowedRoles.includes(decoded.role)) {
+        return res.status(403).json({ message: 'غير مصرح: صلاحيات غير كافية' });
+      }
+console.log(decoded.role);
+console.log(decoded.partner_id+'kjhgfdfghjkl,kmnbvgyuikmnbvgbhuikmn');
+
+      (req as any).user = decoded;
+
+      next();
+    } catch (err) {
+      return res.status(401).json({ message: 'توكن غير صالح أو منتهي' });
+    }
+  };
 };
-
-export default auth;
