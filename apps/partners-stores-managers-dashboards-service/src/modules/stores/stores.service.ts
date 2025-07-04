@@ -23,6 +23,8 @@ function roundUpToNearestten(num) :number{
 async function processRow(row) : Promise<StoreItem>{
 const delivery_price = roundUpToNearestThousand(DeliveryConfig.costPerKM * row.distance_km)
  const result : StoreItem = {
+
+  
    store_id: row.store_id,
    title: row.title,
    tags: row.tags,
@@ -40,9 +42,9 @@ const delivery_price = roundUpToNearestThousand(DeliveryConfig.costPerKM * row.d
    cover_image_url:serverHost+storeImagePath+ row.cover_image_url,
    orders_type: row.orders_type,
    couponCode :row.code,
-    discount_value_percentage :row.discount_value_percentage,
+   discount_value_percentage :row.discount_value_percentage,
    coupon_min_order_value :row.coupon_min_order_value,
-    delivery_discount_percentage :row.delivery_discount_percentage
+   delivery_discount_percentage :row.delivery_discount_percentage
 
 
  }

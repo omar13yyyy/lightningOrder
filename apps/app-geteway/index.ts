@@ -1,9 +1,10 @@
 import {AllCustomersServices} from '../customers-service/index'
+import { CustomerServeceParams } from '../customers-service/types/customers'
 
 
 export const customersServices ={
 
-     fetchTokenEffective : async (customerId: string) => {
-    return await AllCustomersServices.getCustomerTokenByIdService({customerId:customerId})
+     fetchTokenEffective : async (customerId: number) => {
+    return await AllCustomersServices.getCustomerTokenByIdService({customerId:customerId} as CustomerServeceParams)
   }
 }

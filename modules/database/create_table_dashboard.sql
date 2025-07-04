@@ -306,13 +306,15 @@ CREATE TABLE store_ratings_previous_day (
 
 );
 ALTER SEQUENCE store_ratings_previous_day_store_internal_id_seq RESTART WITH 1000;
-
+--TODO add to Seeder
 CREATE TABLE products_sold ( 
 	
     product_sold_id text,--todo data+;+id
     order_id text,
     customer_id bigint,
+    customer_location_code text,
     store_internal_id bigint,
+    tag_internal_id bigint,
     product_name_en text,
     product_name_ar text,
     internal_store_id bigint,
