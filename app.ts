@@ -11,7 +11,7 @@ import { storesServices } from './apps/partners-stores-managers-dashboards-servi
 import { DeliveryConfig } from './modules/config/settingConfig';
 
 dotenv.config()
-// await seederGenerateCSV()
+//  await seederGenerateCSV()
 //   await createDatabases()
 //  await seeder()    
 DeliveryConfig.update()
