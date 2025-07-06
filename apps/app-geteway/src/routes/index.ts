@@ -5,6 +5,7 @@ import {ordersRouter} from './order.routes';
 import {storesRouter} from './stores.routes';
 import {imagesRouter} from './imageTest.routes';
 import {DataentryRouter} from './dataentry.routes.ts';
+import {deliveryRouter} from './delivery.routes.ts';
 
 import express from 'express';
 
@@ -18,6 +19,7 @@ router.use('/api/v1/', ordersRouter);
 router.use('/api/v1/', storesRouter);
 router.use('/api/v1/', imagesRouter);
 router.use('/api/v1/', DataentryRouter);
+router.use('/api/v1/', deliveryRouter);
 
 //import ordersRoutes from './orders.routes';
 

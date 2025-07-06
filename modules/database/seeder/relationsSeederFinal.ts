@@ -1155,7 +1155,7 @@ function generateJsonbDataEnAr(ln, uuidObject) {
   }
 
   let modifierItemsArray :any = [];
-  let categoriesCount = faker.number.int({ min: 1, max: 10 });
+  let categoriesCount = faker.number.int({ min: 3, max: 10 });
   let itemsCount = faker.number.int({ min: 2, max: 10 });
   let modifiersCount = faker.number.int({ min: 1, max: 5 });
     let modifierArray :any = [];

@@ -6,8 +6,8 @@ import {visitorStoreRouter} from '../../../partners-stores-managers-dashboards-s
 export const visitorRouter = Router();
 
 
-visitorRouter.use('/customer', visitorCustomerRouter);     
-visitorRouter.use('/customer', visitorStoreRouter); 
+visitorRouter.use('/store', visitorCustomerRouter);     
+visitorRouter.use('/store', visitorStoreRouter); 
 
 /*
 // تأمين كل مسارات المستخدم

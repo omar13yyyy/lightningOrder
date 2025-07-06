@@ -225,10 +225,7 @@ getStoreProducts: async   (req, res)=>{
      }
     const stats = await storesServices.getStoreProductsServicestore(params);
 
-      return res.status(200).json({
-        success: true,
-        data: stats,
-      });},
+      return res.status(200).json(stats)},
 getCouponDetails: async   (req, res)=>{
     const body :CouponDetailsReq = req.body 
 const params :CouponDetailsService ={

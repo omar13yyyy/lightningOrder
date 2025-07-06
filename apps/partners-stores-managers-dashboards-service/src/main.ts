@@ -27,8 +27,6 @@ visitorStoreRouter.route('/getNearTrendStores').get(storesController.getNearTren
 visitorStoreRouter.route('/getTrendStoresByTag').get(storesController.getNearTrendStores)
 visitorStoreRouter.route('/getTrendStoresByCategory').get(storesController.getNearTrendStoresByCategory)
  */
-
-
 visitorStoreRouter.route('/SearchForStore').post(storesController.searchForStore)
 visitorStoreRouter.route('/getWorkShifts').get(storesController.getWorkShifts)
 visitorStoreRouter.route('/getStoreProducts').get(storesController.getStoreProducts)
@@ -61,8 +59,8 @@ partnerRouter.route('/partnergetAllStores').get(auth(['partner','admin']),partne
 partnerRouter.route('/BalanceWithdrawalRequest').post(auth(['partner','admin']),partnersController.BalanceWithdrawalRequest)
 partnerRouter.route('/walletTransferHistory').get(auth(['partner','admin']),partnersController.walletTransferHistory)
 
-partnerRouter.use(auth(['partner','manager','admin']));
-storeRouter.use(auth(['partner','manager','admin']));
+// partnerRouter.use(auth(['partner','manager','admin']));
+// storeRouter.use(auth(['partner','manager','admin']));
 
 partnerRouter.route('/partnerInfo').get(partnersController.partnerInfo)
 

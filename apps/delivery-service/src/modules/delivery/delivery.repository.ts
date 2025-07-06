@@ -21,12 +21,12 @@ From drivers where driver_id =$1
 },
 //-----------------------------------------------------------------------------------------------------------
 
-logout : async (customer_id) => {
-    const { rows }= await query(` 
+logout : async (driverId) => {
+     await query(` 
       
         DELETE from effective_tokens_delivery where user_id = $1
 
-    `,[customer_id])
+    `,[driverId])
 
 },
 //-----------------------------------------------------------------------------------------------------------
@@ -40,15 +40,15 @@ fetchDriverTokenById : async (userId)=>{
 },
 //-----------------------------------------------------------------------------------------------------------
 
-fetchDriverIdPasswordByNumber : async (userName)=>{
-   const {rows} = await query('select customer_id,encrypted_password from drivers where user_name = $1 LIMIT 1',[userName])
+fetchDriverIdPasswordByUserName : async (userName)=>{
+   const {rows} = await query('select driver_id,encrypted_password from drivers where user_name = $1 LIMIT 1',[userName])
     return  rows[0]
 
 
 },
 //-----------------------------------------------------------------------------------------------------------
 
-updateEffectiveToken : async (token ,userId) =>{
+updateEffectiveToken : async (token ,driverId) =>{
     //TODO after login or first reques save token in redis
     
      await query('UPDATE effective_tokens_delivery SET token =$1 where user_id =$2 ',[token,userId])
