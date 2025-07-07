@@ -136,7 +136,6 @@ ALTER TABLE IF EXISTS public.driver_points
     ON DELETE NO ACTION
     NOT VALID;
 
-END;
 
 END;
 

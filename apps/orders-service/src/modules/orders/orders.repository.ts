@@ -297,7 +297,7 @@ SELECT add_rating_if_delivered($1,$2,$3,$4,$5)
     query(
       ` 
       
-SELECT get_past_deriver_orders($1,$2,$3)
+      SELECT get_past_deriver_orders($1,$2,$3)
 
 
     `,
@@ -306,16 +306,17 @@ SELECT get_past_deriver_orders($1,$2,$3)
   },
 
   //-----------------------------------------------------------------------------------------------------------
-  driverDeliveOrder: async (driverId, limit, offset) => {
-    query(
+  previousDriverDeliveOrder: async (driverId, limit, offset) => {
+   const {rows} =await query(
       ` 
       
-SELECT get_past_deriver_orders($1,$2,$3)
+      SELECT get_past_deriver_orders($1,$2,$3)
 
 
     `,
-      [driverId, limit, offset]
+      [driverId, limit +1, offset]
     );
+    return rows
   },
 
   //----------------------------------------------------------------------------------------------
@@ -415,4 +416,44 @@ LIMIT 1;
 
     return rows[0]
   },
+
+  //------------------------------------------
+
+  delivered: async (
+driverId
+  )=> {
+
+
+  },
+    //------------------------------------
+
+
+
+
+  confirmReceipt: async (
+driverId
+  )=> {
+
+
+  },
+    //------------------------------------
+
+
+
+  customerRefusedToReceive: async (
+driverId
+  )=> {
+
+
+  },
+    //------------------------------------
+  driverRefusedToReceive: async (
+driverId
+  )=> {
+
+
+  },
+    //------------------------------------
+
+
 };

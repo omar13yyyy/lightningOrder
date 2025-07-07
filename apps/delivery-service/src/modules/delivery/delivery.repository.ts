@@ -51,7 +51,19 @@ fetchDriverIdPasswordByUserName : async (userName)=>{
 updateEffectiveToken : async (token ,driverId) =>{
     //TODO after login or first reques save token in redis
     
-     await query('UPDATE effective_tokens_delivery SET token =$1 where user_id =$2 ',[token,userId])
+     await query('UPDATE effective_tokens_delivery SET token =$1 where user_id =$2 ',[token,driverId])
+
+},
+driverAchievements : async (driverId) =>{
+    //TODO after login or first reques save token in redis
+    
+   const {rows} = await query(`SELECT  update_driver_points_by_id($1)`,[driverId])
+
+},
+driverWalletBalance : async (driverId) =>{
+    //TODO after login or first reques save token in redis
+    
+   const {rows} = await query(`SELECT update_driver_points_by_id($1)`,[driverId])
 
 },
 }

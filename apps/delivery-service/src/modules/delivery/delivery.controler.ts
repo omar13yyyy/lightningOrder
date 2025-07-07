@@ -16,4 +16,41 @@ export const deliveryController = {
     await deliveryServices.logoutService(driver_id);
     res.status(200).send({ success: true, message: "Done" });
   },
+    driverProfile: async (req, res) => {
+      const driver_id: number = req.driver_id;
+  
+      let result= await deliveryServices.getDriverProfileService(driver_id);
+      res.status(200).send(result);
+    },
+        driverAchievementsService: async (req, res) => {
+    try {
+
+        let driverId =req.driver_id
+      const result = await deliveryServices.driverAchievementsService(
+        driverId)
+
+      return res.send(result)
+    } catch (error) {
+      return res.status(500).json({
+        success: false,
+        message: "Internal server error",
+      });
+    }
+  },
+      driverWalletBalance: async (req, res) => {
+    try {
+
+        let driverId =req.driver_id
+      const result = await deliveryServices.driverWalletBalanceService(
+        driverId)
+
+      return res.send(result)
+    } catch (error) {
+      return res.status(500).json({
+        success: false,
+        message: "Internal server error",
+      });
+    }
+  },
+  
 }

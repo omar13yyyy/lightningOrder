@@ -239,18 +239,80 @@ export const ordersService = {
 
 
 
+    //------------------------------------
+
+
+  orderService: async (
+driverId
+  )=> {
+
+
+    
+
+  },
+    //------------------------------------
 
 
 
 
+  previousDriverOrderService: async (
+    driverId: string,
+    offset:string,
+    limit :number
+  )=> {
+
+   let rows =  await ordersRepository.previousDriverDeliveOrder(driverId,limit,offset);
+
+
+        return {
+      hasNext: rows.length > limit,
+      order : rows
+    } 
+    
+
+  },
+      //------------------------------------
+
+
+  deliveredService: async (
+driverId
+  )=> {
+   let rows =  await ordersRepository.delivered(driverId);
+
+
+  },
+    //------------------------------------
 
 
 
 
+  confirmReceiptService: async (
+driverId
+  )=> {
+   let rows =  await ordersRepository.confirmReceipt(driverId);
+
+
+  },
+    //------------------------------------
 
 
 
+  customerRefusedToReceiveService: async (
+driverId
+  )=> {
+   let rows =  await ordersRepository.customerRefusedToReceive(driverId);
 
+
+  },
+    //------------------------------------
+  driverRefusedToReceiveService: async (
+driverId
+  )=> {
+   let rows =  await ordersRepository.driverRefusedToReceive(driverId);
+
+
+  },
+    //------------------------------------
 
 
 

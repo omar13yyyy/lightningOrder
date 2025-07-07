@@ -228,5 +228,96 @@ export const ordersControler = {
       return res.send(result)
 
   },
+    //------------------------------------------------------------------------------------------
+  
+  previousDriverOrder: async (req, res) => {
+    try {
+      const {
+        offset ,limit} = req.query
+        let driverId =req.driver_id
+      const result = await ordersService.previousDriverOrderService(
+        driverId,offset,limit)
+
+      return res.send(result)
+    } catch (error) {
+      return res.status(500).json({
+        success: false,
+        message: "Internal server error",
+      });
+    }
+  },
+
+      delivered: async (req, res) => {
+    try {
+
+        let driverId =req.driver_id
+      const result = await ordersService.deliveredService(
+        driverId)
+            return res.status(200).json({
+        success: true,
+        message: "Done",
+      })
+      return res.send(result)
+    } catch (error) {
+      return res.status(500).json({
+        success: false,
+        message: "Internal server error",
+      });
+    }
+  },
+        confirmReceipt: async (req, res) => {
+    try {
+
+        let driverId =req.driver_id
+      const result = await ordersService.confirmReceiptService(
+        driverId)
+
+            return res.status(200).json({
+        success: true,
+        message: "Done",
+      })    } catch (error) {
+      return res.status(500).json({
+        success: false,
+        message: "Internal server error",
+      });
+    }
+  },
+  
+        customerRefusedToReceive: async (req, res) => {
+    try {
+
+        let driverId =req.driver_id
+      const result = await ordersService.customerRefusedToReceiveService(
+        driverId)
+
+            return res.status(200).json({
+        success: true,
+        message: "Done",
+      })    } catch (error) {
+      return res.status(500).json({
+        success: false,
+        message: "Internal server error",
+      });
+    }
+  },
+        driverRefusedToReceive: async (req, res) => {
+    try {
+
+        let driverId =req.driver_id
+      const result = await ordersService.driverRefusedToReceiveService(
+        driverId)
+
+            return res.status(200).json({
+        success: true,
+        message: "Done",
+      })
+    } catch (error) {
+      return res.status(500).json({
+        success: false,
+        message: "Internal server error",
+      });
+    }
+  },
+  
 }
 

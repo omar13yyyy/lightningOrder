@@ -28,5 +28,9 @@ export const deliveryServices = {
   getDriverProfileService: async (driverId) => {
     return deliveryRepository.getDriverProfile(driverId);
   },
-  
+    driverWalletBalanceService: async (driverId) => {
+    return deliveryRepository.driverWalletBalance(driverId);
+  },  driverAchievementsService: async (driverId) => {
+    return deliveryRepository.driverAchievements(driverId);
+  },
 };

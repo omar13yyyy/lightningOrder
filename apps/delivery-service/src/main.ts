@@ -9,5 +9,4 @@ export const deliveryRouter= express.Router()
 
 deliveryRouter.route('/login').get(deliveryController.driverLogin)
 deliveryRouter.route('/logout').get(deliveryController.logout)
-export { deliveryController };
 
