@@ -11,6 +11,7 @@ imageTestRouter.route('/uploadImage').post(upload.single('image'),imageControler
 imageTestRouter.route('/getImage').get(imageControler.getImage)
 imageTestRouter.route('/deleteImage').delete(imageControler.deleteImage)
 imageTestRouter.route('/updateImage').put(upload.single('image'),imageControler.updateImage)
+imageTestRouter.route('/getPresignedUrl').get(imageControler.getPresignedUrl)
 imageTestRouter.route('/getImageUrl').get(imageControler.getImageUrl)
 
 

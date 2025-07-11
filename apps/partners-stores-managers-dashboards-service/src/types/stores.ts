@@ -318,7 +318,42 @@ export interface CouponDetailsRepo{
   storeId: string;
 }
 
+export interface ProductSoldRepo {
+  product_sold_id: string; 
+  order_id: string | null;
+  customer_id: number | null;
+  store_internal_id: number | null;
+  product_name_en: string | null;
+  product_name_ar: string | null;
+  internal_store_id: number | null;
+  product_internal_id: number | null;
+  product_id: string | null;
+  size_name_en: string | null;
+  size_name_ar: string | null;
+  price: number | null;
+  full_price: number | null;
+  coupon_code: string | null;
 
+}
+
+
+export interface ProductSoldService {
+  product_sold_id: string; 
+  order_id: string | null;
+  customer_id: number | null;
+  store_internal_id: number | null;
+  product_name_en: string | null;
+  product_name_ar: string | null;
+  internal_store_id: number | null;
+  product_internal_id: number | null;
+  product_id: string | null;
+  size_name_en: string | null;
+  size_name_ar: string | null;
+  price: number | null;
+  full_price: number | null;
+  coupon_code: string | null;
+
+}
 
 
 

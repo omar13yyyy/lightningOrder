@@ -11,6 +11,7 @@ import {
   insertCustomerRepoParams,
   CodeValidationRepoParams,
   ResetPasswordRepoParams,
+  CustomerTransactionRepo,
 } from "../../../types/customers";
 
 export const userRepository = {
@@ -152,5 +153,20 @@ SELECT full_name,phone_number,email,birth_date,address From customers where
     console.log(rows)
     return rows[0].get_customer_wallet_balance;
   },
-  
+    //------------------------------------------------------------
+
+  insertToCustomerTransaction: async (params: CustomerTransactionRepo) => {
+       await query(
+      "INSERT INTO customer_transactions (transaction_id,order_id,order_internal_id,driver_id,transaction_type,amount,note,transaction_at) VALUES ($1,$2,$3,$4,$5,$6,$7,$8) RETURNING customer_id",
+      [
+        params.transaction_id,
+        params.order_id,
+        params.order_internal_id,
+        params.driver_id,
+        params.transaction_type,
+        params.amount,
+        params.notes,
+        Date.now()
+      ])
+  },
 };

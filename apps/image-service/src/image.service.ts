@@ -2,6 +2,8 @@ import { imagesIdGenerator } from "../../../modules/btuid/imagesBtuid";
 
 import sharp from 'sharp';
 import {minioService} from './minio.service';
+const port: number = parseInt(process.env.MINIO_PORT || '9001');
+const endPoint: string =process.env.MINIO_ENDPOINT ||"localhost";
 
 export const imageService = {
     
@@ -44,7 +46,16 @@ updateImage : async (fileName, imageBuffer) => {
   await minioService.uploadImage(fileName, processedImage); 
   return fileName;
 },
-getImageUrl : async (fileName) => {
+getPresignedUrl : async (fileName) => {
   return await minioService.getPresignedUrl(fileName);
 },
+
+getImageUrl : async (fileName) => {
+    const bucketName = 'images';
+    const host = `http://${endPoint}:${port}`; 
+
+    const url = `${host}/${bucketName}/${fileName}`;
+  return url;
+},
+
 }

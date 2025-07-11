@@ -1,19 +1,38 @@
-import { Server, Socket } from "socket.io";
 
-export function registerDriverHandlers(io: Server, socket: Socket) {
-  const user = socket.data.user;
-  if (user.role !== "driver") return;
+import {DRIVERS_EVENTS} from "../../../modules/events/events"
 
-  const room = `driver:${user.id}`;
-  socket.join(room);
-  console.log(`🚗 Driver ${user.id} joined room ${room}`);
 
-  socket.on("locationUpdate", (location) => {
-    console.log(`📍 Driver ${user.id} location:`, location);
-    // هنا ممكن تخزن الموقع في Redis أو ترسله لـ dispatch-service
+export function registerDriversHandlers(io: any) {
+
+
+
+
+  // استقبال طلب طلبية من السائق
+  io.on(DRIVERS_EVENTS.DRIVERS_ORDER_REQUEST, (orderData) => {
+    console.log("Received order request from driver:", orderData);
+
+
+    const response = {
+      status: "accepted",
+      orderId: orderData.orderId,
+      message: "Order request accepted",
+    };
+
+    io.emit(DRIVERS_EVENTS.DRIVERS_ORDER_RESPONSE, response);
   });
 
-  socket.on("acceptOrder", ({ orderId }) => {
-    console.log(`✅ Driver ${user.id} accepted order ${orderId}`);
+  io.on(DRIVERS_EVENTS.DRIVER_LOCATION_REQUEST, (orderData) => {
+    console.log("Received order request from driver:", orderData);
+
+
+    const response = {
+      status: "accepted",
+      orderId: orderData.orderId,
+      message: "Order request accepted",
+    };
+
+    io.emit(DRIVERS_EVENTS.DRIVER_Location_RESPONSE, response);
   });
+
+
 }

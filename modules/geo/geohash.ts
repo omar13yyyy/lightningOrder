@@ -297,7 +297,6 @@ export function decodeFromQuadrants(quadrantCode) {
   let lonMin = -180.0,
     lonMax = 180.0;
 
-  // كل خطوتين هما رمز واحد: lat direction, lon direction
   for (let i = 0; i < quadrantCode.length; i += 2) {
     const latChar = quadrantCode[i];
     const lonChar = quadrantCode[i + 1];
@@ -321,7 +320,6 @@ export function decodeFromQuadrants(quadrantCode) {
     }
   }
 
-  // مركز المربع
   const latitude = (latMin + latMax) / 2;
   const longitude = (lonMin + lonMax) / 2;
 

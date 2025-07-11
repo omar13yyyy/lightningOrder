@@ -1,10 +1,14 @@
 import { printOrderInput } from "../../../../../dev/modules/printOrderInput";
+import { orderGenerator } from "../../../../../modules/btuid/orderBtuid";
 import { query } from "../../../../../modules/database/commitOrdersSQL";
-import { OrderInput, RateControlerParams } from "../../../../partners-stores-managers-dashboards-service/src/types/order";
+import {
+  OrderInput,
+  RateControlerParams,
+  ResolvedOrderItem,
+} from "../../../../partners-stores-managers-dashboards-service/src/types/order";
 import { resolvepartnerId } from "../../../../partners-stores-managers-dashboards-service/src/utils/resolvepartnerId";
 import { resolveStoreId } from "../../../../partners-stores-managers-dashboards-service/src/utils/resolveStoreId";
 import { ordersService } from "./orders.service";
-
 
 //------------------------------------------------------------------------------------------
 
@@ -13,8 +17,8 @@ export const ordersControler = {
 
   getCurrentStatistics: async (req, res) => {
     try {
-      const partnerId = resolvepartnerId(req); 
-      const storeId =  resolveStoreId(req);
+      const partnerId = resolvepartnerId(req);
+      const storeId = resolveStoreId(req);
 
       const stats = await ordersService.partnergetCurrentStatisticsService(
         partnerId,
@@ -37,18 +41,18 @@ export const ordersControler = {
 
   previousOrder: async (req, res) => {
     try {
-      const partnerId = resolvepartnerId(req); 
-            const storeId =  resolveStoreId(req);
+      const partnerId = resolvepartnerId(req);
+      const storeId = resolveStoreId(req);
 
       const {
-     
         state,
         paymentMethod,
         fromPrice,
         toPrice,
         fromDate,
         toDate,
-      pageSize,page
+        pageSize,
+        page,
       } = req.query;
 
       const stats = await ordersService.previousOrderService(
@@ -60,12 +64,13 @@ export const ordersControler = {
         toPrice,
         fromDate,
         toDate,
-      pageSize,page
+        pageSize,
+        page
       );
 
       return res.status(200).json({
         success: true,
-      ...stats,
+        ...stats,
       });
     } catch (error) {
       console.error("Error in partnerInfo:", error);
@@ -79,10 +84,9 @@ export const ordersControler = {
 
   getCurrentOrders: async (req, res) => {
     try {
-      
-      const partnerId = resolvepartnerId(req); 
-      const {  limit, lastCursor } = req.query;
-      const storeId =  resolveStoreId(req);
+      const partnerId = resolvepartnerId(req);
+      const { limit, lastCursor } = req.query;
+      const storeId = resolveStoreId(req);
 
       const stats = await ordersService.getCurrentOrders(
         partnerId,
@@ -115,7 +119,7 @@ export const ordersControler = {
       const stats = await ordersService.getBillPastOrdersService(orderId);
 
       return res.status(200).json({
-   success: true,
+        success: true,
         data: stats,
       });
     } catch (error) {
@@ -149,7 +153,7 @@ export const ordersControler = {
 
   getCurrentStatisticsStore: async (req, res) => {
     try {
-      const storeId =  resolveStoreId(req);
+      const storeId = resolveStoreId(req);
 
       const stats = await ordersService.getCurrentStatisticsStore(storeId);
 
@@ -169,7 +173,7 @@ export const ordersControler = {
   sendUserOrder: async (req, res) => {
     try {
       const body = req.body;
-      printOrderInput(body.items as OrderInput)
+      printOrderInput(body.items as OrderInput);
       return res.status(200).json({
         success: true,
       });
@@ -182,16 +186,18 @@ export const ordersControler = {
     }
   },
   //------------------------------------------------------------------------------------------
-  
+
   previousCustomerOrder: async (req, res) => {
     try {
-      const {
-        dateOffset ,limit} = req.query
-        let customerId =req.customer_id
+      const { dateOffset, limit } = req.query;
+      let customerId = req.customer_id;
       const result = await ordersService.previousCustomerOrderService(
-        customerId,dateOffset,limit)
+        customerId,
+        dateOffset,
+        limit
+      );
 
-      return res.send(result)
+      return res.send(result);
     } catch (error) {
       return res.status(500).json({
         success: false,
@@ -201,44 +207,48 @@ export const ordersControler = {
   },
   //------------------------------------------------------------------------------------------
 
-   getCurrentCustomerOrders: async (req, res) => {
-  
-      const {
-        dateOffset ,limit} = req.query
-        console.log("dateOffset ",dateOffset)
-        let customerId =req.customer_id
-      const result = await ordersService.previousCustomerOrderService(
-        customerId,dateOffset,limit)
+  getCurrentCustomerOrders: async (req, res) => {
+    const { dateOffset, limit } = req.query;
+    console.log("dateOffset ", dateOffset);
+    let customerId = req.customer_id;
+    const result = await ordersService.previousCustomerOrderService(
+      customerId,
+      dateOffset,
+      limit
+    );
 
-      return res.send(result)
-
+    return res.send(result);
   },
   //------------------------------------------------------------------------------------------
 
-    //Test
-     rate: async (req, res) => {
-  
-      const {
-        orderId ,orderRate,driverRate} = req.body
-        let customerId =req.customer_id
-      const result = await ordersService.addRateService(
-        {orderId:orderId,orderRate:orderRate,driverRate:driverRate}as RateControlerParams,
-        customerId)
+  //Test
+  rate: async (req, res) => {
+    const { orderId, orderRate, driverRate } = req.body;
+    let customerId = req.customer_id;
+    const result = await ordersService.addRateService(
+      {
+        orderId: orderId,
+        orderRate: orderRate,
+        driverRate: driverRate,
+      } as RateControlerParams,
+      customerId
+    );
 
-      return res.send(result)
-
+    return res.send(result);
   },
-    //------------------------------------------------------------------------------------------
-  
+  //------------------------------------------------------------------------------------------
+
   previousDriverOrder: async (req, res) => {
     try {
-      const {
-        offset ,limit} = req.query
-        let driverId =req.driver_id
+      const { offset, limit } = req.query;
+      let driverId = req.driver_id;
       const result = await ordersService.previousDriverOrderService(
-        driverId,offset,limit)
+        driverId,
+        offset,
+        limit
+      );
 
-      return res.send(result)
+      return res.send(result);
     } catch (error) {
       return res.status(500).json({
         success: false,
@@ -247,17 +257,15 @@ export const ordersControler = {
     }
   },
 
-      delivered: async (req, res) => {
+  delivered: async (req, res) => {
     try {
-
-        let driverId =req.driver_id
-      const result = await ordersService.deliveredService(
-        driverId)
-            return res.status(200).json({
+      let driverId = req.driver_id;
+      const result = await ordersService.deliveredService(driverId);
+      return res.status(200).json({
         success: true,
         message: "Done",
-      })
-      return res.send(result)
+      });
+      return res.send(result);
     } catch (error) {
       return res.status(500).json({
         success: false,
@@ -265,52 +273,34 @@ export const ordersControler = {
       });
     }
   },
-        confirmReceipt: async (req, res) => {
+  confirmReceipt: async (req, res) => {
     try {
+      let driverId = req.driver_id;
+      const result = await ordersService.confirmReceiptService(driverId);
 
-        let driverId =req.driver_id
-      const result = await ordersService.confirmReceiptService(
-        driverId)
-
-            return res.status(200).json({
+      return res.status(200).json({
         success: true,
         message: "Done",
-      })    } catch (error) {
+      });
+    } catch (error) {
       return res.status(500).json({
         success: false,
         message: "Internal server error",
       });
     }
   },
-  
-        customerRefusedToReceive: async (req, res) => {
-    try {
 
-        let driverId =req.driver_id
+  customerRefusedToReceive: async (req, res) => {
+    try {
+      let driverId = req.driver_id;
       const result = await ordersService.customerRefusedToReceiveService(
-        driverId)
+        driverId
+      );
 
-            return res.status(200).json({
+      return res.status(200).json({
         success: true,
         message: "Done",
-      })    } catch (error) {
-      return res.status(500).json({
-        success: false,
-        message: "Internal server error",
       });
-    }
-  },
-        driverRefusedToReceive: async (req, res) => {
-    try {
-
-        let driverId =req.driver_id
-      const result = await ordersService.driverRefusedToReceiveService(
-        driverId)
-
-            return res.status(200).json({
-        success: true,
-        message: "Done",
-      })
     } catch (error) {
       return res.status(500).json({
         success: false,
@@ -318,6 +308,24 @@ export const ordersControler = {
       });
     }
   },
-  
-}
+  driverRefusedToReceive: async (req, res) => {
+    try {
+      let driverId = req.driver_id;
+      const result = await ordersService.driverRefusedToReceiveService(
+        driverId
+      );
 
+      return res.status(200).json({
+        success: true,
+        message: "Done",
+      });
+    } catch (error) {
+      return res.status(500).json({
+        success: false,
+        message: "Internal server error",
+      });
+    }
+  },
+  //-------------------------------------------------------------------------------
+
+};

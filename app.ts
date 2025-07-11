@@ -9,6 +9,7 @@ import { OrderInput } from './apps/partners-stores-managers-dashboards-service/s
 import { OrderInputWithStoreId } from './apps/partners-stores-managers-dashboards-service/src/types/stores';
 import { storesServices } from './apps/partners-stores-managers-dashboards-service/src/modules/stores/stores.service';
 import { DeliveryConfig } from './modules/config/settingConfig';
+import socketServer from './apps/socket-service/index';
 
 dotenv.config()
 //  await seederGenerateCSV()
@@ -16,6 +17,7 @@ dotenv.config()
 //  await seeder()    
 DeliveryConfig.update()
 server() 
+socketServer()
 /*  const damasLat = 33.51814950118199;
 const damasLan =36.29422578371265
 const location_code =encodeToQuadrants(damasLat,damasLan)

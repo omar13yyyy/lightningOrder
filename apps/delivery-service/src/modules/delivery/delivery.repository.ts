@@ -1,5 +1,6 @@
 import { ar } from '@faker-js/faker';
 import { query} from '../../../../../modules/database/commitDeliverySQL';
+import { DriverTransaction, TrustPointsLogRepo } from '../../../types/delivery';
 //------------------------------------------------------------------------------------------
 
 export const deliveryRepository = {
@@ -64,6 +65,61 @@ driverWalletBalance : async (driverId) =>{
     //TODO after login or first reques save token in redis
     
    const {rows} = await query(`SELECT update_driver_points_by_id($1)`,[driverId])
+
+},
+insertDriverTransaction : async (
+  dt: DriverTransaction
+)=> {
+ await query(
+    `INSERT INTO driver_transactions (
+      transaction_id,
+      user_id,
+      transaction_type,
+      amount,
+      transaction_at,
+      notes,
+      platform_commission,
+      driver_earnings
+    ) VALUES (
+      $1, $2, $3, $4, $5, $6, $7, $8
+    )
+    RETURNING transaction_id`,
+    [
+      dt.transaction_id,
+      dt.user_id,
+      dt.transaction_type,
+      dt.amount,
+      dt.transaction_at,
+      dt.notes,
+      dt.platform_commission,
+      dt.driver_earnings
+    ]
+  )
+
+},
+insertTrustPointsLog : async (
+  log: TrustPointsLogRepo
+) => {
+  const res = await query(
+    `INSERT INTO trust_points_log (
+      log_id,
+      driver_id,
+      operation_type,
+      points,
+      reason,
+      log_date
+    ) VALUES (
+      $1, $2, $3, $4, $5, now()
+    )
+    RETURNING log_id`,
+    [
+      log.log_id,
+      log.driver_id,
+      log.operation_type,
+      log.points,
+      log.reason,
+    ]
+  );
 
 },
 }

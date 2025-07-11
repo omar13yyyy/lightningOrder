@@ -6,6 +6,10 @@ import { partnersController } from "./partners/partners.controler";
 
 export const AllpartnersController =partnersController
 
+import { storesServices } from "./stores/stores.service";
+
+export const storesServicesExport =storesServices
+
 
 
 // import { partnersService} from "./partners/partners.service";

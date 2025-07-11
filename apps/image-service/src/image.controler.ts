@@ -46,6 +46,15 @@ updateImage : async (req, res) => {
     res.status(500).send('Error updating image.');
   }
 },
+getPresignedUrl : async (req, res) => {
+  try {
+    const url = await imageService.getPresignedUrl(req.query.fileName);
+    res.send({ url });
+  } catch (err) {
+    res.status(500).send('Error generating image URL.');
+  }
+},
+//TODO خبر ليلى عل تعديل تبع ال public
 getImageUrl : async (req, res) => {
   try {
     const url = await imageService.getImageUrl(req.query.fileName);
@@ -54,4 +63,5 @@ getImageUrl : async (req, res) => {
     res.status(500).send('Error generating image URL.');
   }
 },
+
 }

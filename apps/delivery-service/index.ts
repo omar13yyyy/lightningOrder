@@ -1,4 +1,4 @@
 import {deliveryServices} from './src/modules/delivery/delivery.service'
 
-export const AllDeliveryServices =deliveryServices
+export const allDeliveryServices =deliveryServices
 

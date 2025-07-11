@@ -10,13 +10,13 @@ import {
   NearStoresByTagReq,
   NearStoresRepo,
   NearStoresReq,
+  ProductSoldRepo,
   SearchForStoreRepo,
   StoreDistance,
   StoreIdRepo,
   StoreRepo,
   TagRepo,
 } from "../../types/stores";import { off } from 'process';
-
 export const storesRepository = {
   //---------------------------------------------------------------------------------------
   fetchStoreIdPasswordByUserName: async (
@@ -380,10 +380,65 @@ FROM (
       s.latitude::double precision,
       s.longitude::double precision
     ) AS distance_km FROM stores s where store_id = $3
-     `,[(param.latitudes, param.logitudes, param.storeId)]
+     `,[param.latitudes, param.logitudes, param.storeId]
     );
     return rows[0];
   },
+
+  async getstoreStatus(param: StoreIdRepo) {
+
+
+    const { rows } = await query(
+      `SELECT status FROM store where store_id = $1 limit 1
+     `,[param.storeId]
+    );
+    return rows[0];
+  },
+ insertProductSold : async (
+  product: ProductSoldRepo
+) => {
+  const res = await query(
+    `INSERT INTO products_sold (
+      product_sold_id,
+      order_id,
+      customer_id,
+      store_internal_id,
+      product_name_en,
+      product_name_ar,
+      internal_store_id,
+      product_internal_id,
+      product_id,
+      size_name_en,
+      size_name_ar,
+      price,
+      full_price,
+      coupon_code,
+      create_at
+    ) VALUES (
+      $1, $2, $3, $4, $5, $6,
+      $7, $8, $9, $10, $11,
+      $12, $13, $14, now()
+    )
+    RETURNING product_sold_id`,
+    [
+      product.product_sold_id,
+      product.order_id,
+      product.customer_id,
+      product.store_internal_id,
+      product.product_name_en,
+      product.product_name_ar,
+      product.internal_store_id,
+      product.product_internal_id,
+      product.product_id,
+      product.size_name_en,
+      product.size_name_ar,
+      product.price,
+      product.full_price,
+      product.coupon_code,
+    ]
+  )
+
+},
 };
 
 

@@ -105,4 +105,20 @@ export interface ResetPasswordRepoParams {
 //-----------------------------------
 
 
-
+export interface CustomerTransactionRepo {
+  transaction_id: string;
+  order_id: string | null;
+  order_internal_id: number | null;
+  driver_id: number | null;
+  transaction_type: 'NULL' | 'deposit'| 'withdraw'|'discount'; 
+  amount: number | null;
+  notes: string | null;
+}
+export interface CustomerTransactionService {
+  order_id: string | null;
+  order_internal_id: number | null;
+  driver_id: number | null;
+  transaction_type: 'NULL' | 'deposit'| 'withdraw'|'discount'; 
+  amount: number | null;
+  notes: string | null;
+}

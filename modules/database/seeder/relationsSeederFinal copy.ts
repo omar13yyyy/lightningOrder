@@ -77,10 +77,10 @@ const enumStoreStatuses = ["open", "close", "busy"];
 
 const enumOrdersTypes = ["take_away", "delivery","take_away_and_delivery"];
 const enumPaymentMethodTypes = [
-  "cach",
+  "cash",
   "online",
   "wallet",
-  "wallet_and_cach",
+  "wallet_and_cash",
   "wallet_and_online",
 ];
 const modifiersENtypes = ["Optional", "Multiple"];
@@ -1322,7 +1322,7 @@ function ordersMultiGenerator(count) {
       transaction_store_id++;
     } else if (status=="delivered") {
       let PaymentMethod = randomEnum(enumPaymentMethodTypes);
-      if (PaymentMethod == "cach") {
+      if (PaymentMethod == "cash") {
       } else if (PaymentMethod == "online") {
       } else if (PaymentMethod == "wallet") {
         generateCustomerTransaction(
@@ -1332,7 +1332,7 @@ function ordersMultiGenerator(count) {
           amount
         );
         uuidObject.lastUUID++;
-      } else if (PaymentMethod == "wallet_and_cach") {
+      } else if (PaymentMethod == "wallet_and_cash") {
         generateCustomerTransaction(
           uuidObject.uniqueUUID[uuidObject.lastUUID],
           driversArray[driverIndex].driver_id,

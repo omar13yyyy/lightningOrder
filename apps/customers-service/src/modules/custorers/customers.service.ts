@@ -14,7 +14,10 @@ import {
   CodeValidationServeceParams,
   ResetPasswordServeceParams,
   ResetPasswordRepoParams,
+  CustomerTransactionRepo,
+  CustomerTransactionService,
 } from "../../../types/customers";
+import { customerTransactionsGenerator } from "../../../../../modules/btuid/customersBtuid";
 
 export const customersServices = {
   getCustomerTokenByIdService: async (params: CustomerServeceParams) => {
@@ -161,7 +164,22 @@ export const customersServices = {
   logoutService : async (params : CustomerServeceParams)=> {
     return userRepository.logout(params);
 
+  },
+  
+    insertToCustomerTransactionsService : async (params : CustomerTransactionService)=> {
+      let trans :CustomerTransactionRepo = {
+        transaction_id: customerTransactionsGenerator.getExtraBtuid(),
+        order_id: params.order_id,
+        order_internal_id: params.order_internal_id,
+        driver_id:params.driver_id,
+        transaction_type: params.transaction_type,
+        amount: params.amount,
+        notes: params.notes
+      }
+    return userRepository.insertToCustomerTransaction(trans);
+
   }
+//---------------------------------------------------------------------------------
 
 
 };

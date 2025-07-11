@@ -1,7 +1,13 @@
 import { deliveryRepository } from "./delivery.repository";
-
+import {
+  DeliveryConfig,
+} from "../../../../../modules/config/settingConfig";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
+import { DriverTransaction, TrustPointsLogRepo, TrustPointsLogService } from "../../../types/delivery";
+import { trustPointsLogGenerator } from "../../../../../modules/btuid/deliveryBtuid";
+import { publishDriverResponse } from "../../../../../modules/nats/publishers/delivery.pub";
+
 export const deliveryServices = {
   loginService: async (username, password) => {
     const { encrypted_password, driver_id } =
@@ -30,7 +36,48 @@ export const deliveryServices = {
   },
     driverWalletBalanceService: async (driverId) => {
     return deliveryRepository.driverWalletBalance(driverId);
-  },  driverAchievementsService: async (driverId) => {
+  },
+    driverAchievementsService: async (driverId) => {
     return deliveryRepository.driverAchievements(driverId);
   },
+
+  //-----------------------------------------------------
+    orderNotificationToDriver : async () =>{
+      publishDriverResponse
+
+
+},
+    orderNotificationToCustomer : async () =>{
+
+
+
+},
+  refusedDriverDelivery : async () =>{
+    //if remake notif + reset time
+    //else 
+},
+  driverReward (deliveryMin ,expectedMin){
+   let time = expectedMin - deliveryMin
+    if(time >0){
+      return time *DeliveryConfig.deliverPointPerMinute 
+    }else if(time<0){
+      return time *DeliveryConfig.deliverPointPerMinute /2
+    }else
+    return 0;
+  },
+    insertDriverTransactionService: async (params: DriverTransaction) => {
+    return deliveryRepository.insertDriverTransaction(params);
+  },
+    insertTrustPointsLogService: async (params: TrustPointsLogService) => {
+      let id = trustPointsLogGenerator.getExtraBtuid()
+      let log : TrustPointsLogRepo = {
+        log_id: id,
+        driver_id: params.driver_id,
+        operation_type: params.operation_type,
+        points: params.points,
+        reason: params.reason
+      }
+    return deliveryRepository.insertTrustPointsLog(params);
+  },
+
 };

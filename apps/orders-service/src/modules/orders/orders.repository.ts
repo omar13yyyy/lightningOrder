@@ -3,6 +3,9 @@ import {
   query,
 } from "../../../../../modules/database/commitOrdersSQL";
 import { RateRepoParams } from "../../../../partners-stores-managers-dashboards-service/src/types/order";
+import { orderGenerator } from "../../../../../modules/btuid/orderBtuid";
+import { CurrentOrderRepo, ElectronicPaymentRepo, OrderFinancialLogRepo } from "../../../types/orders";
+
 //------------------------------------------------------------------------------------------
 
 export const ordersRepository = {
@@ -307,16 +310,16 @@ SELECT add_rating_if_delivered($1,$2,$3,$4,$5)
 
   //-----------------------------------------------------------------------------------------------------------
   previousDriverDeliveOrder: async (driverId, limit, offset) => {
-   const {rows} =await query(
+    const { rows } = await query(
       ` 
       
       SELECT get_past_deriver_orders($1,$2,$3)
 
 
     `,
-      [driverId, limit +1, offset]
+      [driverId, limit + 1, offset]
     );
-    return rows
+    return rows;
   },
 
   //----------------------------------------------------------------------------------------------
@@ -396,10 +399,9 @@ WHERE
 
   //--------------------------------------------------------------
 
-
   //--------------------------------------------------------------
-  getInternalsPastOrder : async (orderId :string ) => {
-   let {rows} = await query(
+  getInternalsPastOrder: async (orderId: string) => {
+    let { rows } = await query(
       ` 
       
 SELECT customer_id, store_name_ar, store_name_en
@@ -408,52 +410,132 @@ LIMIT 1;
 
 
     `,
-      [
-        orderId
-     
-      ]
+      [orderId]
     );
 
-    return rows[0]
+    return rows[0];
   },
 
   //------------------------------------------
 
-  delivered: async (
-driverId
-  )=> {
+  delivered: async (driverId) => {},
+  //------------------------------------
 
+  confirmReceipt: async (driverId) => {},
+  //------------------------------------
 
+  customerRefusedToReceive: async (driverId) => {},
+  //------------------------------------
+  driverRefusedToReceive: async (driverId) => {},
+
+  //------------------------------------
+  intiOrder: async (orderId: string) => {
+    const { rows } = await query(
+      "INSERT INTO orders (order_id) VALUES ($1) RETURNING internal_id;",
+      [orderId]
+    );
+    return rows[0].internal_id;
   },
-    //------------------------------------
-
-
-
-
-  confirmReceipt: async (
-driverId
-  )=> {
-
-
+  //------------------------------------
+  insertCurrentOrder: async (order: CurrentOrderRepo) => {
+    await query(
+      `INSERT INTO current_orders (
+      order_id, internal_id, customer_id, store_id, store_name_ar, store_name_en,
+      internal_store_id, driver_id, amount, order_details_text, created_at,
+      payment_method, orders_type, location_latitude, location_longitude,
+      store_destination, customer_destination, delivery_fee, coupon_code
+    ) VALUES (
+      $1, $2, $3, $4, $5, $6,
+      $7, $8, $9, $10, $11,
+      $12, $13, $14, $15,
+      $16, $17, $18, $19
+    )`,
+      [
+        order.order_id,
+        order.internal_id,
+        order.customer_id,
+        order.store_id,
+        order.store_name_ar,
+        order.store_name_en,
+        order.internal_store_id,
+        order.driver_id,
+        order.amount,
+        order.order_details_text,
+        order.created_at,
+        order.payment_method,
+        order.orders_type,
+        order.location_latitude,
+        order.location_longitude,
+        order.store_destination,
+        order.customer_destination,
+        order.delivery_fee,
+        order.coupon_code,
+      ]
+    );
   },
-    //------------------------------------
-
-
-
-  customerRefusedToReceive: async (
-driverId
-  )=> {
-
-
+  insertOrderStatus: async (
+    orderId: string,
+    internal_id: number,
+    status: string
+  ) => {
+    return await query(
+      "INSERT INTO order_status (order_id,store_id,status,status_time) VALUES ($1,$2,$3,now())",
+      [orderId, internal_id, status]
+    );
   },
-    //------------------------------------
-  driverRefusedToReceive: async (
-driverId
-  )=> {
-
-
+  insertOrderFinancialLog: async (log: OrderFinancialLogRepo) => {
+    await query(
+      `INSERT INTO order_financial_logs (
+      log_id,
+      driver_id,
+      order_id,
+      order_internal_id,
+      store_id,
+      order_amount,
+      platform_commission,
+      driver_earnings,
+      create_at
+    ) VALUES (
+      $1, $2, $3, $4, $5, $6, $7, $8, now()
+    )
+    RETURNING order_internal_id`,
+      [
+        log.driver_id,
+        log.order_id,
+        log.order_internal_id,
+        log.store_id,
+        log.order_amount,
+        log.platform_commission,
+        log.driver_earnings,
+      ]
+    );
   },
-    //------------------------------------
+   insertElectronicPayment : async (
+  payment: ElectronicPaymentRepo
+) => {
+  const res = await query(
+    `INSERT INTO electronic_payment (
+      payment_id,
+      order_id,
+      card_type,
+      customer_id,
+      paid_amount,
+      bank_transaction,
+      payment_at
+    ) VALUES (
+      $1, $2, $3, $4, $5, $6,now()
+    )
+    `,
+    [
+      payment.payment_id,
+      payment.order_id,
+      payment.card_type,
+      payment.customer_id,
+      payment.paid_amount,
+      payment.bank_transaction,
+    ]
+  );
 
-
+  return ;
+},
 };

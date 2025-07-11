@@ -74,10 +74,10 @@ const enumStoreStatuses = ["open", "close", "busy"];
 
 const enumOrdersTypes = ["take_away", "delivery","take_away_and_delivery"];
 const enumPaymentMethodTypes = [
-  "cach",
+  "cash",
   "online",
   "wallet",
-  "wallet_and_cach",
+  "wallet_and_cash",
   "wallet_and_online",
 ];
 const modifiersENtypes = ["Optional", "Multiple"];
@@ -1418,7 +1418,7 @@ function ordersMultiGenerator(count) {
       transaction_store_id++;
     } else if (status=="delivered") {
       let PaymentMethod = randomEnum(enumPaymentMethodTypes);
-      if (PaymentMethod == "cach") {
+      if (PaymentMethod == "cash") {
       } else if (PaymentMethod == "online") {
       } else if (PaymentMethod == "wallet") {
         generateCustomerTransaction(
@@ -1428,7 +1428,7 @@ function ordersMultiGenerator(count) {
           amount
         );
         uuidObject.lastUUID++;
-      } else if (PaymentMethod == "wallet_and_cach") {
+      } else if (PaymentMethod == "wallet_and_cash") {
         generateCustomerTransaction(
           uuidObject.uniqueUUID[uuidObject.lastUUID],
           driversArray[driverIndex].driver_id,
@@ -1527,6 +1527,7 @@ function SystemSettingsMultiGenerator() {
     generateSystemSettings("delivery_time_per_km",5);
     generateSystemSettings("max_distance_km",15);
     generateSystemSettings("min_delivery_cost",8000);
+    generateSystemSettings("delivery_point_per_minute",10);
 
 
 }

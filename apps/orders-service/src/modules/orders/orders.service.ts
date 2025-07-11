@@ -2,6 +2,9 @@
 import { ordersRepository } from "./orders.repository";
 import { partnerClient } from "../../../index";
 import { RateControlerParams, RateRepoParams } from "../../../../partners-stores-managers-dashboards-service/src/types/order";
+import { orderFinancialLogsGenerator, orderGenerator,electronicPaymentGenerator } from "../../../../../modules/btuid/orderBtuid";
+import { CurrentOrderRepo, ElectronicPaymentRepo, ElectronicPaymentService, OrderFinancialLogRepo, OrderFinancialLogService } from "../../../types/orders";
+import { log } from "console";
 
 export const ordersService = {
   //------------------------------------------------------------------------------------------
@@ -314,10 +317,53 @@ driverId
   },
     //------------------------------------
 
+  orderNotificationToStore: async () => {},
+  //-------------------------------------------------------------------------------
 
+  orderListen: async () => {},
+  //-------------------------------------------------------------------------------
 
+  initOrderService : async () => {
+    let id: string = orderGenerator.getExtraBtuid();
 
+    await ordersRepository.intiOrder(id)
+    return id ;
+  },
 
+  insertCurrentOrderService : async (params : CurrentOrderRepo) => {
 
+   return await ordersRepository.insertCurrentOrder(params)
+  
+  },
+  insertOrderFinancialLogService : async (params : OrderFinancialLogService) => {
+
+    let id = orderFinancialLogsGenerator.getExtraBtuid()
+    let log :OrderFinancialLogRepo ={
+      log_id: id,
+      driver_id: params.driver_id,
+      order_id: params.order_id,
+      order_internal_id: params.order_internal_id,
+      store_id: params.store_id,
+      order_amount: params.order_amount,
+      platform_commission: params.platform_commission,
+      driver_earnings: params.driver_earnings
+    }
+   return await ordersRepository.insertOrderFinancialLog(log)
+  
+  },
+  insertElectronicPaymentService : async (params : ElectronicPaymentService) => {
+
+    let id = electronicPaymentGenerator.getExtraBtuid()
+    let payment :ElectronicPaymentRepo= {
+      payment_id: id,
+      order_id: params.order_id,
+      card_type: params.card_type,
+      customer_id: params.customer_id,
+      paid_amount: params.paid_amount,
+      bank_transaction: params.bank_transaction,
+    }
+   return await ordersRepository.insertElectronicPayment(payment)
+  
+  },
 
 };

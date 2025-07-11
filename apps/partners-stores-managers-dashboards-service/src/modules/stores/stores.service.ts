@@ -10,10 +10,12 @@ import { partnerClient } from "./indenx";
 import bcryptjs from "bcryptjs";
 import jwt from "jsonwebtoken";
 import { CategoryService, CouponDetailsRepo, CouponDetailsService, LanguageService, NearStoresByCategoryRepo, NearStoresByCategoryReq, NearStoresBytagRepo, NearStoresBytagService, NearStoresRepo,
-   NearStoresService, OrderInputWithStoreId, SearchForStoreRepo, SearchForStoreService, StoreDistance, StoreIdRepo, StoreIdService, StoreItem, StoreProductsReq, StoreRepo, StoreService, StoresResponse, TagService } from "../../types/stores";
+   NearStoresService, OrderInputWithStoreId, ProductSoldRepo, ProductSoldService, SearchForStoreRepo, SearchForStoreService, StoreDistance, StoreIdRepo, StoreIdService, StoreItem, StoreProductsReq, StoreRepo, StoreService, StoresResponse, TagService } from "../../types/stores";
 import { MenuData, OrderInput, ResolvedModifier, ResolvedModifierItem, ResolvedOrderItem, TotalResolved } from "../../types/order";
 import { serverHost, storeImagePath } from "../../../../../modules/config/urlConfig";
 import { threadId } from "worker_threads";
+import { productsSoldGenerator } from "../../../../../modules/btuid/dashboardBtuid";
+
 function roundUpToNearestThousand(num) : number {
   return Math.ceil(num / 1000) * 1000;
 }
@@ -548,7 +550,33 @@ export const storesServices = {
 isOpenNowService: async (param: StoreIdRepo) => {
     return await storesRepository.isOpenNow(param) > 0
   },
+isStoreStatusOpenService : async (param: StoreIdRepo) =>{
+  return await storesRepository.getstoreStatus(param) == "open"
+},
+  insertProductSoldService : async (params : ProductSoldService)=> {
+    let id = productsSoldGenerator.getExtraBtuid()
+    let sold :ProductSoldRepo = {
+      product_sold_id: id,
+      order_id: params.order_id,
+      customer_id: params.customer_id,
+      store_internal_id: params.store_internal_id,
+      product_name_en: params.product_name_ar,
+      product_name_ar: params.product_name_ar,
+      internal_store_id: params.internal_store_id,
+      product_internal_id: params.product_internal_id,
+      product_id: params.product_id,
+      size_name_en: params.size_name_en,
+      size_name_ar: params.size_name_ar,
+      price: params.price,
+      full_price: params.full_price,
+      coupon_code: params.coupon_code
+    }
 
+     storesRepository.insertProductSold(params);
+
+  },
+
+  //--------------------------------------------------------
 
 };
 //--------------------------------------------------------
@@ -620,8 +648,6 @@ export function resolveOrderDetails(menu: MenuData, order: OrderInput) {
 
 
   //--------------------------------------------------------
-
-
 
 
 
