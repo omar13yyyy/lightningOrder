@@ -1,12 +1,6 @@
 import { redis } from '../cache/redis';
 import { query } from '../database/commitDashboardSQL';
 
-
-
-
-
-
-
 export const getDeliveryCostPerKm = async (): Promise<number> => {
   const DELIVERY_COST_PER_KM = "settings:delivery_cost_perkm";
 
@@ -107,12 +101,80 @@ export const getDeliveryPointPerMin = async (): Promise<number> => {
 
   return parseFloat(time);
 };
+export const getDriverFeePerKm = async (): Promise<number> => {
+  const DELIVERY_POINT_PER_MINUTE = "settings:driver_fee_per_km";
+
+  const cashDeliveryPointPerMin = await redis.get(DELIVERY_POINT_PER_MINUTE);
+  if (cashDeliveryPointPerMin) {
+    return parseFloat(cashDeliveryPointPerMin);
+  }
+ const getCashgetDriverFeePerKmMinDB= async () => {
+    //TODO after login or first reques save token in redis
+      const { rows } = await query(
+        "select setting_value from system_settings where setting_key = 'driver_fee_per_km' ",
+      [])
+      return rows[0].setting_value
+  }
+  const time = await getCashgetDriverFeePerKmMinDB();
+
+  await redis.set(DELIVERY_POINT_PER_MINUTE, time, "EX", 6 * 60 * 60);
+
+  return parseFloat(time);
+};
+
+
+export const driversForOrder = async (): Promise<number> => {
+  const DRIVER_FOR_ORDER = "settings:driver_for_order";
+
+  const cashDriversForOrder = await redis.get(DRIVER_FOR_ORDER);
+  if (cashDriversForOrder) {
+    return parseFloat(cashDriversForOrder);
+  }
+ const driversForOrderDB= async () => {
+    //TODO after login or first reques save token in redis
+      const { rows } = await query(
+        "select setting_value from system_settings where setting_key = 'driver_for_order' ",
+      [])
+      return rows[0].setting_value
+  }
+  const time = await driversForOrderDB();
+
+  await redis.set(DRIVER_FOR_ORDER, time, "EX", 6 * 60 * 60);
+
+  return parseFloat(time);
+};
+
+export const maxDistanceDriverFromStore = async (): Promise<number> => {
+  const MAX_DISTANCE_DRIVER_FROM_STORE = "settings:max_distance_driver_from_store";
+
+  const cashMaxDistanceDriverFromStore = await redis.get(MAX_DISTANCE_DRIVER_FROM_STORE);
+  if (cashMaxDistanceDriverFromStore) {
+    return parseFloat(cashMaxDistanceDriverFromStore);
+  }
+ const driversForOrderDB= async () => {
+    //TODO after login or first reques save token in redis
+      const { rows } = await query(
+        "select setting_value from system_settings where setting_key = 'max_distance_driver_from_store' ",
+      [])
+      return rows[0].setting_value
+  }
+  const time = await driversForOrderDB();
+
+  await redis.set(MAX_DISTANCE_DRIVER_FROM_STORE, time, "EX", 6 * 60 * 60);
+
+  return parseFloat(time);
+};
+
+
 export class DeliveryConfig {
   static maxDistance: number ; 
   static timePerKM: number ; 
   static costPerKM: number ;
   static MinDeliveryCost: number ; 
   static deliverPointPerMinute: number ; 
+  static driverFeePerKm: number ; 
+  static driversForOrder :number
+    static maxDistanceDriverFromStore :number
 
   constructor(){
     DeliveryConfig.update()
@@ -122,7 +184,10 @@ export class DeliveryConfig {
    this.timePerKM =await getDeliveryTimePerKm();  
    this.costPerKM = await getDeliveryCostPerKm();  
    this.MinDeliveryCost = await getMinDeliveryCost();
-   this.deliverPointPerMinute = await getDeliveryPointPerMin();
-
+   //this.deliverPointPerMinute = await getDeliveryPointPerMin();
+   //this.driversForOrder =await driversForOrder()
+   //this.driverFeePerKm = await getDriverFeePerKm();
+   //this.driverFeePerKm = await getDriverFeePerKm();
+ //   this.maxDistanceDriverFromStore =await maxDistanceDriverFromStore()
   }
 }

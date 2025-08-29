@@ -1,6 +1,7 @@
+import { TotalResolved } from "../../partners-stores-managers-dashboards-service/src/types/order";
+
 export interface CurrentOrderRepo {
   order_id: string;
-  internal_id: number;
   customer_id: number | null;
   store_id: string | null;
   store_name_ar: string | null;
@@ -8,10 +9,9 @@ export interface CurrentOrderRepo {
   internal_store_id: number | null;
   driver_id: number | null;
   amount: number | null;
-  order_details_text: string | null;
-  created_at: string | null; // ISO date string
-  payment_method: 'take_away'|'delivery'|'NULL'; // عدّل القيم حسب enum_payment_method
-  orders_type:  'cash'|'online'|'wallet'|'wallet_and_cash'|'wallet_and_online'|'NULL';         // عدّل حسب enum_orders_type
+  order_details_text: string|TotalResolved | null;
+  payment_method:  'cash'|'online'|'wallet'|'wallet_and_cash'|'wallet_and_online'|'NULL';  
+  orders_type:  'take_away'|'delivery'|'NULL'; 
   location_latitude: number | null;
   location_longitude: number | null;
   store_destination: number | null;
@@ -54,3 +54,4 @@ export interface ElectronicPaymentService {
   paid_amount: number | null;
   bank_transaction: string | null; 
 }
+

@@ -9,6 +9,7 @@ import {
 import { resolvepartnerId } from "../../../../partners-stores-managers-dashboards-service/src/utils/resolvepartnerId";
 import { resolveStoreId } from "../../../../partners-stores-managers-dashboards-service/src/utils/resolveStoreId";
 import { ordersService } from "./orders.service";
+import { createOrderCase } from "./orders.useCases/order.UseCase";
 
 //------------------------------------------------------------------------------------------
 
@@ -173,7 +174,19 @@ export const ordersControler = {
   sendUserOrder: async (req, res) => {
     try {
       const body = req.body;
-      printOrderInput(body.items as OrderInput);
+      console.log(body)
+      await createOrderCase(
+         body.OrderInputs,
+  "cash",
+  body.orders_type,
+  req.customer_id,
+  body.store_id,
+  body.couponCode,
+   body.delivery_note,
+  body.latitudes,
+  body.longitudes,
+  body.total_price
+      )
       return res.status(200).json({
         success: true,
       });

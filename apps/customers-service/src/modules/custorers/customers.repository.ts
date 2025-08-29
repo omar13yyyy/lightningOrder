@@ -40,7 +40,7 @@ export const userRepository = {
 
     await query(`INSERT INTO effective_tokens (user_id, token)
 VALUES ($2, $1)
-ON CONFLICT (user_id) DO UPDATE SET token = EXCLUDED.token;`, [
+ON CONFLICT (user_id) DO UPDATE SET token = EXCLUDED.token`, [
       params.token,
       params.customerId,
     ]);

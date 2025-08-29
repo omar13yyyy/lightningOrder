@@ -440,19 +440,18 @@ LIMIT 1;
   insertCurrentOrder: async (order: CurrentOrderRepo) => {
     await query(
       `INSERT INTO current_orders (
-      order_id, internal_id, customer_id, store_id, store_name_ar, store_name_en,
+      order_id, customer_id, store_id, store_name_ar, store_name_en,
       internal_store_id, driver_id, amount, order_details_text, created_at,
       payment_method, orders_type, location_latitude, location_longitude,
       store_destination, customer_destination, delivery_fee, coupon_code
     ) VALUES (
-      $1, $2, $3, $4, $5, $6,
-      $7, $8, $9, $10, $11,
-      $12, $13, $14, $15,
-      $16, $17, $18, $19
+      $1, $2, $3, $4, $5,
+      $6, $7, $8, $9, now(),
+      $10, $11, $12, $13,
+      $14, $15, $16, $17
     )`,
       [
         order.order_id,
-        order.internal_id,
         order.customer_id,
         order.store_id,
         order.store_name_ar,
@@ -461,7 +460,6 @@ LIMIT 1;
         order.driver_id,
         order.amount,
         order.order_details_text,
-        order.created_at,
         order.payment_method,
         order.orders_type,
         order.location_latitude,
@@ -479,9 +477,11 @@ LIMIT 1;
     status: string
   ) => {
     return await query(
-      "INSERT INTO order_status (order_id,store_id,status,status_time) VALUES ($1,$2,$3,now())",
-      [orderId, internal_id, status]
-    );
+      `INSERT INTO order_status (order_id, store_id,status,status_time)
+        VALUES ($1, $2,$3,now())
+        ON CONFLICT (order_id) DO UPDATE SET status = EXCLUDED.status`,
+      [orderId, internal_id, status])
+   
   },
   insertOrderFinancialLog: async (log: OrderFinancialLogRepo) => {
     await query(

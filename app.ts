@@ -12,10 +12,11 @@ import { DeliveryConfig } from './modules/config/settingConfig';
 import socketServer from './apps/socket-service/index';
 
 dotenv.config()
-//  await seederGenerateCSV()
-//   await createDatabases()
-//  await seeder()    
+// await seederGenerateCSV()
+//  await createDatabases()
+//   await seeder()    
 DeliveryConfig.update()
+
 server() 
 socketServer()
 /*  const damasLat = 33.51814950118199;

@@ -1,3 +1,5 @@
+import { TotalResolved } from "../../partners-stores-managers-dashboards-service/src/types/order";
+
 export interface DriverTransaction {
   transaction_id: string;
   user_id: string | null;
@@ -22,3 +24,32 @@ export interface TrustPointsLogService {
   points: number | null;
   reason: string | null;
 }
+
+
+
+export interface DeliverySocketData {
+  totalResolved :TotalResolved;
+  storeNameAr :string;
+  storeNameEn :string;
+  storeLat : number;
+  storeLon : number;
+  customerLat :number;
+  customerLon :number;
+  customerNumber :String ;
+  paymentMethod :string;
+  deliveryDiscount : number
+  OrderDiscount : number
+  totalBill:number
+
+}
+
+
+interface DriverIds {
+  distance : number,
+  id:string
+}
+export interface Drivers {
+  orderId :string,
+  driverIds :DriverIds;
+}
+

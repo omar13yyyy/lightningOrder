@@ -1,4 +1,4 @@
-interface OrderItem {
+export interface OrderItem {
   item_id: string;
   size_id: string;
   modifiers: ModifierOrderInput[];
@@ -46,7 +46,7 @@ export interface TotalResolved {
   orderEn :ResolvedOrderItem[];
   delivery_note : string,
   total_price: number;
-
+  deliveryFee:number
 }
 //----------------------------------------------------
 export interface MenuData {

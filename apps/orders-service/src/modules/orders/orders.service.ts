@@ -318,6 +318,10 @@ driverId
     //------------------------------------
 
   orderNotificationToStore: async () => {},
+    //-------------------------------------------------------------------------------
+
+  orderNotificationToCustomer: async () => {},
+
   //-------------------------------------------------------------------------------
 
   orderListen: async () => {},
@@ -326,13 +330,21 @@ driverId
   initOrderService : async () => {
     let id: string = orderGenerator.getExtraBtuid();
 
-    await ordersRepository.intiOrder(id)
-    return id ;
+    let internalId = await ordersRepository.intiOrder(id)
+    return {
+      id :id ,
+      internalId : internalId
+    } ;
   },
 
   insertCurrentOrderService : async (params : CurrentOrderRepo) => {
 
    return await ordersRepository.insertCurrentOrder(params)
+  
+  },
+    insertOrderStatusService : async (orderId: string, internal_id: number, status: string) => {
+
+   return await ordersRepository.insertOrderStatus(orderId,internal_id,status)
   
   },
   insertOrderFinancialLogService : async (params : OrderFinancialLogService) => {

@@ -1,0 +1,138 @@
+{
+  "totalResolved": {
+    "orderAR": [
+      {
+        "item_name": "بيتزا مارجريتا",
+        "size_name": "كبير",
+        "size_price": 45.0,
+        "modifiers": [
+          {
+            "title": "إضافات",
+            "items": [
+              {
+                "name": "جبنة إضافية",
+                "price": 5.0,
+                "number": 1
+              },
+              {
+                "name": "زيتون أسود",
+                "price": 3.0,
+                "number": 1
+              }
+            ]
+          },
+          {
+            "title": "صلصات",
+            "items": [
+              {
+                "name": "صلصة رانش",
+                "price": 2.5,
+                "number": 2
+              }
+            ]
+          }
+        ],
+        "count": 1,
+        "note": "بدون فلفل حار"
+      },
+      {
+        "item_name": "برغر لحم",
+        "size_name": "وسط",
+        "size_price": 30.0,
+        "modifiers": [
+          {
+            "title": "إضافات",
+            "items": [
+              {
+                "name": "بيكون بقري",
+                "price": 4.0,
+                "number": 1
+              },
+              {
+                "name": "جبنة شيدر",
+                "price": 2.0,
+                "number": 1
+              }
+            ]
+          }
+        ],
+        "count": 2,
+        "note": "زيادة صوص"
+      }
+    ],
+    "orderEn": [
+      {
+        "item_name": "Margherita Pizza",
+        "size_name": "Large",
+        "size_price": 45.0,
+        "modifiers": [
+          {
+            "title": "Toppings",
+            "items": [
+              {
+                "name": "Extra Cheese",
+                "price": 5.0,
+                "number": 1
+              },
+              {
+                "name": "Black Olives",
+                "price": 3.0,
+                "number": 1
+              }
+            ]
+          },
+          {
+            "title": "Sauces",
+            "items": [
+              {
+                "name": "Ranch Sauce",
+                "price": 2.5,
+                "number": 2
+              }
+            ]
+          }
+        ],
+        "count": 1,
+        "note": "No chili"
+      },
+      {
+        "item_name": "Beef Burger",
+        "size_name": "Medium",
+        "size_price": 30.0,
+        "modifiers": [
+          {
+            "title": "Add-ons",
+            "items": [
+              {
+                "name": "Beef Bacon",
+                "price": 4.0,
+                "number": 1
+              },
+              {
+                "name": "Cheddar Cheese",
+                "price": 2.0,
+                "number": 1
+              }
+            ]
+          }
+        ],
+        "count": 2,
+        "note": "Extra sauce"
+      }
+    ],
+    "delivery_note": "يرجى الاتصال عند الوصول ولا تطرق الباب",
+    "total_price": 121.0,
+    "deliveryFee": 12.0
+  },
+  "storeNameAr": "مطعم المذاق الإيطالي",
+  "storeNameEn": "Italian Taste Restaurant",
+  "storeLat": 24.7136,
+  "storeLon": 46.6753,
+  "customerLat": 24.7743,
+  "customerLon": 46.7386,
+  "customerNumber": "+966512345678",
+  "paymentMethod": "Credit Card",
+  "deliveryDiscount": 2.0,
+  "OrderDiscount": 10.0,
+  "totalBill": 121.0
+}

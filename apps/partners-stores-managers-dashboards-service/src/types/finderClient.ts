@@ -1,3 +1,5 @@
+import { TotalResolved } from "./order";
+
 interface LocationData {
   id: string;
   latitude: number;
@@ -10,8 +12,31 @@ export interface AddAllDriversAndOrdersRequest {
   driversForOrder: number;
   maxDistance: number;
 }
+export interface AddAllDriversRequest {
+  drivers: LocationData[];
+  vehicle:"motorcycle"|"bicycle"|"car" 
+}
+export interface GetDriverRequest {
+  driversForOrder: number;
+  maxDistance: number;
+  id :string;
+  locationCode : string;
+  longitude:number;
+  latitude:number;
+
+}
+
+export interface GetDriverResponse {
+  driverIds
+  orderId
+}
 
 
+
+export interface DeleteDriverRequest {
+  id :string;
+  locationCode : string;
+}
 
 export interface OrdersWithDriversResponse {
   orders: {
@@ -26,6 +51,23 @@ interface idWithDist {
 export interface OrderWithDrivers {
   orderId: string;
   driverIds: idWithDist[];
+}
+export interface OrderWithDriver {
+  orderId:string;
+  orderResolved : TotalResolved;
+  orderCouponDetails :string;
+  storeNameAr: string;      
+  storeNameEn: string;       
+  storeLat: number;          
+  storeLon: number;          
+  customerLat: number;       
+  customerLon: number;       // Customer longitude
+  customerNumber: string;    // Customer phone number
+  paymentMethod: "cash"|"online"
+  deliveryDiscount: number;  
+  orderDiscount: number;     
+  totalBill: number;         
+
 }
 
 
@@ -44,6 +86,7 @@ export interface GetNearStoresRequest {
   limit: number;
   offset: number;
 }
+
 
 
 

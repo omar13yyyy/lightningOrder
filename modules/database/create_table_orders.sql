@@ -25,7 +25,7 @@ CREATE TABLE ratings (
 --Rejected applications and those without drivers do not enter here.
 CREATE TABLE current_orders ( 
     order_id text ,
-    internal_id bigint,
+    internal_id bigserial,
     customer_id bigint,
     store_id text,
     store_name_ar text,
@@ -47,6 +47,7 @@ CREATE TABLE current_orders (
 
     PRIMARY KEY (internal_id)
 );
+ALTER SEQUENCE current_orders_internal_id_seq RESTART WITH 100000;
 
 CREATE TABLE order_status (
     order_id text,

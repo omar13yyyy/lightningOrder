@@ -941,6 +941,7 @@ const menu :MenuData = JSON.parse(menuString);
     ],
     delivery_note:"delivery_note",
     total_price: size.price + modifiersTotal,
+    deliveryFee:0
   };
   }
 }
@@ -954,7 +955,7 @@ const menu :MenuData = JSON.parse(menuString);
         modifiers: [],
         count: 1,
         note:"note"
-
+        
       }
     ],
     orderEn: [
@@ -970,6 +971,7 @@ const menu :MenuData = JSON.parse(menuString);
     ],
     delivery_note:"delivery_note",
     total_price: 0,
+    deliveryFee :0
   };
   }
 
@@ -1528,6 +1530,7 @@ function SystemSettingsMultiGenerator() {
     generateSystemSettings("max_distance_km",15);
     generateSystemSettings("min_delivery_cost",8000);
     generateSystemSettings("delivery_point_per_minute",10);
+    generateSystemSettings("driver_fee_per_km",3500);
 
 
 }

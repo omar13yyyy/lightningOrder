@@ -15,6 +15,7 @@ import {
   StoreDistance,
   StoreIdRepo,
   StoreRepo,
+  StoreTransactionRepo,
   TagRepo,
 } from "../../types/stores";import { off } from 'process';
 export const storesRepository = {
@@ -153,7 +154,7 @@ getCoupons: async (
     //TODO : check order coupon if end
     //TODO : get round from setting
     const { rows, rowCount } = await query(
-      `select discount_value_percentage as discount_percentage,min_order_value from coupons where code =$1 AND store_id = $2 AND expiration_date > now() AND
+      `select discount_value_percentage as discount_percentage,delivery_discount_percentage as delivery_discount,min_order_value from coupons where code =$1 AND store_id = $2 AND expiration_date > now() AND
          real_usage IS NULL OR max_usage IS NULL OR real_usage < max_usage `,
       [coupon.couponCode, coupon.storeId]
     );
@@ -389,7 +390,16 @@ FROM (
 
 
     const { rows } = await query(
-      `SELECT status FROM store where store_id = $1 limit 1
+      `SELECT status FROM stores where store_id = $1 limit 1
+     `,[param.storeId]
+    );
+    return rows[0].status;
+  },
+    async getstoreDetails(param: StoreIdRepo) {
+
+
+    const { rows } = await query(
+      `SELECT partner_id preparation_time,longitude,Latitude,full_address,phone_number,store_name_en,store_name_ar,platform_commission ,internal_id ,location_code FROM stores where store_id = $1 limit 1
      `,[param.storeId]
     );
     return rows[0];
@@ -439,6 +449,33 @@ FROM (
   )
 
 },
+insertStoreTransaction : async (tx: StoreTransactionRepo)=> {
+
+  await query(`
+    INSERT INTO store_transactions (
+      transaction_id,
+      partner_id,
+      store_id,
+      internal_store_id,
+      transaction_type,
+      amount,
+      amount_platform_commission,
+      transaction_at,
+      notes
+    ) VALUES ($1, $2, $3, $4, $5, $6, $7, now(), $9)
+  `,[
+    tx.transaction_id,
+    tx.partner_id,
+    tx.store_id,
+    tx.internal_store_id,
+    tx.transaction_type,
+    tx.amount,
+    tx.amount_platform_commission,
+    tx.notes ?? null
+  ]);
+},
+
+
 };
 
 

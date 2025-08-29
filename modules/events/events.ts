@@ -1,30 +1,16 @@
-export const ORDER_EVENTS = {
-  //nats event
-  ORDER_CREATED: "order:created", 
-  ORDER_ACCEPTED: "order:accepted", 
-  ORDER_DETAILS: "order:detials", 
-
-};
+// modules/events/events.ts
 export const DRIVERS_EVENTS = {
-  //nats event
-  DRIVERS_COLLECT_REQUEST: "drivers:collect:Request",
-  DRIVERS_COLLECT_RESPONSE: "drivers:collect:Response",
-  DRIVER_SINGLE_REQUEST: "driver:single:Request",
-  DRIVER_SINGLE_RESPONSE: "driver:single:Response",
+  JOIN_DRIVER_ROOM: "driver:join",
+  DRIVERS_ORDER_REQUEST: "driver:order:request",     // server -> driver
+  DRIVERS_ORDER_RESPONSE: "driver:order:response",   // driver -> server
+  DRIVER_LOCATION_RESPONSE: "driver:location:update",
+  DRIVER_STORE_DECISION: "driver:store:decision",    // server -> driver
+} as const;
 
-
-  //socket events talk with driver
-  DRIVER_LOCATION_REQUEST: "driver:location:Request",
-  DRIVER_Location_RESPONSE: "driver:location:Response",
-  JOIN_DRIVER_ROOM: "joinDriverRoom",
-  DRIVERS_ORDER_REQUEST: "drivers:order:Request",
-  DRIVERS_ORDER_RESPONSE: "drivers:order:Response",
-};
 export const STORES_EVENTS = {
-
-  //socket events talk with store
-
-  JOIN_STORE_ROOM: "joinStoreRoom",
-  STORE_ORDER_REQUEST: "store:order:request",
-  STORE_ORDER_RESPONSE: "store:order:response",
-};
+  JOIN_STORE_ROOM: "store:join",
+  STORE_ORDER_REQUEST: "store:order:request",        // server -> store
+  STORE_ORDER_RESPONSE: "store:order:response",      // store -> server
+  STORE_ORDER_DRIVER_DECISION: "store:driver:decision", // server -> store
+  STORE_DRIVER_LOCATION_PUSH: "store:driver:location",  // server -> store
+} as const;

@@ -4,7 +4,7 @@ type StoreStatus = 'busy' | 'open' | 'closed'
 type OrdersType = 'take_away' | 'delivery' | 'take_away_and_delivery';
 
 export interface StoreItem {
-  rating_previous_day: string; // لاحظ أنها string وليست number
+  rating_previous_day: string; 
   number_of_raters: number;
   store_id: string;
   distance_km: number;
@@ -338,7 +338,6 @@ export interface ProductSoldRepo {
 
 
 export interface ProductSoldService {
-  product_sold_id: string; 
   order_id: string | null;
   customer_id: number | null;
   store_internal_id: number | null;
@@ -359,4 +358,23 @@ export interface ProductSoldService {
 
 
 
+export interface StoreTransactionRepo {
+  transaction_id: string;
+  partner_id: string;
+  store_id: string;
+  internal_store_id: number;
+  transaction_type: 'deposit'| 'withdraw'|'discount'|'NULL'; // حسب القيم المتوقعة في enum
+  amount: number;
+  amount_platform_commission: number;
+  notes?: string | null;
+}
 
+export interface StoreTransactionService {
+  partner_id: string;
+  store_id: string;
+  internal_store_id: number;
+  transaction_type: 'deposit'| 'withdraw'|'discount'|'NULL'; // حسب القيم المتوقعة في enum
+  amount: number;
+  amount_platform_commission: number;
+  notes?: string | null;
+}

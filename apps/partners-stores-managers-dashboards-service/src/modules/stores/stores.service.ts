@@ -10,11 +10,12 @@ import { partnerClient } from "./indenx";
 import bcryptjs from "bcryptjs";
 import jwt from "jsonwebtoken";
 import { CategoryService, CouponDetailsRepo, CouponDetailsService, LanguageService, NearStoresByCategoryRepo, NearStoresByCategoryReq, NearStoresBytagRepo, NearStoresBytagService, NearStoresRepo,
-   NearStoresService, OrderInputWithStoreId, ProductSoldRepo, ProductSoldService, SearchForStoreRepo, SearchForStoreService, StoreDistance, StoreIdRepo, StoreIdService, StoreItem, StoreProductsReq, StoreRepo, StoreService, StoresResponse, TagService } from "../../types/stores";
+   NearStoresService, OrderInputWithStoreId, ProductSoldRepo, ProductSoldService, SearchForStoreRepo, SearchForStoreService, StoreDistance, StoreIdRepo, StoreIdService, StoreItem, StoreProductsReq, StoreRepo, StoreService, StoresResponse, StoreTransactionRepo, StoreTransactionService, TagService } from "../../types/stores";
 import { MenuData, OrderInput, ResolvedModifier, ResolvedModifierItem, ResolvedOrderItem, TotalResolved } from "../../types/order";
 import { serverHost, storeImagePath } from "../../../../../modules/config/urlConfig";
 import { threadId } from "worker_threads";
 import { productsSoldGenerator } from "../../../../../modules/btuid/dashboardBtuid";
+import { storeTransactionsGenerator } from "../../../../../modules/btuid/dashboardBtuid";
 
 function roundUpToNearestThousand(num) : number {
   return Math.ceil(num / 1000) * 1000;
@@ -547,110 +548,128 @@ export const storesServices = {
 
 
   },
+
 isOpenNowService: async (param: StoreIdRepo) => {
     return await storesRepository.isOpenNow(param) > 0
   },
 isStoreStatusOpenService : async (param: StoreIdRepo) =>{
   return await storesRepository.getstoreStatus(param) == "open"
 },
-  insertProductSoldService : async (params : ProductSoldService)=> {
-    let id = productsSoldGenerator.getExtraBtuid()
-    let sold :ProductSoldRepo = {
-      product_sold_id: id,
-      order_id: params.order_id,
-      customer_id: params.customer_id,
-      store_internal_id: params.store_internal_id,
-      product_name_en: params.product_name_ar,
-      product_name_ar: params.product_name_ar,
-      internal_store_id: params.internal_store_id,
-      product_internal_id: params.product_internal_id,
-      product_id: params.product_id,
-      size_name_en: params.size_name_en,
-      size_name_ar: params.size_name_ar,
-      price: params.price,
-      full_price: params.full_price,
-      coupon_code: params.coupon_code
-    }
+getstoreDetailsService : async (param: StoreIdRepo) =>{
+  return await storesRepository.getstoreDetails(param)
+},
 
-     storesRepository.insertProductSold(params);
+  insertProductSoldService : async (params : ProductSoldService[])=> {
+    for(let product of params ){
+          let id = productsSoldGenerator.getExtraBtuid()
+
+        let sold :ProductSoldRepo = {
+      product_sold_id: id,
+      order_id: product.order_id,
+      customer_id: product.customer_id,
+      store_internal_id: product.store_internal_id,
+      product_name_en: product.product_name_ar,
+      product_name_ar: product.product_name_ar,
+      internal_store_id: product.internal_store_id,
+      product_internal_id: product.product_internal_id,
+      product_id: product.product_id,
+      size_name_en: product.size_name_en,
+      size_name_ar: product.size_name_ar,
+      price: product.price,
+      full_price: product.full_price,
+      coupon_code: product.coupon_code
+      
+    }
+         storesRepository.insertProductSold(sold);
+
+    }
+  
+
 
   },
 
   //--------------------------------------------------------
+insertStoreTransactionService : async (param: StoreTransactionService) =>{
 
+  let storeTanseaction : StoreTransactionRepo ={
+    transaction_id:storeTransactionsGenerator.getExtraBtuid(),
+    partner_id: param.partner_id,
+    store_id: param.store_id,
+    internal_store_id: param.internal_store_id,
+    transaction_type: param.transaction_type,
+    amount: param.amount,
+    amount_platform_commission: param.amount_platform_commission,
+    notes:param.notes
+  }
+  return await storesRepository.insertStoreTransaction(storeTanseaction)
+},
 };
 //--------------------------------------------------------
-
 export function resolveOrderDetails(menu: MenuData, order: OrderInput) {
-  let totalPrice =0 ;
-  let orderResolves :ResolvedOrderItem[] =  order.OrderInputs.map(orderItem => {
-  
-    const item = menu.items.find(i => i.item_id === orderItem.item_id);
-    if (!item) throw new Error(`Item not found: ${orderItem.item_id}`);
+  let totalPrice = 0;
+  let orderResolves: ResolvedOrderItem[] = order.OrderInputs.map(
+    (orderItem) => {
+      const item = menu.items.find((i) => i.item_id === orderItem.item_id);
+      if (!item) throw new Error(`Item not found: ${orderItem.item_id}`);
 
-    const size = item.sizes.find((s) => s.size_id === orderItem.size_id);
-    if (!size) throw new Error(`Size not found for item ${orderItem.item_id}`);
+      const size = item.sizes.find((s) => s.size_id === orderItem.size_id);
+      if (!size)
+        throw new Error(`Size not found for item ${orderItem.item_id}`);
 
-    const resolvedModifiers: ResolvedModifier[] = orderItem.modifiers.map(
-      (modInput) => {
-        const modifier = menu.modifiers.find(
-          (m) => m.modifiers_id === modInput.modifiers_id
-        );
-        if (!modifier)
-          throw new Error(`Modifier not found: ${modInput.modifiers_id}`);
-        let modiCount = 0;
-        const resolvedItems: ResolvedModifierItem[] =
-          modInput.modifiers_item.map((modItemInput) => {
-            const modItem = modifier.items.find(
-              (mi) => mi.modifiers_item_id === modItemInput.modifiers_item_id
-            );
-            if (!modItem || !modItem.is_enable)
-              throw new Error(
-                `Modifier item not found or disabled: ${modItemInput.modifiers_item_id}`
-              );
-            modiCount += modItemInput.number;
-            totalPrice += modItem.price * modItemInput.number;
-            return {
-              name: modItem.name,
-              number: modItemInput.number,
-              price: modItem.price,
-            };
-          });
-        if (modiCount > modifier.max || modiCount < modifier.min)
-          throw new Error(
-            `Modifier item count not currect: ${modifier.modifiers_id}`
+      const resolvedModifiers: ResolvedModifier[] = orderItem.modifiers.map(
+        (modInput) => {
+          const modifier = menu.modifiers.find(
+            (m) => m.modifiers_id === modInput.modifiers_id
           );
+          if (!modifier)
+            throw new Error(`Modifier not found: ${modInput.modifiers_id}`);
+          let modiCount = 0;
+          const resolvedItems: ResolvedModifierItem[] =
+            modInput.modifiers_item.map((modItemInput) => {
+              const modItem = modifier.items.find(
+                (mi) => mi.modifiers_item_id === modItemInput.modifiers_item_id
+              );
+              if (!modItem || !modItem.is_enable)
+                throw new Error(
+                  `Modifier item not found or disabled: ${modItemInput.modifiers_item_id}`
+                );
+              modiCount += modItemInput.number;
+              totalPrice += modItem.price * modItemInput.number;
+              return {
+                name: modItem.name,
+                number: modItemInput.number,
+                price: modItem.price,
+              };
+            });
+          if (modiCount > modifier.max || modiCount < modifier.min)
+            throw new Error(
+              `Modifier item count not currect: ${modifier.modifiers_id}`
+            );
 
-        return {
-          title: modifier.title,
-          items: resolvedItems,
-        };
-      }
-    );
-    totalPrice += size.price;
+          return {
+            title: modifier.title,
+            items: resolvedItems,
+          };
+        }
+      );
+      totalPrice += size.price;
+      return {
+        item_name: item.name,
+        size_name: size.name,
+        size_price: size.price,
+        size_calories: size.calories,
+        modifiers: resolvedModifiers,
+        count: orderItem.count,
+        note: orderItem.note,
+      };
+    }
+  );
+  if (totalPrice == order.total_price) {
     return {
-      item_name: item.name,
-      size_name: size.name,
-      size_price: size.price,
-      size_calories: size.calories,
-      modifiers: resolvedModifiers,
-      count :orderItem.count,
-      note : orderItem.note,
+      order: orderResolves,
+      total_price: totalPrice,
     };
-  });
-  if(totalPrice==order.total_price){
-  return {
-          order :orderResolves,
-          total_price:totalPrice
-  }
-}else 
-  throw "totalPrice is change "
-
+  } else throw "totalPrice is change ";
 
   //--------------------------------------------------------
-
-
-
-
-  
 }

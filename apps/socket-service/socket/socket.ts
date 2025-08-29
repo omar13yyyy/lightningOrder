@@ -1,40 +1,48 @@
-import { Server } from "socket.io";
+import { Server, Socket } from "socket.io";
 import { authMiddleware } from "../middlewares/auth.middleware";
 import { registerDriversHandlers } from "../handlers/driver.handler";
-import { registerStoreHandlers } from "../handlers/restaurant.handler";
-import {DRIVERS_EVENTS,STORES_EVENTS} from "../../../modules/events/events"
+import { registerStoreHandlers } from "../handlers/store.handler";
+import { DRIVERS_EVENTS, STORES_EVENTS } from "../../../modules/events/events";
+import { DriverId, StoreId, DriverOrderRequest, StoreOrderRequest } from "../types/types";
+import { waitForDriverDecision, waitForStoreDecision } from "./awaitables";
+import { OrderWithDriver } from "../../partners-stores-managers-dashboards-service/src/types/finderClient";
+
+let ioRef: Server | null = null;
 
 export function setupSocket(server: any) {
-  const io = new Server(server, {
-    cors: { origin: "*" }
-  });
-
+  const io = new Server(server, { cors: { origin: "*" } });
+  ioRef = io;
   io.use(authMiddleware);
 
-io.on("connection", (socket) => {
+  io.on("connection", (socket: Socket) => {
+    const role = socket.role;
 
-  console.log(`Client connected: ${socket.id}`);
-  const role = socket.role;
-  if( role == "driver"){
-  socket.on(DRIVERS_EVENTS.JOIN_DRIVER_ROOM, (driverId) => {
-    socket.join(`driver_${driverId}`);
-
-    registerDriversHandlers(socket);
-
+    if (role === "driver") {
+      socket.on(DRIVERS_EVENTS.JOIN_DRIVER_ROOM, (driverId: DriverId) => {
+        socket.data.driverId = driverId;
+        socket.join(`driver_${driverId}`);
+        registerDriversHandlers(io, socket);
+      });
+    } else if (role === "store") {
+      socket.on(STORES_EVENTS.JOIN_STORE_ROOM, (storeId: StoreId) => {
+        socket.data.storeId = storeId;
+        socket.join(`store_${storeId}`);
+        socket.join("stores");
+        registerStoreHandlers(io, socket);
+      });
+    }
   });
-  }else if( role == "store"){
-  socket.on(STORES_EVENTS.JOIN_STORE_ROOM, (driverId) => {
-    socket.join(`store_${driverId}`);
-
-    registerStoreHandlers(socket);
-
-  });
-  }
-  socket.on("disconnect", () => {
-    console.log(`Client disconnected: ${socket.id}`);
-  });
-
-});
 
   return io;
 }
+
+/* ----- إرسال ----- */
+export function sendOrderToDriver(driverId: DriverId, payload: OrderWithDriver) {
+  ioRef?.to(`driver_${driverId}`).emit(DRIVERS_EVENTS.DRIVERS_ORDER_REQUEST, payload);
+}
+export function sendOrderToStore(storeId: StoreId, payload: StoreOrderRequest) {
+  ioRef?.to(`store_${storeId}`).emit(STORES_EVENTS.STORE_ORDER_REQUEST, payload);
+}
+
+/* ----- انتظار القرارات (مصدّرة للسيرفس) ----- */
+export { waitForDriverDecision, waitForStoreDecision };

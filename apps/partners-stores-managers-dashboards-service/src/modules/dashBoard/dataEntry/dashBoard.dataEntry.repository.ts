@@ -271,7 +271,7 @@ addCategory: async (
     ON CONFLICT (store_id)
     DO UPDATE SET
       product_data_ar_jsonb = add_category(products.product_data_ar_jsonb, $2, $3, $4),
-      product_data_en_jsonb = add_category(products.product_data_en_jsonb, $2, $3, $4);
+      product_data_en_jsonb = add_category(products.product_data_en_jsonb, $2, $3, $4)
   `;
 
   await dashboardQuery(query, [store_id, name_ar, name_en, order, JSON.stringify(baseJson)]);
