@@ -29,8 +29,8 @@ CREATE TYPE enum_user_transaction_type AS ENUM ( 'input','output','NULL');
 CREATE TYPE enum_vehicle_type AS ENUM ( 'car', 'motorcycle','bicycle','electric_bike','NULL');
 CREATE TYPE enum_driver_transaction_type AS ENUM ( 'order_cost', 'driver_profits_received_to_driver','driver_order_cost_received_from_driver','NULL');
 CREATE TYPE enum_trust_points_operation_type AS ENUM ( 'auto','manual','NULL');
-CREATE TYPE enum_payment_method AS ENUM ( 'cach','online','wallet','wallet_and_cach','wallet_and_online','NULL');
-CREATE TYPE enum_order_status AS ENUM ( 'accepted', 'rejected','with_driver','delivered','customer_not_Received','driver_not_Received','NULL');
+CREATE TYPE enum_payment_method AS ENUM ( 'cash','online','wallet','wallet_and_cash','wallet_and_online','NULL');
+CREATE TYPE enum_order_status AS ENUM ( 'accepted', 'rejected','with_driver','delivered','customer_not_Received','driver_not_Received','new','NULL');
 
 
 END;

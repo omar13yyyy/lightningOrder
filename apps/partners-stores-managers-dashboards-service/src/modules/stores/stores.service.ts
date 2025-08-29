@@ -280,7 +280,7 @@ export const storesServices = {
   //------------------------------------------------------------------------------------------
 
   getCoupons: async (
-        partnerId: number,
+        partnerId: string,
 
     storeId: string,
     page: number,

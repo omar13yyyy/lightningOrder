@@ -2,7 +2,7 @@ import {AllpartnersService} from '../../../../partners-stores-managers-dashboard
 
 export const partnerClient ={
 
-     geInfoByStoreIds: async (partnerId: number) => {
+     geInfoByStoreIds: async (partnerId: string) => {
     return await AllpartnersService.partnersService.geInfoByStoreIdsService(partnerId);
   },
      getStoreId: async (store_id: string) => {

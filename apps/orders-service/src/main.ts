@@ -12,11 +12,11 @@ export const orderRouter= express.Router()
 
 orderRouter.use(auth(['partner','manager','admin']));
 
-orderRouter.route('/getCurrentStatistics').get(auth,ordersControler.getCurrentStatistics)
-orderRouter.route('/getCurrentOrders').get(auth,ordersControler.getCurrentOrders)
-orderRouter.route('/previousOrder').get(auth,ordersControler.previousOrder)
-orderRouter.route('/getBillCurrentOrders').get(auth,ordersControler.getBillCurrentOrders)
-orderRouter.route('/getBillPastOrders').get(auth,ordersControler.getBillPastOrders)
+orderRouter.route('/getCurrentStatistics').get(ordersControler.getCurrentStatistics)
+orderRouter.route('/getCurrentOrders').get(ordersControler.getCurrentOrders)
+orderRouter.route('/previousOrder').get(ordersControler.previousOrder)
+orderRouter.route('/getBillCurrentOrders').get(ordersControler.getBillCurrentOrders)
+orderRouter.route('/getBillPastOrders').get(ordersControler.getBillPastOrders)
 
 
 orderRouter.route('/sendUserOrder').post(customerHyperdAuth,ordersControler.sendUserOrder)

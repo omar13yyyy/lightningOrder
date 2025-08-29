@@ -1,6 +1,6 @@
 BEGIN;
 CREATE OR REPLACE FUNCTION get_past_deriver_orders(
-    driver_id_param INT,
+    driver_id_param TEXT,
     offset_value INT DEFAULT 0,
     limit_params INT DEFAULT 10
 )

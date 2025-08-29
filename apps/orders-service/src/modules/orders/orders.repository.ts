@@ -6,8 +6,7 @@ import { RateRepoParams } from "../../../../partners-stores-managers-dashboards-
 //------------------------------------------------------------------------------------------
 
 export const ordersRepository = {
-  //------------------------------------------------------------------------------------------
-
+  //-----------------------------------------------------------------------------------------
   getCurrentStatistics: async (
     storeId: number[] | number
   ): Promise<{
@@ -176,6 +175,7 @@ export const ordersRepository = {
     hasNextPage: boolean;
     nextCursor?: string;
   }> => {
+    console.log("shhhhhhhhhhuu 3m ysir");
     const idsArray = Array.isArray(storeId) ? storeId : [storeId];
     const placeholders = idsArray.map((_, i) => `$${i + 1}`).join(", ");
 
@@ -395,10 +395,9 @@ WHERE
 
   //--------------------------------------------------------------
 
-
   //--------------------------------------------------------------
-  getInternalsPastOrder : async (orderId :string ) => {
-   let {rows} = await query(
+  getInternalsPastOrder: async (orderId: string) => {
+    let { rows } = await query(
       ` 
       
 SELECT customer_id, store_name_ar, store_name_en
@@ -407,12 +406,9 @@ LIMIT 1;
 
 
     `,
-      [
-        orderId
-     
-      ]
+      [orderId]
     );
 
-    return rows[0]
+    return rows[0];
   },
 };

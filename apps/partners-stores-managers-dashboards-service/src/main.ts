@@ -4,6 +4,7 @@ export const services = { fun1, fun2 };
 */
 import {auth} from '../../app-geteway/src/middleware/auth.middleware';
 import { dataEntryControler } from "./modules/dashBoard/dataEntry/dashBoard.dataEntry.controler";
+import multer from 'multer';
 
 import { storesController } from "./modules/stores/stores.controler";
 import { partnersController } from "./modules/partners/partners.controler";
@@ -14,6 +15,7 @@ export const visitorStoreRouter= express.Router()
 export const partnerRouter= express.Router()
 export const storeRouter= express.Router()
 export const dataentryRouter= express.Router()
+const upload = multer({ storage: multer.memoryStorage() });
 
 visitorStoreRouter.route('/getCategoryTags').get(/* auth ,*/storesController.getCategoryTag)
 visitorStoreRouter.route('/getStoreCategories').get(storesController.getStoreCategories)
@@ -48,7 +50,43 @@ dataentryRouter.route('/addNewItem').post(dataEntryControler.addNewItem)
 dataentryRouter.route('/EditItem').post(dataEntryControler.EditItem)
 dataentryRouter.route('/deleteItem').post(dataEntryControler.deleteItem)
 dataentryRouter.route('/EditItemWithImage').post(dataEntryControler.EditItemWithImage)
+dataentryRouter.route('/addModifier').post(dataEntryControler.addModifier)
+dataentryRouter.route('/editModifier').post(dataEntryControler.editModifier)
+dataentryRouter.route('/deleteModifier').post(dataEntryControler.deleteModifier)
+dataentryRouter.route('/addModifierItem').post(dataEntryControler.addModifierItem)
+dataentryRouter.route('/editModifiersItem').post(dataEntryControler.editModifiersItem)
+dataentryRouter.route('/deleteModifierItem').post(dataEntryControler.deleteModifierItem)
+dataentryRouter.route('/addSize').post(dataEntryControler.addSize)
+dataentryRouter.route('/editSize').post(dataEntryControler.editSize)
+dataentryRouter.route('/deleteSize').post(dataEntryControler.deleteSize)
+dataentryRouter
+  .route('/addStoreBranch')
+  .post(
+    upload.fields([
+      { name: 'logo',  maxCount: 1 },
+      { name: 'cover', maxCount: 1 },
+    ]),
+    dataEntryControler.addStoreBranch
+  );dataentryRouter.route('/getCategories').get(dataEntryControler.getCategories)
+dataentryRouter.route('/createCategory').post(dataEntryControler.createCategory)
+dataentryRouter.route('/getTags').get(dataEntryControler.getTags)
+dataentryRouter.route('/createTag').post(dataEntryControler.createTag)
+dataentryRouter.route('/addDriver')
+  .post(
+    upload.fields([
+      { name: 'driver_image', maxCount: 1 },
+      { name: 'plate', maxCount: 1 },
+      { name: 'driving_license_image', maxCount: 1 },
+      { name: 'images', maxCount: 5 },
+    ]),
+    dataEntryControler.addDriver
+  );
 
+dataentryRouter.route('/getDriverDetails').get(dataEntryControler.getDriverDetails);
+dataentryRouter.route('/getDrivers').get(dataEntryControler.getDrivers);
+dataentryRouter.post('/addTrend', upload.single('contract_image'), dataEntryControler.addTrend);
+dataentryRouter.post('/stopTrend', dataEntryControler.stopTrend);
+dataentryRouter.get('/getStoreTrends', dataEntryControler.getStoreTrends);
 
 partnerRouter.route('/partnerLogin').post(partnersController.partnerLogin)
 storeRouter.route('/StoreLogin').post(storesController.StoreLogin)

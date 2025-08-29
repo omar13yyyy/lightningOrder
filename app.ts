@@ -12,10 +12,10 @@ import { DeliveryConfig } from './modules/config/settingConfig';
 
 dotenv.config()
 //  await seederGenerateCSV()
-  await createDatabases()
+//   await createDatabases()
 //  await seeder()    
-// DeliveryConfig.update()
-// server() 
+DeliveryConfig.update()
+server() 
 /*  const damasLat = 33.51814950118199;
 const damasLan =36.29422578371265
 const location_code =encodeToQuadrants(damasLat,damasLan)

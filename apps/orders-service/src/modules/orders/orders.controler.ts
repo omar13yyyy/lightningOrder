@@ -83,6 +83,7 @@ export const ordersControler = {
       const partnerId = resolvepartnerId(req); 
       const {  limit, lastCursor } = req.query;
       const storeId =  resolveStoreId(req);
+        console.log('controleeeeeeeeeer 3m ysir1')
 
       const stats = await ordersService.getCurrentOrders(
         partnerId,

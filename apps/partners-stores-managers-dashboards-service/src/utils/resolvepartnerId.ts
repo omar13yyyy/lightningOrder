@@ -1,7 +1,7 @@
 import { Request } from 'express';
 
-export function resolvepartnerId(req: Request): number  {
-  const user = req.user as { partner_id?: number; role?: string };
+export function resolvepartnerId(req: Request): string  {
+  const user = req.user as { partner_id?: string; role?: string };
 
   if (user?.role === 'partner') {
     if (user.partner_id) {
@@ -13,13 +13,13 @@ export function resolvepartnerId(req: Request): number  {
   }
 
   const partnerId =
-    (req.query?.partnerId ) ||
-    (req.params?.partnerId ) ||
-    (req.body?.partnerId);
+    (req.query?.partnerId as string ) ||
+    (req.params?.partnerId as string) ||
+    (req.body?.partnerId as string);
       console.log(partnerId+ ' << partner_id from resolveStoreId ');
 
-  // if (!partnerId || typeof partnerId !== 'string')
-     if (!partnerId) {
+   if (!partnerId || typeof partnerId !== 'string'){
+    // if (!partnerId) {
     console.warn('resolveStoreId: partnerId is empty (allowed for non-partner)');
     return undefined;
   }

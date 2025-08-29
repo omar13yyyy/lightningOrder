@@ -31,7 +31,7 @@ CREATE TABLE current_orders (
     store_name_ar text,
     store_name_en text,
     internal_store_id bigint,
-    driver_id bigint,
+    driver_id text,
     amount DOUBLE PRECISION,
     order_details_text text,--with details of locations
     created_at timestamp with time zone,
@@ -88,7 +88,7 @@ CREATE TABLE past_orders (
     store_name_ar text,
     store_name_en text,
     internal_store_id bigint,
-    driver_id bigint,
+    driver_id text,
     order_details_text text,
     amount DOUBLE PRECISION,
     created_at timestamp with time zone,
