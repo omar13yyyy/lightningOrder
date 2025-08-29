@@ -197,11 +197,12 @@ export const ordersRepository = {
     SELECT
       order_id,
       created_at,
+      store_id,
       store_name_ar,
       orders_type,
       payment_method,
       order_details_text
-    FROM past_orders
+    FROM current_orders
     WHERE ${whereClause}
     ORDER BY created_at DESC
     LIMIT $${idsArray.length + 1}
@@ -216,6 +217,7 @@ export const ordersRepository = {
       orders: rows.map((row) => ({
         order_id: row.order_id,
         created_at: row.created_at,
+        store_id : row.store_id,
         store_name: row.store_name_ar,
         type: row.orders_type,
         payment_method: row.payment_method,

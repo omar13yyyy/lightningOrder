@@ -97,8 +97,8 @@ partnerRouter.route('/partnergetAllStores').get(auth(['partner','admin']),partne
 partnerRouter.route('/BalanceWithdrawalRequest').post(auth(['partner','admin']),partnersController.BalanceWithdrawalRequest)
 partnerRouter.route('/walletTransferHistory').get(auth(['partner','admin']),partnersController.walletTransferHistory)
 
-// partnerRouter.use(auth(['partner','manager','admin']));
-// storeRouter.use(auth(['partner','manager','admin']));
+ partnerRouter.use(auth(['partner','manager','admin']));
+ storeRouter.use(auth(['partner','manager','admin']));
 
 partnerRouter.route('/partnerInfo').get(partnersController.partnerInfo)
 

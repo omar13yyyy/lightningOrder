@@ -7,6 +7,7 @@ import { PG_ORDERS_DATABASE } from "../../../../../../modules/database/config";
 import { imageService } from "../../../../../image-service/src/image.service";
 import { documentImagesGenerator, rolesGenerator, tagsGenerator } from "../../../../../../modules/btuid/dashboardBtuid";
 import { driversGenerator } from "../../../../../../modules/btuid/deliveryBtuid";
+import { encodeToQuadrants } from "../../../../../../modules/geo/geohash";
 //------------------------------------------------------------------------------------------
 type DocType = 'profile' | 'plate' | 'driving_license';
 type GetDriversInput = {
@@ -522,7 +523,7 @@ addStoreBranch: async ({
   store_namear, store_nameen, orders_type, preparation_time, user_name,
   phone_number, email, full_address, min_order_price, Latitude, longitude,
   logo_image_url, cover_image_url, store_description, platform_commission,
-  category_name_id, managerUserName, password, images, tag_name_id, partnerId
+  category_name_id, managerUserName, password, tag_name_id, partnerId
 }: {
   store_namear: string,
   store_nameen: string,
@@ -542,14 +543,12 @@ addStoreBranch: async ({
   category_name_id: string,
   managerUserName: string,
   password: string,
-  images: string[],
   tag_name_id: string[],
   partnerId: string | null
 }): Promise<void> => {
   // placeholders مؤقّتاً حتى تفعّل الرفع الفعلي
-  const _logo = '/uploads/_mock/logo-placeholder.png';
-  const _cover = '/uploads/_mock/cover-placeholder.png';
 
+  let locationCode =encodeToQuadrants(Latitude,longitude)
   await dataEntryrepository.addStoreBranch({
     store_namear,
     store_nameen,
@@ -562,16 +561,16 @@ addStoreBranch: async ({
     min_order_price,
     Latitude,
     longitude,
-    logo_image_url: _logo,
-    cover_image_url: _cover,
+    logo_image_url: logo_image_url,
+    cover_image_url: cover_image_url,
     store_description,
     platform_commission,
     category_name_id,
     managerUserName,
     password,
-    images: images || [],
     tag_name_id: Array.isArray(tag_name_id) ? tag_name_id : [],
-    partnerId
+    partnerId,
+    locationCode
   });
 },
 

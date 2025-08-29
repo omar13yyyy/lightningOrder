@@ -13,7 +13,8 @@ export function authMiddleware(socket: any, next: Function) {
     next();
   } catch (err) {
       try {
-    const payload = jwt.verify(token, process.env.TOKEN_SECRET_STORE!);
+    const payload = jwt.verify(token, process.env.TOKEN_SECRET_ADMIN!);
+    console.log(payload)
     socket.store_id = payload.store_id;
     socket.role = "store"
     next();

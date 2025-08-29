@@ -10,21 +10,21 @@ import express from 'express';
 import { get } from "http";
 export const orderRouter= express.Router()
 
-//orderRouter.use(auth(['partner','manager','admin']));
-
-orderRouter.route('/getCurrentStatistics').get(ordersControler.getCurrentStatistics)
-orderRouter.route('/getCurrentOrders').get(ordersControler.getCurrentOrders)
-orderRouter.route('/previousOrder').get(ordersControler.previousOrder)
-orderRouter.route('/getBillCurrentOrders').get(ordersControler.getBillCurrentOrders)
-orderRouter.route('/getBillPastOrders').get(ordersControler.getBillPastOrders)
-
-
 orderRouter.route('/sendUserOrder').post(customerHyperdAuth,ordersControler.sendUserOrder)
 orderRouter.route('/currentCustomerOrder').get(customerHyperdAuth,ordersControler.getCurrentCustomerOrders)
 orderRouter.route('/previousCustomerOrder').get(customerHyperdAuth,ordersControler.previousCustomerOrder)
 orderRouter.route('/rate').get(customerHyperdAuth,ordersControler.rate)
 
 
+
+
+orderRouter.use(auth(['partner','manager','admin']));
+
+orderRouter.route('/getCurrentStatistics').get(ordersControler.getCurrentStatistics)
+orderRouter.route('/getCurrentOrders').get(ordersControler.getCurrentOrders)
+orderRouter.route('/previousOrder').get(ordersControler.previousOrder)
+orderRouter.route('/getBillCurrentOrders').get(ordersControler.getBillCurrentOrders)
+orderRouter.route('/getBillPastOrders').get(ordersControler.getBillPastOrders)
 
 
 

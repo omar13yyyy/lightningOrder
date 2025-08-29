@@ -64,13 +64,6 @@ CREATE TABLE customer_transactions (
 
 
 
-ALTER TABLE IF EXISTS public.customer_transactions
-    ADD FOREIGN KEY (driver_id)
-    REFERENCES public.customers (customer_id) MATCH SIMPLE
-    ON UPDATE NO ACTION
-    ON DELETE NO ACTION
-    NOT VALID;
-
 
 ALTER TABLE IF EXISTS public.customer_wallets_previous_day
     ADD FOREIGN KEY (customer_wallet_id)

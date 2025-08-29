@@ -16,7 +16,7 @@ export function setupSocket(server: any) {
 
   io.on("connection", (socket: Socket) => {
     const role = socket.role;
-
+    
     if (role === "driver") {
       socket.on(DRIVERS_EVENTS.JOIN_DRIVER_ROOM, (driverId: DriverId) => {
         socket.data.driverId = driverId;
@@ -24,10 +24,12 @@ export function setupSocket(server: any) {
         registerDriversHandlers(io, socket);
       });
     } else if (role === "store") {
+      console.log(`store_${socket.store_id}`)
       socket.on(STORES_EVENTS.JOIN_STORE_ROOM, (storeId: StoreId) => {
         socket.data.storeId = storeId;
-        socket.join(`store_${storeId}`);
+        socket.join(`store_${socket.store_id}`);
         socket.join("stores");
+
         registerStoreHandlers(io, socket);
       });
     }

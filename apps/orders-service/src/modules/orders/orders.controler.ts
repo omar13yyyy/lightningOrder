@@ -135,7 +135,7 @@ export const ordersControler = {
   getBillCurrentOrders: async (req, res) => {
     try {
       const { orderId } = req.query;
-      const stats = await ordersService.getBillPastOrdersService(orderId);
+      const stats = await ordersService.getBillCurrentOrdersService(orderId);
 
       return res.status(200).json({
         success: true,
@@ -224,7 +224,7 @@ export const ordersControler = {
     const { dateOffset, limit } = req.query;
     console.log("dateOffset ", dateOffset);
     let customerId = req.customer_id;
-    const result = await ordersService.previousCustomerOrderService(
+    const result = await ordersService.getCurrentOrders(
       customerId,
       dateOffset,
       limit

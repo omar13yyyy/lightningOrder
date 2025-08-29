@@ -3,7 +3,7 @@ export const imageControler = {
   uploadImage: async (req, res) => {
     try {
       if (!req.file) return res.status(400).send("No file uploaded.");
-      const fileName = await imageService.processAndUploadImage(
+      const fileName = await imageService.processAndUploadImage("",
         req.file.buffer
       );
       //send file name to service

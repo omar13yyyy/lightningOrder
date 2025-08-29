@@ -118,6 +118,7 @@ delivery_note : delivery_note
   }
   
   ordersService.insertCurrentOrderService(currentOrder)
+  console.log("socket store id ",storeId)
   let storeAccepted =await deliveryServicesClient.orderNotificationToStore(storeId,{ 
      orderId: order.id,
     storeId: storeId, 
