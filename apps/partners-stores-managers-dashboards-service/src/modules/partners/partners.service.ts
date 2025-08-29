@@ -31,7 +31,7 @@ console.log(partner_id+'paaaaaaaaaaaarrrrrrrrtnerid')
   //------------------------------------------------------------------------------------------
   infoService: async (
     storeId: string,
-    partnerId: number
+    partnerId: string
   ): Promise<{
     categoris_in_stores: number;
     items_in_stores: number;
@@ -66,7 +66,7 @@ console.log(partner_id+'paaaaaaaaaaaarrrrrrrrtnerid')
   },
   //---------------------------------------------------------------------------------------
   getStatisticsService: async (
-    partnerId: number,
+    partnerId: string,
     store_id: string,
     fromDate?: Date,
     toDate?: Date
@@ -104,7 +104,7 @@ console.log(partner_id+'paaaaaaaaaaaarrrrrrrrtnerid')
   },
   //------------------------------------------------------------------------------------------
   bestSellerService: async (
-    partnerId: number,
+    partnerId: string,
     store_id: string,
     fromDate: Date,
     toDate: Date
@@ -135,7 +135,7 @@ console.log(partner_id+'paaaaaaaaaaaarrrrrrrrtnerid')
 
   //------------------------------------------------------------------------------------------
   profileService: async (
-    partnerId: number
+    partnerId: string
   ): Promise<{
     partner_name: string;
     phone_number: number;
@@ -152,7 +152,7 @@ console.log(partner_id+'paaaaaaaaaaaarrrrrrrrtnerid')
   changeStoreState: async (
     storeId: string,
     state: string,
-    partnerId: number
+    partnerId: string
   ): Promise<{ success: boolean; message: string }> => {
   console.log(storeId,state)
      const store = await partnersRepository.getStoreId(storeId);
@@ -178,7 +178,7 @@ console.log(partner_id+'paaaaaaaaaaaarrrrrrrrtnerid')
 
   getStoreProfile: async (
     storeId: string,
-    partnerId: number
+    partnerId: string
   ): Promise<{
     store_name: string;
     phone_number: string;
@@ -202,7 +202,7 @@ console.log(partner_id+'paaaaaaaaaaaarrrrrrrrtnerid')
   },
   //--------------------------------------------------------------------------------------
   getSpecialCustomers: async (
-    partnerId:number,
+    partnerId:string,
     storeId: string,
     fromDate: Date,
     toDate: Date
@@ -235,7 +235,7 @@ console.log(partner_id+'paaaaaaaaaaaarrrrrrrrtnerid')
   //------------------------------------------------------------------------------------------
   gePartnerBalance: async (
     internal_id: string  ,
-      partnerId: number,
+      partnerId: string,
 
   ): Promise<{ wallet_balance: number }> => { 
     const isSingleStore = !!internal_id ;
@@ -251,7 +251,7 @@ console.log(partner_id+'paaaaaaaaaaaarrrrrrrrtnerid')
 
   walletTransferHistorystore: async (
     store_id: string,
-    partner_id: number,
+    partner_id: string,
   pageSize: number ,
       page: number,
 
@@ -279,7 +279,7 @@ console.log(partner_id+'paaaaaaaaaaaarrrrrrrrtnerid')
   },
   //-----------------------------------------------------------------------------------------
 walletTransferHistory: async (
-  partnerId: number,
+  partnerId: string,
   page: number,
   pageSize: number
 ) => {
@@ -306,7 +306,7 @@ walletTransferHistory: async (
 
   //-----------------------------------------------------------------------------------------
   BalanceWithdrawalRequest: async (
-    partnerId: number
+    partnerId: string
   ): Promise<{ withdrawal_id: string }> => {
     return await partnersRepository.walletBalanceWithdrawalRequest(partnerId);
   },
@@ -315,10 +315,9 @@ walletTransferHistory: async (
   
   //----------------------------------------------------------------------
   changeStoreStatemanger: async (
-    storeId: number,
+    storeId: string,
     state: string
   ): Promise<{ success: boolean; message: string }> => {
-    // نفّذ التحديث
     const result = await partnersRepository.updateStoreState(storeId, state);
 
     if (result.rowCount === 1) {
@@ -336,7 +335,7 @@ walletTransferHistory: async (
   //---------------------------------------------------------------------------------------------------
 
   getStoreProfilemanger: async (
-    storeId: number
+    storeId: string
   ): Promise<{
     store_name: string;
     phone_number: string;

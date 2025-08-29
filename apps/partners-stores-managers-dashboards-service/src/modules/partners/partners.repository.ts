@@ -14,7 +14,7 @@ export const partnersRepository = {
   //---------------------------------------------------------------------------------------
   //بتجيب معرف المتاجر الخاصة بالشريك و اسمائن
   getStoreIdsByPartnerId: async (
-    partner_id: number
+    partner_id: string
   ): Promise<
     {
       internal_id: number;
@@ -96,7 +96,7 @@ export const partnersRepository = {
   //---------------------------------------------------------------------------------------
   //بتجيب كل المتاجر تبع الشريك مع معلوماتهم الكاملة
   getAllStores: async (
-    partner_id: number
+    partner_id: string
   ): Promise<
     {
       store_id: string;
@@ -230,7 +230,6 @@ export const partnersRepository = {
     const idsArray = Array.isArray(storeIds) ? storeIds : [storeIds];
     const placeholders = idsArray.map((_, i) => `$${i + 1}`).join(", ");
 
-    // نحدد المواقع للداتا حسب عدد المتاجر
     const dateFromIndex = idsArray.length + 1;
     const dateToIndex = idsArray.length + 2;
 
@@ -256,7 +255,7 @@ export const partnersRepository = {
   },
   //---------------------------------------------------------------------------------------
   profile: async (
-    partner_id: number
+    partner_id: string
   ): Promise<{
     partner_name: string;
     phone_number: number;
@@ -274,7 +273,7 @@ export const partnersRepository = {
     return rows[0];
   },
   //---------------------------------------------------------------------------------------
-  getStoreByIdAndPartner: async (storeId: string, partnerId: number) => {
+  getStoreByIdAndPartner: async (storeId: string, partnerId: string,) => {
     const { rows } = await dashboardQuery(
       "SELECT internal_id FROM stores WHERE store_id = $1 AND partner_id = $2",
       [storeId, partnerId]
@@ -293,7 +292,7 @@ export const partnersRepository = {
   //---------------------------------------------------------------------------------------
   getStoreProfile: async (
     storeId: string,
-    partnerId: number
+    partnerId: string,
   ): Promise<{
     store_name: string;
     phone_number: string;
@@ -387,7 +386,7 @@ export const partnersRepository = {
   },
   //-----------------------------------------------------------------------------------
   gePartnerBalancepartner: async (
-    partner_id: number
+    partner_id: string
   ): Promise<{
     wallet_balance;
   }> => {
@@ -450,7 +449,7 @@ export const partnersRepository = {
   //-----------------------------------------------------------------------------------
 
 getWalletTransferHistoryRows: async (
-  partnerId: number,
+  partnerId: string,
   limit: number,
   offset: number
 ) => {
@@ -488,7 +487,7 @@ getWalletTransferHistoryCountstore: async (
 
   //-----------------------------------------------------------------------------------
 getWalletTransferHistoryCount: async (
-  partnerId: number
+  partnerId: string,
 ) => {
   const { rows } = await dashboardQuery(
     `SELECT COUNT(*) AS total FROM store_transactions WHERE partner_id = $1`,
@@ -500,7 +499,7 @@ getWalletTransferHistoryCount: async (
 
   //-----------------------------------------------------------------------------------
   walletBalanceWithdrawalRequest: async (
-    partnerId: number,
+    partnerId: string,
     uploadedAt: Date = new Date()
   ): Promise<{ withdrawal_id: string }> => {
     const { rows } = await dashboardQuery(
@@ -550,7 +549,7 @@ getWalletTransferHistoryCount: async (
 
   //-------------------------------------------------------------------------------------------
   getStoreProfilemanger: async (
-    storeId: number
+    storeId: string
   ): Promise<{
     store_name: string;
     phone_number: string;

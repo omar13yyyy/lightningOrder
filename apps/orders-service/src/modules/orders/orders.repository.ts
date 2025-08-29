@@ -9,8 +9,7 @@ import { CurrentOrderRepo, ElectronicPaymentRepo, OrderFinancialLogRepo } from "
 //------------------------------------------------------------------------------------------
 
 export const ordersRepository = {
-  //------------------------------------------------------------------------------------------
-
+  //-----------------------------------------------------------------------------------------
   getCurrentStatistics: async (
     storeId: number[] | number
   ): Promise<{
@@ -179,6 +178,7 @@ export const ordersRepository = {
     hasNextPage: boolean;
     nextCursor?: string;
   }> => {
+    console.log("shhhhhhhhhhuu 3m ysir");
     const idsArray = Array.isArray(storeId) ? storeId : [storeId];
     const placeholders = idsArray.map((_, i) => `$${i + 1}`).join(", ");
 

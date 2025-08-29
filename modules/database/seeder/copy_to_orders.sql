@@ -1,4 +1,5 @@
 BEGIN;
+
 COPY orders FROM '/home/omar/project3/coding/backend/modules/database/seeder/CSV/orders.csv' DELIMITER ',' CSV HEADER;
 COPY past_orders FROM '/home/omar/project3/coding/backend/modules/database/seeder/CSV/past_orders.csv' DELIMITER ',' CSV HEADER;
 COPY current_orders FROM '/home/omar/project3/coding/backend/modules/database/seeder/CSV/current_orders.csv' DELIMITER ',' CSV HEADER;

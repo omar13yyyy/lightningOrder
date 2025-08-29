@@ -1,8 +1,8 @@
 import { BtuidGenerator } from 'btuid';
 import path from 'path';
 
+const rootLocation: string = process.env.ROOT_LOCATION || "/home/omar/project3/coding/backend/";
 
-const rootLocation: string = process.env.ROOT_LOCATION || "/home/omar/project3/coding/backend/"
 const dashboard :string = "dashboard" 
 
 const partnersFilePath = path.join(rootLocation,"btuidFiles" ,dashboard, 'partners.json');
@@ -49,3 +49,14 @@ export const withdrawalRequestsGenerator = new BtuidGenerator({ path: withdrawal
 
 const productsFilePath = path.join(rootLocation,"btuidFiles" ,dashboard, 'products.json');
 export const productsGenerator = new BtuidGenerator({ path: productsFilePath });
+
+const modifiersFilePath = path.join(rootLocation, "dashboard", "btuidFiles", 'modifiers.json');
+export const modifiersGenerator = new BtuidGenerator({ path: modifiersFilePath }); 
+
+const modifierItemsFilePath = path.join(rootLocation, "dashboard", "btuidFiles", 'modifier_items.json');
+export const modifierItemsGenerator = new BtuidGenerator({ path: modifierItemsFilePath }); 
+const sizesFilePath = path.join(rootLocation, "dashboard", "btuidFiles", 'sizes.json');
+export const sizesGenerator = new BtuidGenerator({ path: sizesFilePath }); 
+
+const categoriesFilePath = path.join(rootLocation, "dashboard", "btuidFiles", 'categories.json');
+export const categoriesGenerator = new BtuidGenerator({ path: categoriesFilePath }); 

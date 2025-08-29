@@ -2,7 +2,6 @@ BEGIN;
 
 
 
-
 COPY store_categories FROM '/home/omar/project3/coding/backend/modules/database/seeder/CSV/store_categories.csv' DELIMITER ',' CSV HEADER;
 COPY tags FROM '/home/omar/project3/coding/backend/modules/database/seeder/CSV/tags.csv' DELIMITER ',' CSV HEADER;
 COPY address FROM '/home/omar/project3/coding/backend/modules/database/seeder/CSV/address.csv' DELIMITER ',' CSV HEADER;
@@ -27,6 +26,7 @@ COPY coupons FROM '/home/omar/project3/coding/backend/modules/database/seeder/CS
 COPY withdrawal_requests FROM '/home/omar/project3/coding/backend/modules/database/seeder/CSV/withdrawal_requests.csv' DELIMITER ',' CSV HEADER;
 COPY withdrawal_document_images FROM '/home/omar/project3/coding/backend/modules/database/seeder/CSV/withdrawal_document_images.csv' DELIMITER ',' CSV HEADER;
 COPY system_settings FROM '/home/omar/project3/coding/backend/modules/database/seeder/CSV/system_settings.csv' DELIMITER ',' CSV HEADER;
+
 
 
 

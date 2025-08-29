@@ -2,7 +2,6 @@ import { Request, Response, NextFunction } from 'express';
 
 import { query } from "../../../../modules/database/commitDashboardSQL";
 
-// middleware/checkStoreOwnership.ts
 const checkStoreOwnership = async (req, res, next) => {
   const { storeId } = req.body;
   const {partnerId} = req.body;
@@ -16,7 +15,7 @@ const checkStoreOwnership = async (req, res, next) => {
     return res.status(403).json({ message: 'غير مصرح لك بتعديل هذا المتجر' });
   }
 
-  next(); // استمر للفنكشن التالية (اللي تنفذ التعديل)
+  next(); 
 };
 
 export default checkStoreOwnership;

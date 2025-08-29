@@ -12,7 +12,7 @@ export const ordersService = {
 
 
   partnergetCurrentStatisticsService: async (
-    partnerId: number,
+    partnerId: string,
     store_id: string
   ): Promise<{
     accepted: number;
@@ -36,7 +36,7 @@ export const ordersService = {
   //------------------------------------------------------------------------------------------
 
   previousOrderService: async (
-    partnerId: number,
+    partnerId: string,
     storeId: string,
     state: string,
     paymentMethod: string,
@@ -121,7 +121,7 @@ export const ordersService = {
   //------------------------------------------------------------------------------------------
 
   getCurrentOrders: async (
-    partnerId: number,
+    partnerId: string,
     storeId: string,
     limit: number,
     lastCursor?: string
@@ -138,6 +138,8 @@ export const ordersService = {
     nextCursor?: string;
   }> => {
     if (storeId) {
+              console.log('f 3m ysir1')
+
       const { internal_id } = await partnerClient.getStoreId(storeId);
       return await ordersRepository.getCurrentOrders(
         internal_id,
@@ -146,7 +148,11 @@ export const ordersService = {
       );
     }
     const stores = await partnerClient.geInfoByStoreIds(partnerId);
+        console.log('shhhhhhhhhhuu 3m ysir1')
+
     const storeIds = stores.map((row) => row.internal_id);
+        console.log('shhhhhhhhhhuu 3m ysir2')
+
     return await ordersRepository.getCurrentOrders(storeIds, limit, lastCursor);
   },
   //-----------------------------------------------------------------------------------------

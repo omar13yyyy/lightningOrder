@@ -139,4 +139,3 @@ ALTER TABLE IF EXISTS public.driver_points
 
 END;
 
-
