@@ -224,7 +224,7 @@ export const ordersControler = {
     const { dateOffset, limit } = req.query;
     console.log("dateOffset ", dateOffset);
     let customerId = req.customer_id;
-    const result = await ordersService.previousCustomerOrderService(
+    const result = await ordersService.getCurrentOrders(
       customerId,
       dateOffset,
       limit

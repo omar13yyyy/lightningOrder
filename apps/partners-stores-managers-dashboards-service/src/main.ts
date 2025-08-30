@@ -85,6 +85,20 @@ dataentryRouter.route('/getDrivers').get(dataEntryControler.getDrivers);
 dataentryRouter.post('/addTrend', upload.single('contract_image'), dataEntryControler.addTrend);
 dataentryRouter.post('/stopTrend', dataEntryControler.stopTrend);
 dataentryRouter.get('/getStoreTrends', dataEntryControler.getStoreTrends);
+// القراءة العامة
+dataentryRouter.route('/getWorkShifts').get(dataEntryControler.getWorkShifts);
+
+// إدارة الشيفتات
+dataentryRouter.route('/addWorkShift').post(dataEntryControler.addWorkShift);
+dataentryRouter.route('/deleteWorkShift').post(dataEntryControler.deleteWorkShift);
+dataentryRouter.get('/newWithdrawalRequestsPartner', dataEntryControler.newWithdrawalRequestsPartner);
+dataentryRouter.get('/waitWithdrawalRequestsPartner', dataEntryControler.waitWithdrawalRequestsPartner);
+dataentryRouter.post('/withdrawalRequestsStatusPartner', dataEntryControler.withdrawalRequestsStatusPartner);
+dataentryRouter.post('/withdrawalRequestDonePartner', dataEntryControler.withdrawalRequestDonePartner);
+dataentryRouter.get('/withdrawalRequestsDriver', dataEntryControler.withdrawalRequestsDriver);
+
+
+
 
 partnerRouter.route('/partnerLogin').post(partnersController.partnerLogin)
 storeRouter.route('/StoreLogin').post(storesController.StoreLogin)
@@ -97,8 +111,8 @@ partnerRouter.route('/partnergetAllStores').get(auth(['partner','admin']),partne
 partnerRouter.route('/BalanceWithdrawalRequest').post(auth(['partner','admin']),partnersController.BalanceWithdrawalRequest)
 partnerRouter.route('/walletTransferHistory').get(auth(['partner','admin']),partnersController.walletTransferHistory)
 
-// partnerRouter.use(auth(['partner','manager','admin']));
-// storeRouter.use(auth(['partner','manager','admin']));
+partnerRouter.use(auth(['partner','manager','admin']));
+storeRouter.use(auth(['partner','manager','admin']));
 
 partnerRouter.route('/partnerInfo').get(partnersController.partnerInfo)
 
