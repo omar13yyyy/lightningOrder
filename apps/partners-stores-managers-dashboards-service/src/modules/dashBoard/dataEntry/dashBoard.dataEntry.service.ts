@@ -7,7 +7,34 @@ import { PG_ORDERS_DATABASE } from "../../../../../../modules/database/config";
 import { imageService } from "../../../../../image-service/src/image.service";
 import { documentImagesGenerator, rolesGenerator, tagsGenerator } from "../../../../../../modules/btuid/dashboardBtuid";
 import { driversGenerator } from "../../../../../../modules/btuid/deliveryBtuid";
-import { encodeToQuadrants } from "../../../../../../modules/geo/geohash";
+
+const daysOrder = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'] as const;
+
+export type WorkShiftsDTO = {
+  isOpen: boolean;
+  Sun: { opening_time: string; closing_time: string; shift_id: number }[];
+  Mon: { opening_time: string; closing_time: string; shift_id: number }[];
+  Tue: { opening_time: string; closing_time: string; shift_id: number }[];
+  Wed: { opening_time: string; closing_time: string; shift_id: number }[];
+  Thu: { opening_time: string; closing_time: string; shift_id: number }[];
+  Fri: { opening_time: string; closing_time: string; shift_id: number }[];
+  Sat: { opening_time: string; closing_time: string; shift_id: number }[];
+};
+
+function nowHHMM(): string {
+  const d = new Date();
+  const hh = String(d.getHours()).padStart(2, '0');
+  const mm = String(d.getMinutes()).padStart(2, '0');
+  return `${hh}:${mm}`;
+}
+function todayDay(): string {
+  const idx = new Date().getDay(); // 0=Sun
+  return daysOrder[idx];
+}
+function isTimeInRange(t: string, open: string, close: string) {
+  return (t >= open) && (t < close);
+}
+
 //------------------------------------------------------------------------------------------
 type DocType = 'profile' | 'plate' | 'driving_license';
 type GetDriversInput = {
@@ -736,5 +763,125 @@ addDriver: async (payload: {
   },
    getStoreTrends: async (store_id: string) => {
     return dataEntryrepository.getStoreTrends(store_id);
+  },
+async getWorkShifts(storeId: string): Promise<WorkShiftsDTO> {
+    const rows = await dataEntryrepository.getShiftsByStore(storeId);
+
+    // نبني Response مجمّع بالأيام
+    const base = {
+      Sun: [], Mon: [], Tue: [], Wed: [], Thu: [], Fri: [], Sat: [],
+    } as any;
+
+    for (const r of rows) {
+      base[r.day_of_week]?.push({
+        opening_time: r.opening_time?.slice(0,5),
+        closing_time: r.closing_time?.slice(0,5),
+        shift_id: r.shift_id,
+      });
+    }
+
+    // حساب isOpen الآن بناءً على اليوم والوقت الحالي (UTC/سيرفر)
+    const day = todayDay();
+    const now = nowHHMM();
+    const todays = base[day] as Array<{ opening_time:string; closing_time:string }>;
+    const openNow = todays?.some(s => isTimeInRange(now, s.opening_time, s.closing_time)) || false;
+
+    return { isOpen: openNow, ...base };
+  },
+
+  async addWorkShift(payload: {
+    store_id: string;
+    day_of_week: 'Sun'|'Mon'|'Tue'|'Wed'|'Thu'|'Fri'|'Sat'|string;
+    opening_time: string; // 'HH:MM'
+    closing_time: string; // 'HH:MM'
+  }): Promise<{ shift_id: number }> {
+    const internalId = await dataEntryrepository.getInternalStoreId(payload.store_id);
+    if (!internalId) throw new Error('Store not found');
+
+    if (!/^\d{2}:\d{2}$/.test(payload.opening_time) || !/^\d{2}:\d{2}$/.test(payload.closing_time)) {
+      throw new Error('Bad time format, expected HH:MM');
+    }
+    if (payload.opening_time >= payload.closing_time) {
+      throw new Error('opening_time must be < closing_time');
+    }
+
+    // تفادي التداخل
+    const overlap = await dataEntryrepository.hasOverlap({
+      internalStoreId: internalId,
+      day: payload.day_of_week,
+      opening: payload.opening_time,
+      closing: payload.closing_time,
+    });
+    if (overlap) throw new Error('Shift overlaps with existing one');
+
+    return dataEntryrepository.insertShift({
+      storeId: payload.store_id,
+      internalStoreId: internalId,
+      day: payload.day_of_week,
+      opening: payload.opening_time,
+      closing: payload.closing_time,
+    });
+  },
+
+  async deleteWorkShift(shiftId: number): Promise<void> {
+    await dataEntryrepository.deleteShift(shiftId);
+  },
+async getNewPartnerRequests() {
+    return dataEntryrepository.listPartnerRequestsByStatus('new');
+  },
+  async getWaitPartnerRequests() {
+    return dataEntryrepository.listPartnerRequestsByStatus('wait');
+  },
+
+// move to waiting
+async movePartnerRequestToWaiting(withdrawalId: string) {
+  if (!withdrawalId) throw new Error('WithdrawalId مطلوب');
+
+  await dataEntryrepository.markPartnerRequestWaiting(withdrawalId);
+
+  // رجع شي يدل إنو العملية تمت (مو شرط success)
+  return { withdrawalId, status: 'waiting' };
+}
+,
+
+  // done + images
+  async completePartnerRequest(payload: {
+    withdrawalId: string;
+    images: { url: string; description?: string }[];
+    partnerId?: string | number | null;
+  }) {
+    if (!payload.withdrawalId) throw new Error('WithdrawalId مطلوب');
+
+    await dataEntryrepository.markPartnerRequestDone(payload.withdrawalId);
+
+    if (payload.images?.length) {
+      await dataEntryrepository.insertWithdrawalImages({
+        withdrawalId: payload.withdrawalId,
+        userId: payload.partnerId ?? null,
+        images: payload.images,
+        userType: 'partner',
+      });
+    }
+
+    return { success: true };
+  },
+// service
+async  completePartnerWithdrawal(payload: {
+  withdrawalId: string;
+  partnerId: string;
+  amount: number;
+  notes?: string | null;
+}) {
+  if (!payload.withdrawalId) throw new Error('WithdrawalId مطلوب');
+  if (!payload.partnerId) throw new Error('partnerId مطلوب');
+  if (!Number.isFinite(payload.amount) || payload.amount <= 0) {
+    throw new Error('قيمة السحب غير صالحة');
+  }
+
+  return dataEntryrepository.allocateWithdrawalAcrossStores(payload);
+},
+  // driver list
+  async getDriverRequests() {
+    return dataEntryrepository.listDriverRequests();
   },
 };

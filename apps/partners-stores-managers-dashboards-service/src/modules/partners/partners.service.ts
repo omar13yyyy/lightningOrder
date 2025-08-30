@@ -240,20 +240,27 @@ console.log(partner_id+'paaaaaaaaaaaarrrrrrrrtnerid')
     );
   },
   //------------------------------------------------------------------------------------------
-  gePartnerBalance: async (
-    internal_id: string  ,
-      partnerId: string,
+gePartnerBalance: async (
+    internal_id: string | null, // store_id النصي (وليس internal numeric)
+    partnerId: string | null
+  ): Promise<{ wallet_balance: number }> => {
+    const isSingleStore = !!internal_id;
 
-  ): Promise<{ wallet_balance: number }> => { 
-    const isSingleStore = !!internal_id ;
-    // استدعاء تابع تحديث جدول الاحصائيات و البارتنر
     if (isSingleStore) {
-      return await partnersRepository.gePartnerBalancestore(internal_id); // استرجاع الرصيد للمتجر
+      // 1) حدّث إحصائيات/محفظة المتجر عبر الدالة
+      await partnersRepository.refreshStoreWalletAndStats(internal_id!);
+      // 2) رجّع الرصيد الحالي من store_wallets
+      const { wallet_balance } = await partnersRepository.gePartnerBalancestore(internal_id!);
+      return { wallet_balance };
     } else {
-      return await partnersRepository.gePartnerBalancepartner(partnerId); // استرجاع الرصيد للـ partner
+      if (!partnerId) throw new Error('partnerId is required when store_id not provided');
+      // 1) حدّث كل متاجر الشريك واجمع الأرصدة عبر الدالة
+      await partnersRepository.refreshPartnerWalletAndStats(partnerId);
+      // 2) رجّع الرصيد الحالي من partners.wallet_balance
+      const { wallet_balance } = await partnersRepository.gePartnerBalancepartner(partnerId);
+      return { wallet_balance };
     }
   },
-
   //-----------------------------------------------------------------------------------------
 
   walletTransferHistorystore: async (

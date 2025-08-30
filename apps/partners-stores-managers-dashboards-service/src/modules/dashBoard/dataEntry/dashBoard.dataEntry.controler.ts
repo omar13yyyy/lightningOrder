@@ -1049,7 +1049,6 @@ addDriver: async (req, res) => {
         vehicle_type,
         is_activated,
       });
-
       return res.status(200).json({
         success: true,
         data: result.rows,            // متوافقة مع الفرونت { success, data }
@@ -1063,43 +1062,40 @@ addDriver: async (req, res) => {
       });
     }
   },
-  addTrend: async (req, res) => {
-    try {
-      const {
-        store_id,          // لازم: store_id (نستخرج internal_id منه)
-        details,           // نص اختياري/مطلوب حسب الاستخدام
-        from_date,         // نص تاريخ ISO أو yyyy-mm-dd
-        to_date,           // اختياري
-        create_at          // اختياري
-      } = req.body as any;
+  // ------- ADD TREND (no images) -------
+addTrend: async (req, res) => {
+  try {
+    const {
+      store_id,
+      details,
+      from_date,
+      to_date,
+      create_at
+    } = req.body as any;
 
-      if (!store_id) {
-        return res.status(400).json({ success: false, message: 'store_id مطلوب' });
-      }
-
-      // معالجة صورة العقد إن وجدت
-      let contract_image: string | null = null;
-      if (req.file && req.file.buffer) {
-        const fileName = await imageService.processAndUploadImage(req.file.buffer);
-        contract_image = fileName; // خزن الاسم/المسار (image service بيرجّع اسم)
-      }
-
-      const payload = {
-        store_id: String(store_id),
-        details: details ?? null,
-        contract_image, // ممكن يكون null
-        from_date: from_date ? new Date(from_date) : null,
-        to_date: to_date ? new Date(to_date) : null,
-        create_at: create_at ? new Date(create_at) : new Date(),
-      };
-
-      await dataEntryService.addTrend(payload);
-      return res.status(200).json({ success: true });
-    } catch (error: any) {
-      console.error('Error addTrend:', error);
-      return res.status(500).json({ success: false, message: error.message || 'Internal server error' });
+    if (!store_id) {
+      return res.status(400).json({ success: false, message: 'store_id مطلوب' });
     }
-  },
+
+    // لا صور بعد الآن
+    const payload = {
+      store_id: String(store_id),
+      details: details ?? null,
+      contract_image: null, // ثابت null
+      from_date: from_date ? new Date(from_date) : null,
+      to_date: to_date ? new Date(to_date) : null,
+      create_at: create_at ? new Date(create_at) : new Date(),
+    };
+
+    await dataEntryService.addTrend(payload);
+
+    return res.status(200).json({ success: true });
+  } catch (error: any) {
+    console.error('Error addTrend:', error);
+    return res.status(500).json({ success: false, message: error.message || 'Internal server error' });
+  }
+},
+
 
   // ------- STOP TREND -------
   stopTrend: async (req, res) => {
@@ -1127,10 +1123,173 @@ addDriver: async (req, res) => {
         return res.status(400).json({ success: false, message: 'storeId مطلوب' });
       }
       const rows = await dataEntryService.getStoreTrends(String(storeId));
+            console.log(rows+'lkjhgfdsfghjkl')
+
       return res.status(200).json({ success: true, data: rows });
+
     } catch (error: any) {
       console.error('Error getStoreTrends:', error);
       return res.status(500).json({ success: false, message: error.message || 'Internal server error' });
+    }
+  },
+getWorkShifts: async (req, res) => {
+    try {
+      const { storeId } = req.query as any;
+      if (!storeId) return res.status(400).json({ success: false, message: 'storeId مطلوب' });
+
+      const data = await dataEntryService.getWorkShifts(String(storeId));
+      console.log(data)
+      return res.status(200).json({ success: true, data });
+    } catch (err: any) {
+      console.error('getWorkShifts error:', err);
+      return res.status(500).json({ success: false, message: err.message || 'Internal server error' });
+    }
+  },
+
+  // POST /dataentry/addWorkShift (form-data OR json)
+  addWorkShift: async (req, res) => {
+    try {
+      const {
+        store_id,
+        day_of_week,
+        opening_time,
+        closing_time,
+      } = (req.body || {});
+
+      if (!store_id || !day_of_week || !opening_time || !closing_time) {
+        return res.status(400).json({ success: false, message: 'حقول ناقصة' });
+      }
+
+      const { shift_id } = await dataEntryService.addWorkShift({
+        store_id,
+        day_of_week,
+        opening_time,
+        closing_time,
+      });
+
+      return res.status(200).json({ success: true, data: { shift_id } });
+    } catch (err: any) {
+      console.error('addWorkShift error:', err);
+      return res.status(400).json({ success: false, message: err.message || 'Bad request' });
+    }
+  },
+
+  // DELETE /dataentry/deleteWorkShift?shiftId=...
+  deleteWorkShift: async (req, res) => {
+    try {
+      const { shiftId } = req.query || {};
+      if (!shiftId) return res.status(400).json({ success: false, message: 'shiftId مطلوب' });
+
+      await dataEntryService.deleteWorkShift(Number(shiftId));
+      return res.status(200).json({ success: true });
+    } catch (err: any) {
+      console.error('deleteWorkShift error:', err);
+      return res.status(500).json({ success: false, message: err.message || 'Internal server error' });
+    }
+  },
+  // GET /dashBoard/newWithdrawalRequestsPartner
+  // GET /dashBoard/newWithdrawalRequestsPartner
+  async newWithdrawalRequestsPartner(req, res) {
+    try {
+      const rows = await dataEntryService.getNewPartnerRequests();
+      return res.status(200).json({ success: true, data: rows });
+    } catch (e: any) {
+      console.error('newWithdrawalRequestsPartner error:', e);
+      return res
+        .status(500)
+        .json({ success: false, message: e?.message || 'Internal error' });
+    }
+  },
+
+  // GET /dashBoard/waitWithdrawalRequestsPartner
+  async waitWithdrawalRequestsPartner(req, res) {
+    try {
+      const rows = await dataEntryService.getWaitPartnerRequests();
+      return res.status(200).json({ success: true, data: rows });
+    } catch (e: any) {
+      console.error('waitWithdrawalRequestsPartner error:', e);
+      return res
+        .status(500)
+        .json({ success: false, message: e?.message || 'Internal error' });
+    }
+  },
+
+  // POST /dashBoard/withdrawalRequestsStatusPartner
+  // body: x-www-form-urlencoded { WithdrawalId: string }
+  async withdrawalRequestsStatusPartner(req, res) {
+    try {
+      console.log('hhhhhhhhhhhhh')
+      const withdrawalId =  req.body?.withdrawalId as string;
+            console.log('hhhhhhhhhhhhh',withdrawalId)
+
+      if (!withdrawalId) {
+        return res.status(400).json({ success: false, message: 'WithdrawalId مطلوب' });
+      }
+
+      const out = await dataEntryService.movePartnerRequestToWaiting(withdrawalId);
+      return res.status(200).json({ success: true, ...out });
+    } catch (e: any) {
+      console.error('withdrawalRequestsStatusPartner error:', e);
+      return res
+        .status(400)
+        .json({ success: false, message: e?.message || 'Bad request' });
+    }
+  },
+
+  // POST /dashBoard/withdrawalRequestDonePartner
+  // يدعم:
+  //  - Multipart مع images[] (مرفقات)
+  //  - أو body.images كنص/مصفوفة URLs
+async withdrawalRequestDonePartner(req, res) {
+  try {
+    const withdrawalId =
+      (req.body?.WithdrawalId || req.body?.withdrawalId) as string;
+    const amount = Number(req.body?.amount ?? req.body?.withdrawAmount);
+    const notes = req.body?.notes ?? null;
+
+    if (!withdrawalId) {
+      return res.status(400).json({ success: false, message: 'WithdrawalId مطلوب' });
+    }
+    if (!Number.isFinite(amount) || amount <= 0) {
+      return res.status(400).json({ success: false, message: 'قيمة السحب غير صالحة' });
+    }
+
+    // يُفضَّل أخذ partnerId من الـ JWT
+    const partnerId = (req as any)?.user?.partner_id ?? req.body?.partnerId;
+    if (!partnerId) {
+      return res.status(401).json({ success: false, message: 'غير مصرح: partnerId مفقود' });
+    }
+
+    // وزّع السحب على متاجر الشريك وسجّل القيود
+    await dataEntryService.completePartnerWithdrawal({
+      withdrawalId,
+      partnerId,
+      amount,
+      notes,
+    });
+
+    // غيّر حالة الطلب إلى done (كما كان)
+    await dataEntryService.markPartnerRequestDone(withdrawalId);
+
+    return res.status(200).json({ success: true });
+  } catch (e: any) {
+    console.error('withdrawalRequestDonePartner error:', e);
+    return res
+      .status(400)
+      .json({ success: false, message: e?.message || 'Bad request' });
+  }
+},
+
+  // GET /dashBoard/withdrawalRequestsDriver
+  async withdrawalRequestsDriver(req, res) {
+    try {
+      const rows = await dataEntryService.getDriverRequests();
+      return res.status(200).json({ success: true, data: rows });
+    } catch (e: any) {
+      console.error('withdrawalRequestsDriver error:', e);
+      return res
+        .status(500)
+        .json({ success: false, message: e?.message || 'Internal error' });
     }
   },
 };

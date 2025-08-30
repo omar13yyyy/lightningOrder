@@ -1,5 +1,26 @@
 import { query as dashboardQuery } from "../../../../../modules/database/commitDashboardSQL";
 //---------------------------------------------------------------------------------------
+
+
+export type PartnerWithdrawalRow = {
+  withdrawal_id: string;
+  partner_name: string | null;
+  amount: number | null;
+  bank: string | null;
+  iban: string | null;
+  withdrawal_status: string | null;
+  uploaded_at: string | null;
+};
+
+export type DriverWithdrawalRow = {
+  withdrawal_id: string;
+  full_name: string | null;
+  status: string | null;
+  amount: number | null;
+  bank: string | null;
+  iban: string | null;
+  uploaded_at: string | null;
+};
 export const partnersRepository = {
   //---------------------------------------------------------------------------------------
   fetchPartnerIdPasswordByUserName: async (
@@ -384,6 +405,17 @@ export const partnersRepository = {
 
     return rows;
   },
+//-----------------------------------------------------------
+  async refreshStoreWalletAndStats(storeId: string): Promise<void> {
+    // ترجع الدالة double precision (الرصيد الحالي)، لكن يكفينا تنفيذها
+    await dashboardQuery(`SELECT public.update_store_stats_prevday($1) AS balance;`, [storeId]);
+  },
+
+  // ينفّذ دالة تحديث كل متاجر الشريك
+  async refreshPartnerWalletAndStats(partnerId: string): Promise<void> {
+    await dashboardQuery(`SELECT public.update_partner_wallet_and_stats($1) AS total;`, [partnerId]);
+  },
+
   //-----------------------------------------------------------------------------------
   gePartnerBalancepartner: async (
     partner_id: string

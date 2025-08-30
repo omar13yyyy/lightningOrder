@@ -8,12 +8,20 @@ import {
   productsGenerator,
   sizesGenerator,
   storesGenerator,
+  storeTransactionsGenerator,
   tagsGenerator,
 } from "../../../../../../modules/btuid/dashboardBtuid";
 import { query as dashboardQuery } from "../../../../../../modules/database/commitDashboardSQL";
 
 import { query  } from "../../../../../../modules/database/commitDeliverySQL";
-
+export type WorkShiftRow = {
+  shift_id: number;
+  store_id: string;
+  internal_store_id: number;
+  day_of_week: 'Sun'|'Mon'|'Tue'|'Wed'|'Thu'|'Fri'|'Sat'|string;
+  opening_time: string;  // HH:MM:SS
+  closing_time: string;  // HH:MM:SS
+};
 type RepoInput = {
   page: number;
   pageSize: number;
@@ -37,6 +45,28 @@ type AddDriverInput = {
     plate: string | null;
     driving_license: string | null;
   }
+};
+
+
+// النتائج المتوقعة
+export type PartnerWithdrawalRow = {
+  withdrawal_id: string;
+  partner_name: string | null;
+  amount: number | null;
+  bank: string | null;
+  iban: string | null;
+  withdrawal_status: string; // enum_withdrawal_status
+  uploaded_at: string | null; // ISO-like
+};
+
+export type DriverWithdrawalRow = {
+  withdrawal_id: string;
+  full_name: string | null;
+  status: string; // enum_withdrawal_status
+  amount: number | null;
+  bank: string | null;
+  iban: string | null;
+  uploaded_at: string | null; // ISO-like
 };
 //---------------------------------------------------------------------------------------
 export const dataEntryrepository = {
@@ -1285,32 +1315,33 @@ insertDriver: async (p: {
 
   // ------- STOP TREND -------
   stopTrend: async ({
-    store_id, details
-  }: {
-    store_id: string;
-    details: string | null;
-  }): Promise<void> => {
-    const query = `
-      WITH s AS (
-        SELECT internal_id
-        FROM stores
-        WHERE store_id = $1
-        LIMIT 1
-      )
-      UPDATE trends t
-      SET
-        to_date = NOW(),
-        details = COALESCE($2, t.details)
-      FROM s
-      WHERE t.internal_store_id = s.internal_id
-    `;
-    const values = [store_id, details];
-    const r = await dashboardQuery(query, values);
-    if (r.rowCount === 0) {
-      // ممكن ما يكون في ترند قائم، مو خطأ قاتل—حسب رغبتك:
-      // throw new Error('لا يوجد ترند لإيقافه لهذا المتجر');
-    }
-  },
+  store_id, details // details صارت غير مستخدمة هنا
+}: {
+  store_id: string;
+  details: string | null;
+}): Promise<void> => {
+  const query = `
+    WITH s AS (
+      SELECT internal_id
+      FROM stores
+      WHERE store_id = $1
+      LIMIT 1
+    )
+    DELETE FROM trends t
+    USING s
+    WHERE t.internal_store_id = s.internal_id
+    RETURNING t.internal_store_id
+  `;
+  const values = [store_id];
+  const r = await dashboardQuery(query, values);
+
+  if (r.rowCount === 0) {
+    // ما في سجلات تم حذفها لهذا المتجر
+    // بإمكانك ترجع بدون خطأ أو ترمي خطأ—حسب منطقك:
+    // throw new Error('لا يوجد ترند لهذا المتجر ليتم حذفه');
+  }
+}
+,
 getStoreTrends: async (store_id: string) => {
     const q = `
       SELECT 
@@ -1328,5 +1359,275 @@ getStoreTrends: async (store_id: string) => {
     `;
     const r = await dashboardQuery(q, [store_id]);
     return r.rows || [];
+  },
+async getInternalStoreId(storeId: string): Promise<number | null> {
+    const q = `SELECT internal_id FROM stores WHERE store_id = $1 LIMIT 1`;
+    const res = await dashboardQuery(q, [storeId]);
+    return res?.rows?.[0]?.internal_id ?? null;
+  },
+
+  async getShiftsByStore(storeId: string): Promise<WorkShiftRow[]> {
+    const q = `
+      SELECT shift_id, store_id, internal_store_id, day_of_week, opening_time, closing_time
+      FROM working_hours
+      WHERE store_id = $1
+      ORDER BY 
+        CASE day_of_week
+          WHEN 'Sun' THEN 1 WHEN 'Mon' THEN 2 WHEN 'Tue' THEN 3
+          WHEN 'Wed' THEN 4 WHEN 'Thu' THEN 5 WHEN 'Fri' THEN 6
+          WHEN 'Sat' THEN 7 ELSE 8 END,
+        opening_time ASC
+    `;
+    const res = await dashboardQuery(q, [storeId]);
+            console.log(res.rows,'gfghjkl;')
+
+    return res?.rows ?? [];
+  },
+
+  async hasOverlap(args: {
+    internalStoreId: number;
+    day: string;
+    opening: string; // 'HH:MM'
+    closing: string; // 'HH:MM'
+  }): Promise<boolean> {
+    // تداخل إذا كان: new.open < existing.close AND new.close > existing.open
+    const q = `
+      SELECT 1
+      FROM working_hours
+      WHERE internal_store_id = $1
+        AND day_of_week = $2
+        AND (to_char(opening_time, 'HH24:MI') < $4)
+        AND (to_char(closing_time, 'HH24:MI') > $3)
+      LIMIT 1
+    `;
+    const res = await dashboardQuery(q, [
+      args.internalStoreId, args.day, args.opening, args.closing,
+    ]);
+        console.log(res.rows+'gfghjkl;')
+
+    return Boolean(res?.rowCount);
+  },
+
+  async insertShift(args: {
+    storeId: string;
+    internalStoreId: number;
+    day: string;
+    opening: string; // 'HH:MM'
+    closing: string; // 'HH:MM'
+  }): Promise<{ shift_id: number }> {
+    const q = `
+      INSERT INTO working_hours (store_id, internal_store_id, day_of_week, opening_time, closing_time)
+      VALUES ($1, $2, $3, $4::time, $5::time)
+      RETURNING shift_id
+    `;
+    console.log('he1')
+    const res = await dashboardQuery(q, [
+      args.storeId, args.internalStoreId, args.day, args.opening, args.closing,
+    ]);
+    console.log(res.rows+'gfghjkl;')
+    return { shift_id: res?.rows?.[0]?.shift_id };
+  },
+
+  async deleteShift(shiftId: number): Promise<void> {
+    const q = `DELETE FROM working_hours WHERE shift_id = $1`;
+    await dashboardQuery(q, [shiftId]);
+  },
+async listPartnerRequestsByStatus(
+    status: 'new' | 'wait'
+  ): Promise<PartnerWithdrawalRow[]> {
+    const q = `
+      SELECT 
+        wr.withdrawal_id,
+        p.partner_name,
+        p.bank_name AS bank,
+        p.iban      AS iban,
+        wr.withdrawal_status,
+        TO_CHAR(wr.uploaded_at, 'YYYY-MM-DD"T"HH24:MI:SS') AS uploaded_at
+      FROM withdrawal_requests wr
+      JOIN partners p ON p.partner_id = wr.partner_id
+      WHERE wr.withdrawal_user = 'partner'::enum_withdrawal_user
+        AND wr.withdrawal_status = $1::enum_withdrawal_status
+      ORDER BY wr.uploaded_at DESC NULLS LAST
+    `;
+    const r = await dashboardQuery(q, [status]);
+    return r?.rows ?? [];
+  },
+
+  /* ============ Partner: move to waiting ============ */
+  async markPartnerRequestWaiting(withdrawalId: string): Promise<void> {
+    const q = `
+      UPDATE withdrawal_requests
+      SET withdrawal_status = 'wait'::enum_withdrawal_status
+      WHERE withdrawal_id = $1
+        AND withdrawal_user = 'partner'::enum_withdrawal_user
+    `;
+    await dashboardQuery(q, [withdrawalId]);
+  },
+
+  /* ============ Partner: mark done ============ */
+
+
+  /* ====== Images for partner/driver withdrawals ====== */
+  async insertWithdrawalImages(params: {
+    withdrawalId: string;
+    userId: string | number | null; // اختياري
+    images: { url: string; description?: string }[];
+    userType: 'partner' | 'driver';
+  }): Promise<void> {
+    if (!params.images?.length) return;
+
+    // نجهّز placeholders ديناميكياً
+    const values: any[] = [];
+    const rows: string[] = [];
+    let i = 1;
+
+    for (const img of params.images) {
+      rows.push(
+        // ملاحظة: عندك في الجدول اسم العمود Withdrawal_id بحرف كبير W
+        `($${i++}, $${i++}, $${i++}, $${i++}, $${i++}::enum_withdrawal_user, NOW(), FALSE)`
+      );
+      values.push(
+        params.withdrawalId,                            // Withdrawal_id
+        params.userId ?? null,                          // userId
+        img.description ?? 'withdrawal_document',       // document_description
+        img.url,                                        // image_url
+        params.userType                                 // user_type (enum)
+      );
+    }
+
+    const q = `
+      INSERT INTO withdrawal_document_images
+        ("Withdrawal_id", "userId", document_description, image_url, user_type, uploaded_at, expired)
+      VALUES ${rows.join(', ')}
+    `;
+    await dashboardQuery(q, values);
+  },
+
+  /* ==================== Driver: list all ==================== */
+  async listDriverRequests(): Promise<DriverWithdrawalRow[]> {
+    const q = `
+      SELECT 
+        wr.withdrawal_id,
+        d.full_name,
+        wr.withdrawal_status AS status,
+        d.bank_name AS bank,
+        d.iban      AS iban,
+        TO_CHAR(wr.uploaded_at, 'YYYY-MM-DD"T"HH24:MI:SS') AS uploaded_at
+      FROM withdrawal_requests wr
+      JOIN remotely.drivers d 
+        ON d.driver_id::text = wr.partner_id
+      WHERE wr.withdrawal_user = 'driver'::enum_withdrawal_user
+      ORDER BY wr.uploaded_at DESC NULLS LAST
+    `;
+    const r = await dashboardQuery(q, []);
+    return r?.rows ?? [];
+  },
+  async allocateWithdrawalAcrossStores(params: {
+    withdrawalId: string;
+    partnerId: string;
+    amount: number;
+    notes?: string | null;
+  }) {
+    const client = await pool.connect();
+    try {
+      await client.query('BEGIN');
+
+      // جيب متاجر الشريك
+      const storesRes = await client.query(
+        `SELECT s.internal_id, s.store_id
+         FROM stores s
+         WHERE s.partner_id = $1
+         ORDER BY s.internal_id ASC`,
+        [params.partnerId]
+      );
+      const stores: Array<{ internal_id: number; store_id: string }> = storesRes.rows;
+
+      if (!stores.length) {
+        throw new Error('لا توجد متاجر لهذا الشريك');
+      }
+
+      let remaining = params.amount;
+      const now = new Date();
+
+      for (const st of stores) {
+        if (remaining <= 0) break;
+
+        // حدّث رصيد المحفظة حتى الآن (تأكد الدالة تستخدم transaction_at)
+        await client.query(
+          `SELECT public.get_store_wallet_balance($1)`,
+          [st.store_id]
+        );
+
+        // اقفل صف المحفظة وخذ الرصيد الحالي
+        const wRes = await client.query(
+          `SELECT balance_previous_day
+           FROM store_wallets
+           WHERE store_id = $1
+           FOR UPDATE`,
+          [st.store_id]
+        );
+
+        const currentBalance = Number(wRes.rows?.[0]?.balance_previous_day ?? 0);
+        if (currentBalance <= 0) continue;
+
+        const take = Math.min(remaining, currentBalance);
+        if (take <= 0) continue;
+
+        // أدخل قيد سحب
+        const transactionId = storeTransactionsGenerator.getExtraBtuid();
+        await client.query(
+          `INSERT INTO store_transactions
+             (transaction_id, partner_id, store_id, internal_store_id,
+              transaction_type, amount, amount_platform_commission, transaction_at, notes)
+           VALUES ($1, $2, $3, $4, 'withdraw', $5, 0, $6, $7)`,
+          [
+            transactionId,
+            params.partnerId,
+            st.store_id,
+            st.internal_id,
+            take,
+            now,
+            params.notes ? `${params.notes} (withdrawalId=${params.withdrawalId})`
+                         : `withdrawalId=${params.withdrawalId}`,
+          ]
+        );
+
+        // خصم فوري من المحفظة وتحديث وقت آخر تحديث
+        await client.query(
+          `UPDATE store_wallets
+             SET balance_previous_day = balance_previous_day - $2,
+                 last_updated_at = $3
+           WHERE store_id = $1`,
+          [st.store_id, take, now]
+        );
+
+        remaining -= take;
+      }
+
+      if (remaining > 0) {
+        // ما قدرنا نغطي كامل السحب
+        throw new Error('الرصيد غير كافٍ لدى متاجر الشريك لتغطية مبلغ السحب');
+      }
+
+      await client.query('COMMIT');
+      return { success: true };
+    } catch (err) {
+      await client.query('ROLLBACK');
+      throw err;
+    } finally {
+      client.release();
+    }
+  },
+
+  async markPartnerRequestDone(withdrawalId: string): Promise<void> {
+    const q = `
+      UPDATE withdrawal_requests
+      SET withdrawal_status = 'done'::enum_withdrawal_status,
+          done = TRUE,
+          uploaded_at = NOW()
+      WHERE withdrawal_id = $1
+        AND withdrawal_user = 'partner'::enum_withdrawal_user
+    `;
+    await dashboardQuery(q, [withdrawalId]);
   },
 };
