@@ -5,7 +5,8 @@ import { resolveStoreDecision } from "../socket/awaitables";
 
 export function registerStoreHandlers(io: Server, socket: Socket) {
   socket.on(STORES_EVENTS.STORE_ORDER_RESPONSE, (decision: StoreOrderDecision) => {
-    console.log("decision : ",decision)
+    console.log("resolveStoreDecision : ",decision)
+    decision.storeId =socket.store_id||""
     resolveStoreDecision(decision); // للسيرفس
 
   });

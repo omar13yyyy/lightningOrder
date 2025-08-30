@@ -44,7 +44,7 @@ dataentryRouter.route('/editPartner').post(dataEntryControler.editPartner)
 dataentryRouter.route('/deleteCategory').post(dataEntryControler.deleteCategory)
 dataentryRouter.route('/editCategory').post(dataEntryControler.editCategory)
 dataentryRouter.route('/addCategory').post(dataEntryControler.addCategory)
-dataentryRouter.route('/addNewItem').post(dataEntryControler.addNewItem)
+dataentryRouter.route('/addNewItem').post(upload.single("image"),dataEntryControler.addNewItem)
 dataentryRouter.route('/EditItem').post(dataEntryControler.EditItem)
 dataentryRouter.route('/deleteItem').post(dataEntryControler.deleteItem)
 dataentryRouter.route('/EditItemWithImage').post(dataEntryControler.EditItemWithImage)
@@ -116,7 +116,7 @@ storeRouter.use(auth(['partner','manager','admin']));
 
 partnerRouter.route('/partnerInfo').get(partnersController.partnerInfo)
 
-storeRouter.route('/getStoreProducts').get(storesController.getStoreProducts)
+storeRouter.route('/getStoreProductsL').get(storesController.getStoreProducts)
 storeRouter.route('/changeItemState').post(storesController.changeItemState)
 storeRouter.route('/changeModifiersItemState').post(storesController.changeModifiersItemState)
 storeRouter.route('/getCoupons').get(storesController.getCoupons)

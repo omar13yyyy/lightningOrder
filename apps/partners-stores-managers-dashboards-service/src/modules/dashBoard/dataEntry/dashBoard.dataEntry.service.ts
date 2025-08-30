@@ -7,6 +7,7 @@ import { PG_ORDERS_DATABASE } from "../../../../../../modules/database/config";
 import { imageService } from "../../../../../image-service/src/image.service";
 import { documentImagesGenerator, rolesGenerator, tagsGenerator } from "../../../../../../modules/btuid/dashboardBtuid";
 import { driversGenerator } from "../../../../../../modules/btuid/deliveryBtuid";
+import { encodeToQuadrants } from "../../../../../../modules/geo/geohash";
 
 const daysOrder = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'] as const;
 
@@ -243,6 +244,7 @@ export const dataEntryService = {
 
   //------------------------------------------------------------------------------------------------------------------------------
   addNewItem: async ({
+    image_url,
     store_id,
     category_id,
     name_en,
@@ -256,6 +258,7 @@ export const dataEntryService = {
     sizes,
   }: //image_path,
   {
+    image_url:string;
     store_id: string;
     category_id: string;
     name_en: string;
@@ -277,6 +280,7 @@ export const dataEntryService = {
     //image_path: string;
   }): Promise<void> => {
     await dataEntryrepository.addNewItem(
+      image_url,
       store_id,
       category_id,
       name_en,
@@ -288,7 +292,6 @@ export const dataEntryService = {
       order,
       allergens,
       sizes
-      //image_path
     );
   },
 
@@ -360,7 +363,7 @@ export const dataEntryService = {
     max,
     min,
     type,
-    lable,
+    label,
 
     enTille,
     arTitle,
@@ -377,7 +380,7 @@ export const dataEntryService = {
       max,
       min,
       type,
-      lable,
+      label,
 
       enTille,
       arTitle,
@@ -392,7 +395,7 @@ export const dataEntryService = {
     max,
     min,
     type,
-    lable,
+    label,
     enTille,
     arTitle
     // items
@@ -403,7 +406,7 @@ export const dataEntryService = {
       max,
       min,
       type,
-      lable,
+      label,
       enTille,
       arTitle
       //items

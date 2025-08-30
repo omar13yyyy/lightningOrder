@@ -1,7 +1,7 @@
 import { BtuidGenerator } from 'btuid';
 import path from 'path';
 
-const rootLocation: string = process.env.ROOT_LOCATION || "E:/lightningOrder/";
+const rootLocation: string = process.env.ROOT_LOCATION || "/home/omar/project3/coding/backend/";
 
 const dashboard :string = "dashboard" 
 

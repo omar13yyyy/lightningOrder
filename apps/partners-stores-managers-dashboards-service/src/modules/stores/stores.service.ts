@@ -16,8 +16,9 @@ import { serverHost, storeImagePath } from "../../../../../modules/config/urlCon
 import { threadId } from "worker_threads";
 import { productsSoldGenerator } from "../../../../../modules/btuid/dashboardBtuid";
 import { storeTransactionsGenerator } from "../../../../../modules/btuid/dashboardBtuid";
+import { imageService } from "../../../../image-service/src/image.service";
 
-function roundUpToNearestThousand(num) : number {
+export function roundUpToNearestThousand(num) : number {
   return Math.ceil(num / 1000) * 1000;
 }
 function roundUpToNearestten(num): number {
@@ -42,8 +43,8 @@ const delivery_price = roundUpToNearestThousand(DeliveryConfig.costPerKM * row.d
    ),
    rating_previous_day: row.rating_previous_day,
    number_of_raters: row.number_of_raters,
-   logo_image_url: serverHost+storeImagePath+row.logo_image_url,
-   cover_image_url:serverHost+storeImagePath+ row.cover_image_url,
+   logo_image_url:await imageService.getImageUrl(row.logo_image_url),
+   cover_image_url:await imageService.getImageUrl(row.cover_image_url),
    orders_type: row.orders_type,
    couponCode :row.code,
    discount_value_percentage :row.discount_value_percentage,
@@ -97,8 +98,8 @@ const delivery_price = roundUpToNearestThousand(DeliveryConfig.costPerKM * row.d
    ),
    rating_previous_day: row.rating_previous_day,
    number_of_raters: row.number_of_raters,
-   logo_image_url: serverHost+storeImagePath+row.logo_image_url,
-   cover_image_url:serverHost+storeImagePath+ row.cover_image_url,
+   logo_image_url:await imageService.getImageUrl(row.logo_image_url),
+   cover_image_url:await imageService.getImageUrl(row.cover_image_url),
    orders_type: row.orders_type,
    couponCode :row.code,
     discount_value_percentage :row.discount_value_percentage,
@@ -170,9 +171,9 @@ export const storesServices = {
     } as StoreRepo);
     if (row != undefined) {
       for (let i = 0; i < row.products.items.length; i++) {
-        row.products.items[i].image_url =
-          serverHost + storeImagePath + row.products.items[i].image_url;
+          row.products.items[i].image_url=await imageService.getImageUrl(row.products.items[i].image_url)
       }
+      
     }
     return row;
   },

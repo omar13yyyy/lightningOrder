@@ -17,6 +17,7 @@ import {
 import { lastUpdate, driverOrderMap } from "../../main";
 import {sendOrderToDriver, sendOrderToStore, waitForDriverDecision, waitForStoreDecision} from "../../../../socket-service/socket/socket"
 import { DriverId, DriverOrderDecision, DriverOrderRequest ,StoreId, StoreOrderDecision, StoreOrderRequest} from "../../../../socket-service/types/types";
+import { roundUpToNearestThousand } from "../../../../partners-stores-managers-dashboards-service/src/modules/stores/stores.service";
 export type OrderNotifyResult =
   | { status: "accepted"; decision: DriverOrderDecision }
   | { status: "rejected_all"; triedDrivers: DriverId[] }
@@ -67,7 +68,7 @@ export const deliveryServices = {
 
   //-----------------------------------------------------
   getDriverFee: (distToStore, distToCustomer) => {
-    return roundDriverFee(
+    return roundUpToNearestThousand(
       DeliveryConfig.driverFeePerKm * (distToStore + distToCustomer)
     );
   },
@@ -107,6 +108,7 @@ export const deliveryServices = {
       const decision = await waitForDriverDecision(orderPayload.orderId, driver, timeoutMs);
       console.log("decision ",decision)
       if (decision.accepted) {
+        decision.dis=candidate?.order.driverIds.at(0)?.distance||0
         decision.driverId =driver
         return { status: "accepted", decision };
       }
@@ -130,6 +132,7 @@ export const deliveryServices = {
 
   try {
     const decision = await waitForStoreDecision(orderPayload.orderId, storeId, timeoutMs);
+    console.log("store decision ," ,decision)
     return decision.accepted
       ? { status: "accepted", decision }
       : { status: "rejected", decision };

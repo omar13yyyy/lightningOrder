@@ -223,9 +223,11 @@ getStoreProducts: async   (req, res)=>{
          ln: query.ln,
          storeId: resolveStoreId(req)
      }
+     console.log("storeId ",params.storeId)
     const stats = await storesServices.getStoreProductsServicestore(params);
 
-      return res.status(200).json(stats)},
+      return res.status(200).json(stats)
+    },
 getCouponDetails: async   (req, res)=>{
     const body :CouponDetailsReq = req.body 
 const params :CouponDetailsService ={

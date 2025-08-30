@@ -10,6 +10,7 @@ interface JwtPayload {
 }
 
 export const auth = (allowedRoles: string[]) => { 
+
   return (req: Request, res: Response, next: NextFunction) => {
     console.log('auth middleware')
     const authHeader = req.headers.authorization;
@@ -26,7 +27,7 @@ export const auth = (allowedRoles: string[]) => {
         return res.status(403).json({ message: 'غير مصرح: صلاحيات غير كافية' });
       }
 console.log(decoded.role);
-console.log(decoded.partner_id+'kjhgfdfghjkl,kmnbvgyuikmnbvgbhuikmn');
+console.log(decoded+'kjhgfdfghjkl,kmnbvgyuikmnbvgbhuikmn');
 
       (req as any).user = decoded;
 

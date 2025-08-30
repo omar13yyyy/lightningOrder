@@ -352,8 +352,8 @@ export const partnersRepository = {
       t.tag_name_en
     FROM stores s
     left JOIN store_categories  sc ON sc.category_id = s.category_id
-     left JOIN category_tags ct ON sc.internal_id = ct.internal_category_id 
-     left JOIN tags t ON t.tag_id = ct.tag_id
+     left JOIN store_tags st ON st.store_id  = s.store_id 
+     left JOIN tags t ON t.tag_id = st.tag_id
     WHERE s.store_id = $1 
   `;
 

@@ -31,6 +31,7 @@ export interface DriverOrderDecision {
   orderId: OrderId;
   driverId: DriverId;
   storeId: StoreId;
+  dis:number;
   accepted: boolean;
   reason?: string;
   at?: number;

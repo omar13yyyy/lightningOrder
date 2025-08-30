@@ -189,7 +189,7 @@ CREATE TABLE working_hours (
         PRIMARY KEY(shift_id)
 
 );
-ALTER SEQUENCE working_hours_shift_id_seq RESTART WITH 1000;
+ALTER SEQUENCE working_hours_shift_id_seq RESTART WITH 15000;
 
 CREATE TABLE system_settings (
     setting_key text,

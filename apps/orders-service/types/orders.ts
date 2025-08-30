@@ -16,7 +16,7 @@ export interface CurrentOrderRepo {
   location_longitude: number | null;
   store_destination: number | null;
   customer_destination: number | null;
-  delivery_fee: number | null;
+  delivery_fee: number ;
   coupon_code: string | null;
 }
 export interface OrderFinancialLogRepo {

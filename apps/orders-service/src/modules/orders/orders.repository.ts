@@ -36,7 +36,7 @@ export const ordersRepository = {
     count(*) FILTER (WHERE os.status = 'customer_not_Received') AS customer_not_Received,
         count(*) FILTER (WHERE os.status = 'driver_not_Received') AS driver_not_Received
 
-  FROM order_status os
+  FROM order_status os 
   WHERE
     os.store_id IN (${placeholders})
 `;
@@ -425,7 +425,7 @@ LIMIT 1;
   },
     getDriverCurrentOrder: async (driverId) => {
           const { rows } = await query(
-      "SELECT order_id From current_orders where driver_id = #1 ",
+      "SELECT order_id From current_orders where driver_id = $1 ",
       [driverId]
     );
     return rows[0].order_id

@@ -1,5 +1,5 @@
 BEGIN;
-CREATE OR REPLACE FUNCTION move_order_to_past(driver_id text)
+CREATE OR REPLACE FUNCTION move_order_to_past(driver_id_p text)
 RETURNS void
 LANGUAGE plpgsql
 AS $$
@@ -10,10 +10,10 @@ BEGIN
     -- Step 1: Fetch order
     SELECT * INTO current_order_record
     FROM current_orders
-    WHERE driver_id = driver_id;
+    WHERE driver_id = driver_id_p;
 
     IF NOT FOUND THEN
-        RAISE EXCEPTION 'Order % not found in current_orders', driver_id;
+        RAISE EXCEPTION 'Order % not found in current_orders', driver_id_p;
     END IF;
 
     -- Step 2: Calculate duration
@@ -69,11 +69,8 @@ BEGIN
     );
 
     -- Step 4: Delete from current_orders
-    DELETE FROM current_orders WHERE driver_id = driver_id;
+    DELETE FROM current_orders WHERE driver_id = driver_id_p;
 
-    -- Step 5: Update order_status
-    INSERT INTO order_status (order_id, store_id, status, status_time)
-    VALUES (p_order_id, current_order_record.internal_store_id, 'deliverd', NOW());
 END;
 $$;
 

@@ -96,41 +96,18 @@ delivery_note : delivery_note
 
   }
   console.log("orderId",order)
-  let currentOrder :CurrentOrderRepo = {
-    order_id:order.id,
-    customer_id: customerId,
-    store_id: storeId,
-    store_name_ar: store.store_name_ar,
-    store_name_en: store.store_name_en,
-    internal_store_id: store.internal_id,
-    //TODO
-    driver_id: null,
-    amount: (resolveOrderEn.total_price * discountPercentage),
-    order_details_text: totalResolved,
-    payment_method: paymentMethod,
-    orders_type: orderType,
-    location_latitude: lat,
-    location_longitude: lon,
-     //TODO
-    store_destination: 0 ,
-    customer_destination: getDistanceInKm(lat,lon ,store.Latitude, store.longitude),
-    delivery_fee: null,
-    coupon_code: couponCode
+   console.log("socket store id ",storeId)
+  let storeAccepted =await deliveryServicesClient.orderNotificationToStore(storeId,{ 
+     orderId: order.id,
+    storeId: storeId, 
+    items: totalResolved,
+    total : 0,
+    customer: { name: customer.full_name, phone: customer.phone_number }
+  }as StoreOrderRequest ,{timeoutMs : 1000000}as Options )
+  console.log(storeAccepted.status)
+  if( storeAccepted.status != "accepted"){
+    throw "store not accepted"
   }
-  
-  ordersService.insertCurrentOrderService(currentOrder)
-  console.log("socket store id ",storeId)
-  // let storeAccepted =await deliveryServicesClient.orderNotificationToStore(storeId,{ 
-  //    orderId: order.id,
-  //   storeId: storeId, 
-  //   items: totalResolved,
-  //   total : 0,
-  //   customer: { name: customer.full_name, phone: customer.phone_number }
-  // }as StoreOrderRequest ,{timeoutMs : 100000}as Options )
-
-  // if( storeAccepted.status != "accepted"){
-  //   throw "store not accepted"
-  // }
   console.log(store ,store)
     let driverAccepted =await deliveryServicesClient.orderNotificationToDriver({ 
   driversForOrder: 1,
@@ -161,6 +138,30 @@ delivery_note : delivery_note
       if(driverAccepted.status!= "accepted"){
         throw "no driver found"
       }
+       let currentOrder :CurrentOrderRepo = {
+    order_id:order.id,
+    customer_id: customerId,
+    store_id: storeId,
+    store_name_ar: store.store_name_ar,
+    store_name_en: store.store_name_en,
+    internal_store_id: store.internal_id,
+    //TODO
+    driver_id: driverAccepted.decision.driverId,
+    amount: (resolveOrderEn.total_price * discountPercentage),
+    order_details_text: totalResolved,
+    payment_method: paymentMethod,
+    orders_type: orderType,
+    location_latitude: lat,
+    location_longitude: lon,
+     //TODO
+    store_destination: driverAccepted.decision.dis ,
+    customer_destination: getDistanceInKm(lat,lon ,store.Latitude, store.longitude),
+    delivery_fee: await deliveryServicesClient.getDriverFee(driverAccepted.decision.dis,getDistanceInKm(lat,lon ,store.Latitude, store.longitude)),
+    coupon_code: couponCode
+  }
+  totalResolved.deliveryFee=currentOrder.delivery_fee
+  ordersService.insertCurrentOrderService(currentOrder)
+
       //todo destenation
       orderTransactionCase(totalResolved,customerId,storeId,couponCode,driverAccepted.decision.driverId,order.id,0,0,0,0,order.internalId,"cash")
 }
@@ -218,7 +219,7 @@ let storeTransactionService :StoreTransactionService ={
   internal_store_id: store.internal_id,
   transaction_type: "deposit",
   //TODO   amount: 0 coupon
-  amount: 0,
+  amount: totalResolved.total_price,
   amount_platform_commission: store.platform_commission
 }
 storesServicesClient.insertStoreTransactionService(storeTransactionService)
@@ -252,7 +253,7 @@ let orderFinancialLogService :OrderFinancialLogService = {
   order_id: orderId,
   order_internal_id:order_internal_id,
   store_id: storeId,
-  order_amount: totalResolved.deliveryFee,
+  order_amount: totalResolved.total_price,
   platform_commission: store.platform_commission,
   //todo driver_earnings = totalResolved.deliveryFee - نسبة المنصة 
   driver_earnings: totalResolved.deliveryFee,
@@ -354,7 +355,7 @@ export function resolveOrderDetails(menu: MenuData, order: OrderInput) {
   let totalPrice = 0;
   let orderResolves: ResolvedOrderItem[] = order.OrderInputs.map(
     (orderItem) => {
-      console.log(menu)
+      console.log("order OrderInput ",order.OrderInputs[0].modifiers)
       const item = menu.items.find((i) => i.item_id === orderItem.item_id);
       if (!item) throw new Error(`Item not found: ${orderItem.item_id}`);
                 console.log("hereee3")
@@ -376,7 +377,7 @@ export function resolveOrderDetails(menu: MenuData, order: OrderInput) {
                 console.log("hereee2")
 
           const resolvedItems: ResolvedModifierItem[] =
-            modInput.modifiers_item.map((modItemInput) => {
+            modInput.items.map((modItemInput) => {
               const modItem = modifier.items.find(
                 (mi) => mi.modifiers_item_id === modItemInput.modifiers_item_id
               );

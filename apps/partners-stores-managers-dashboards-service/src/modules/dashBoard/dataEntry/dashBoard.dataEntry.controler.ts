@@ -269,7 +269,9 @@ export const dataEntryControler = {
   //-----------------------------------------------------------------------------
   addNewItem: async (req, res) => {
     try {
-      //const imageFile = req.file;
+      const imageFile = req.file;
+    const image_url = `${imagesIdGenerator.getExtraBtuid()}${imageFile.filename}.jpg`
+    imageService.processAndUploadImage(image_url,imageFile.buffer)
 
       const {
         store_id,
@@ -287,6 +289,7 @@ export const dataEntryControler = {
       const sizes = JSON.parse(req.body.sizes) || {};
 
       await dataEntryService.addNewItem({
+        image_url,
         store_id,
         category_id,
         name_en,
@@ -298,7 +301,7 @@ export const dataEntryControler = {
         order: parseInt(order),
         allergens,
         sizes,
-        //image_path: imageFile.path,
+        
       });
 
       return res.status(200).json({ success: true });

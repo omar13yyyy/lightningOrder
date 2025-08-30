@@ -64,7 +64,24 @@ console.log(partner_id+'paaaaaaaaaaaarrrrrrrrtnerid')
 
   partnergetAllStoresService: async (partner_id) => {
     //استدعاء دالة تحديث قيمة في الترانزكشن للمتجر
-    return await partnersRepository.getAllStores(partner_id);
+    let stores =  await partnersRepository.getAllStores(partner_id);
+    let newStores:any=[] ; 
+    for(let i =0 ;i<stores.length ;i ++){
+      newStores.push({
+              store_id: stores.at(i)?.store_id,
+      store_name_ar: stores.at(i)?.store_name_ar,
+      full_address: stores.at(i)?.full_address,
+      status: stores.at(i)?.status,
+      min_order_price: stores.at(i)?.min_order_price,
+      rating_previous_day: stores.at(i)?.rating_previous_day,
+      balance_previous_day: stores.at(i)?.balance_previous_day,
+        
+        
+        logo_image_url:await imageService.getImageUrl(stores.at(i)?.logo_image_url)})
+
+    }
+
+    return newStores
   },
   //---------------------------------------------------------------------------------------
   getStatisticsService: async (

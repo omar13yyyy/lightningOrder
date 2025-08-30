@@ -394,6 +394,7 @@ export const dataEntryrepository = {
 
   //------------------------------------------------------------------------------------
   addNewItem: async (
+    image_url :string,
     store_id: string,
     category_id: string,
     name_en: string,
@@ -411,6 +412,7 @@ export const dataEntryrepository = {
       price: number;
       calories: number;
       modifiers_id: string[];
+      external_price:0
     }[]
   ): Promise<void> => {
     const item_id = productsGenerator.getExtraBtuid();
@@ -444,6 +446,7 @@ export const dataEntryrepository = {
     }));
 
     const newitemar = {
+    
       item_id,
       store_id,
       category_id,
@@ -454,6 +457,8 @@ export const dataEntryrepository = {
       order,
       allergens,
       sizes: sizes_ar,
+      image_url:image_url,
+      external_price:0
     };
 
     const newitemen = {
@@ -467,6 +472,8 @@ export const dataEntryrepository = {
       order,
       allergens,
       sizes: sizes_en,
+      image_url:image_url,
+      external_price:0
     };
 
     const query = `
@@ -725,10 +732,10 @@ export const dataEntryrepository = {
     is_enable,
     order
   ): Promise<void> => {
-    const modifiersitem_id = modifierItemsGenerator.getExtraBtuid();
+    const modifiers_item_id = partnersGenerator.getExtraBtuid();
 
     const addModifieritemar = {
-      modifiersitem_id,
+      modifiers_item_id,
       ModifierId,
       name:arTitle,
       price,
@@ -737,7 +744,7 @@ export const dataEntryrepository = {
       order,
     };
     const addModifieritemen = {
-      modifiersitem_id,
+      modifiers_item_id,
       ModifierId,
       name:enTitle,
       price,
