@@ -4,6 +4,7 @@ export const services = { fun1, fun2 };
 */
 import  {auth}  from '../../app-geteway/src/middleware/auth.middleware';
 import  customerHyperdAuth  from '../../app-geteway/src/middleware/customerHyperdAuth.middleware';
+import  driverHyperdAuth  from '../../app-geteway/src/middleware/driverHyperdAuth.middleware';
 
 import { ordersControler } from "./modules/orders/orders.controler";
 import express from 'express';
@@ -14,11 +15,14 @@ orderRouter.route('/sendUserOrder').post(customerHyperdAuth,ordersControler.send
 orderRouter.route('/currentCustomerOrder').get(customerHyperdAuth,ordersControler.getCurrentCustomerOrders)
 orderRouter.route('/previousCustomerOrder').get(customerHyperdAuth,ordersControler.previousCustomerOrder)
 orderRouter.route('/rate').get(customerHyperdAuth,ordersControler.rate)
+orderRouter.route('/delivered').get(driverHyperdAuth,ordersControler.delivered)
+orderRouter.route('/confirmReceipt').get(driverHyperdAuth,ordersControler.confirmReceipt)
 
 
 
 
-orderRouter.use(auth(['partner','manager','admin']));
+
+//orderRouter.use(auth(['partner','manager','admin']));
 
 orderRouter.route('/getCurrentStatistics').get(ordersControler.getCurrentStatistics)
 orderRouter.route('/getCurrentOrders').get(ordersControler.getCurrentOrders)

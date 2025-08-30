@@ -20,10 +20,10 @@ export interface GetDriverRequest {
   driversForOrder: number;
   maxDistance: number;
   id :string;
-  locationCode : string;
+  location_code : string;
   longitude:number;
   latitude:number;
-
+  vehicle:string
 }
 
 export interface GetDriverResponse {
@@ -39,9 +39,8 @@ export interface DeleteDriverRequest {
 }
 
 export interface OrdersWithDriversResponse {
-  orders: {
-    order: OrderWithDrivers[];
-  };
+    order: OrderWithDrivers;
+  
 }
 
 interface idWithDist {
@@ -54,7 +53,7 @@ export interface OrderWithDrivers {
 }
 export interface OrderWithDriver {
   orderId:string;
-  orderResolved : TotalResolved;
+  totalResolved : TotalResolved;
   orderCouponDetails :string;
   storeNameAr: string;      
   storeNameEn: string;       

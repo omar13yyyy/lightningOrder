@@ -6,6 +6,6 @@ declare module "socket.io" {
     driver_id?: string;
     customer_id?: string;
     store_id?: string;
-
+    vehicle?:string;
   }
 }

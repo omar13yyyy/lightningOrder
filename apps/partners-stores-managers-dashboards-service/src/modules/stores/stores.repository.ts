@@ -188,7 +188,7 @@ FROM (
   //-------------------------------------------------------
   getNearStores: async (param: NearStoresRepo) => {
     const precision = 20;
-    const locationCodeLength = 14; //عدد الاسطر
+    const locationCodeLength = 7; //عدد الاسطر
     const neighbors = generateNeighbors(param.locationCode);
     let sql = getStoreSql(param.ln, "", "", "", "", "");
 
@@ -206,7 +206,7 @@ FROM (
   },
   // ------------------------------------------------------------------
   getNearStoresbyCategory: async (param: NearStoresByCategoryRepo) => {
-    const locationCodeLength = 14; //عدد الاسطر
+    const locationCodeLength = 7; //عدد الاسطر
 
     const precision = 20;
     const neighbors = generateNeighbors(param.locationCode);
@@ -231,7 +231,7 @@ FROM (
     return rows;
   },
   getNearStoresbyTag: async (param: NearStoresBytagRepo) => {
-    const locationCodeLength = 14; //عدد الاسطر
+    const locationCodeLength = 7; //عدد الاسطر
 
     const precision = 20;
     const neighbors = generateNeighbors(param.locationCode);
@@ -259,7 +259,7 @@ FROM (
   //-------------------------------------------------------------
   getNearTrendStores: async (param: NearStoresRepo) => {
     const precision = 20;
-    const locationCodeLength = 14; //عدد الاسطر
+    const locationCodeLength = 7; //عدد الاسطر
     const neighbors = generateNeighbors(param.locationCode);
     let sql = getStoreSql(
       param.ln,
@@ -284,7 +284,7 @@ FROM (
   },
   // ------------------------------------------------------------------
   getNearTrendStoresbyCategory: async (param: NearStoresByCategoryRepo) => {
-    const locationCodeLength = 14; //عدد الاسطر
+    const locationCodeLength = 7; //عدد الاسطر
 
     const precision = 20;
     const neighbors = generateNeighbors(param.locationCode);
@@ -309,7 +309,7 @@ FROM (
     return rows;
   },
   getNearTrendStoresbyTag: async (param: NearStoresBytagRepo) => {
-    const locationCodeLength = 14; //عدد الاسطر
+    const locationCodeLength = 7; 
 
     const precision = 20;
     const neighbors = generateNeighbors(param.locationCode);
@@ -335,7 +335,7 @@ FROM (
     return rows;
   },
   SearchForStore: async (param: SearchForStoreRepo) => {
-    const locationCodeLength = 14; //عدد الاسطر
+    const locationCodeLength = 7; //عدد الاسطر
 
     const precision = 20;
     const neighbors = generateNeighbors(param.locationCode);
@@ -462,7 +462,7 @@ insertStoreTransaction : async (tx: StoreTransactionRepo)=> {
       amount_platform_commission,
       transaction_at,
       notes
-    ) VALUES ($1, $2, $3, $4, $5, $6, $7, now(), $9)
+    ) VALUES ($1, $2, $3, $4, $5, $6, $7, now(), $8)
   `,[
     tx.transaction_id,
     tx.partner_id,

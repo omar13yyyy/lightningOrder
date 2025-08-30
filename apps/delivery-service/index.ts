@@ -1,5 +1,5 @@
 import { ServiceClient } from '../../modules/http-client/service-client'
-import { AddAllDriversAndOrdersRequest, OrderWithDrivers, AddAllStoresRequest, GetNearStoresRequest, AddAllDriversRequest, GetDriverRequest, DeleteDriverRequest, NearStoresResponse } from '../partners-stores-managers-dashboards-service/src/types/finderClient'
+import { AddAllDriversAndOrdersRequest, OrderWithDrivers, AddAllStoresRequest, GetNearStoresRequest, AddAllDriversRequest, GetDriverRequest, DeleteDriverRequest, NearStoresResponse, OrdersWithDriversResponse } from '../partners-stores-managers-dashboards-service/src/types/finderClient'
 import { DriverId } from '../socket-service/types/types'
 import {deliveryServices} from './src/modules/delivery/delivery.service'
 
@@ -27,7 +27,8 @@ export const finderClient = {
       url: `/addAllDrivers`,
     });
   },
-    getDriver: async (driverFinderBody:GetDriverRequest): Promise<DriverId> => {
+    getDriver: async (driverFinderBody:GetDriverRequest): Promise<OrdersWithDriversResponse> => {
+      console.log("get driver driverFinderBody",driverFinderBody)
     return await finderService.request({
       method: "POST",
       data: driverFinderBody,

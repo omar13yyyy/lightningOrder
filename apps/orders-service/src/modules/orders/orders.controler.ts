@@ -273,12 +273,13 @@ export const ordersControler = {
   delivered: async (req, res) => {
     try {
       let driverId = req.driver_id;
+            console.log("delivered.....")
+
       const result = await ordersService.deliveredService(driverId);
       return res.status(200).json({
         success: true,
         message: "Done",
       });
-      return res.send(result);
     } catch (error) {
       return res.status(500).json({
         success: false,
@@ -289,6 +290,7 @@ export const ordersControler = {
   confirmReceipt: async (req, res) => {
     try {
       let driverId = req.driver_id;
+      console.log("confirmReceipt.....")
       const result = await ordersService.confirmReceiptService(driverId);
 
       return res.status(200).json({

@@ -19,8 +19,10 @@ export function setupSocket(server: any) {
     
     if (role === "driver") {
       socket.on(DRIVERS_EVENTS.JOIN_DRIVER_ROOM, (driverId: DriverId) => {
-        socket.data.driverId = driverId;
-        socket.join(`driver_${driverId}`);
+              console.log(`driver_${socket.driver_id}`)
+          
+        socket.data.driverId = socket.driver_id;
+        socket.join(`driver_${socket.driver_id}`);
         registerDriversHandlers(io, socket);
       });
     } else if (role === "store") {

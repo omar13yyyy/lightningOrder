@@ -286,7 +286,9 @@ driverId
   deliveredService: async (
 driverId
   )=> {
-   let rows =  await ordersRepository.delivered(driverId);
+   let orderId= await ordersRepository.getDriverCurrentOrder(driverId)
+   await ordersRepository.UpdateOrderStatus(orderId,"delivered")
+    await ordersRepository.moveOrder(driverId)
 
 
   },
@@ -298,8 +300,8 @@ driverId
   confirmReceiptService: async (
 driverId
   )=> {
-   let rows =  await ordersRepository.confirmReceipt(driverId);
-
+   let orderId= await ordersRepository.getDriverCurrentOrder(driverId)
+   await ordersRepository.UpdateOrderStatus(orderId,"with_driver")
 
   },
     //------------------------------------
@@ -318,7 +320,7 @@ driverId
 driverId
   )=> {
    let rows =  await ordersRepository.driverRefusedToReceive(driverId);
-
+   
 
   },
     //------------------------------------
@@ -351,6 +353,11 @@ driverId
     insertOrderStatusService : async (orderId: string, internal_id: number, status: string) => {
 
    return await ordersRepository.insertOrderStatus(orderId,internal_id,status)
+  
+  },
+      updateOrderStatusService : async (orderId: string, status: string) => {
+
+   return await ordersRepository.UpdateOrderStatus(orderId,status)
   
   },
   insertOrderFinancialLogService : async (params : OrderFinancialLogService) => {

@@ -4,7 +4,8 @@ import { ServiceCallOptions } from '../../types/types';
 export class ServiceClient {
   private client: AxiosInstance;
 
-  constructor(private baseURL: string) {
+  constructor( baseURL: string) {
+    console.log("baseURL ",baseURL)
     this.client = axios.create({
       baseURL,
       timeout: 5000,
@@ -13,6 +14,7 @@ export class ServiceClient {
 
   async request<T = any>(options: ServiceCallOptions): Promise<T> {
     try {
+      console.log("axios options.url",options.url)
       const response = await this.client.request<T>({
         method: options.method,
         url: options.url,
@@ -20,6 +22,7 @@ export class ServiceClient {
         headers: {
           ...options.headers,
           'X-Service-Request': 'internal',
+          
         },
       });
       return response.data;

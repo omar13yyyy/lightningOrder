@@ -420,7 +420,16 @@ LIMIT 1;
 
   //------------------------------------------
 
-  delivered: async (driverId) => {},
+  delivered: async (driverId) => {
+
+  },
+    getDriverCurrentOrder: async (driverId) => {
+          const { rows } = await query(
+      "SELECT order_id From current_orders where driver_id = #1 ",
+      [driverId]
+    );
+    return rows[0].order_id
+  },
   //------------------------------------
 
   confirmReceipt: async (driverId) => {},
@@ -485,6 +494,26 @@ LIMIT 1;
       [orderId, internal_id, status])
    
   },
+    UpdateOrderStatus: async (
+    orderId: string,
+    status: string
+  ) => {
+    return await query(
+            "UPDATE order_status SET status =$1 where order_id =$2 ",
+
+      [ status,orderId])
+   
+  },
+  moveOrder: async (
+    orderId: string,
+  ) => {
+    return await query(
+      
+            "SELECT move_order_to_past ($1) ",
+
+      [ orderId])
+   
+  },
   insertOrderFinancialLog: async (log: OrderFinancialLogRepo) => {
     await query(
       `INSERT INTO order_financial_logs (
@@ -502,6 +531,7 @@ LIMIT 1;
     )
     RETURNING order_internal_id`,
       [
+        log.log_id,
         log.driver_id,
         log.order_id,
         log.order_internal_id,

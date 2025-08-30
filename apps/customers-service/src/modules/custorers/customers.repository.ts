@@ -2,7 +2,6 @@ import { resolveSoa } from "dns";
 import { query } from "../../../../../modules/database/commitCustomerSQL";
 import {
   generateNeighbors,
-  generateNeighborsByDistance,
 } from "../../../../../modules/geo/geohash";
 import {
   CustomerServeceParams,
@@ -157,7 +156,7 @@ SELECT full_name,phone_number,email,birth_date,address From customers where
 
   insertToCustomerTransaction: async (params: CustomerTransactionRepo) => {
        await query(
-      "INSERT INTO customer_transactions (transaction_id,order_id,order_internal_id,driver_id,transaction_type,amount,note,transaction_at) VALUES ($1,$2,$3,$4,$5,$6,$7,$8) RETURNING customer_id",
+      "INSERT INTO customer_transactions (transaction_id,order_id,order_internal_id,driver_id,transaction_type,amount,notes,transaction_at) VALUES ($1,$2,$3,$4,$5,$6,$7,now()) RETURNING driver_id",
       [
         params.transaction_id,
         params.order_id,
@@ -166,7 +165,6 @@ SELECT full_name,phone_number,email,birth_date,address From customers where
         params.transaction_type,
         params.amount,
         params.notes,
-        Date.now()
       ])
   },
 };

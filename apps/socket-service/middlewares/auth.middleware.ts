@@ -10,6 +10,8 @@ export function authMiddleware(socket: any, next: Function) {
     const payload = jwt.verify(token, process.env.TOKEN_SECRET_DRIVER!);
     socket.driver_id = payload.driver_id;
     socket.role = "driver"
+    socket.vehicle = payload.vehicle
+    console.log("authDecode ",socket.driver_id,socket.role,socket.vehicle)
     next();
   } catch (err) {
       try {

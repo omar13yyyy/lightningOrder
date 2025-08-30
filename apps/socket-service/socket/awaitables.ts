@@ -21,11 +21,13 @@ export function waitForDriverDecision(orderId: OrderId, driverId: DriverId, time
     driverWaiters.set(k, { resolve, reject, timer });
   });
 }
-export function resolveDriverDecision(d: DriverOrderDecision) {
-  const k = keyD(d.orderId, d.driverId);
+export function resolveDriverDecision(d: DriverOrderDecision,driver_id) {
+  const k = keyD(d.orderId, driver_id);
   const w = driverWaiters.get(k); if (!w) return;
   clearTimeout(w.timer); driverWaiters.delete(k); w.resolve(d);
 }
+
+
 
 /* ---------- متجر ---------- */
 export function waitForStoreDecision(orderId: OrderId, storeId: StoreId, timeoutMs=20000) {

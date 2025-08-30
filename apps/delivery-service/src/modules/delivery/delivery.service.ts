@@ -34,12 +34,13 @@ export type StoreNotifyResult =
   | { status: "timeout" };
 export const deliveryServices = {
   loginService: async (username, password) => {
-    const { encrypted_password, driver_id } =
+    const { encrypted_password, driver_id ,vehicle } =
       await deliveryRepository.fetchDriverIdPasswordByUserName(username);
+      console.log("vehicle : ",vehicle)
     if (await bcrypt.compare(password, encrypted_password)) {
       const token = jwt.sign(
-        { driver_id: driver_id },
-        process.env.TOKEN_SECRET_TOKEN_SECRET_DRIVER
+        { driver_id: driver_id ,vehicle : vehicle},
+        process.env.TOKEN_SECRET_DRIVER
       );
       await deliveryRepository.updateEffectiveToken(token, driver_id);
 
@@ -72,15 +73,15 @@ export const deliveryServices = {
   },
   //-----------------------------------------------------
 
- async async   (
+ async  orderNotificationToDriver  (
   baseFinderBody: GetDriverRequest,
   orderPayload: OrderWithDriver,
   opts: Options = {}
 ): Promise<OrderNotifyResult> {
   const timeoutMs = opts.timeoutMs ?? 20000;
-  const maxAttempts = Math.max(1, opts.maxAttempts ?? 5);
-
-  const tried = new Set<DriverId>();
+  const maxAttempts = 1//Math.max(1, opts.maxAttempts ?? 5);
+  console.log("baseFinderBody",baseFinderBody)
+  const tried = new Set<string>();
 
   for (let attempt = 1; attempt <= maxAttempts; attempt++) {
     const candidate = await finderClient.getDriver({
@@ -88,26 +89,30 @@ export const deliveryServices = {
     }).catch(() => null);
 
     const driverId = candidate;
-    if (!driverId) {
+        console.log("driverId, ",driverId)
+    if (driverId?.order.driverIds.length == 0 ) {
       // لا يوجد مرشح جديد
       return { status: tried.size ? "rejected_all" : "no_candidate", triedDrivers: [...tried] };
     }
+    console.log(driverId?.order.driverIds)
+        let driver = driverId?.order.driverIds.at(0)?.id||""
 
-    tried.add(driverId);
-
+    tried.add(driver);
+    console.log("driverId",driverId)
     // أرسل الطلب للسائق
-    sendOrderToDriver(driverId, orderPayload);
+    sendOrderToDriver(driver, orderPayload);
 
     // انتظر قرار السائق
     try {
-      const decision = await waitForDriverDecision(orderPayload.orderId, driverId, timeoutMs);
-
+      const decision = await waitForDriverDecision(orderPayload.orderId, driver, timeoutMs);
+      console.log("decision ",decision)
       if (decision.accepted) {
+        decision.driverId =driver
         return { status: "accepted", decision };
       }
-      // رفض — نحاول مرشحًا آخر
     } catch (e) {
-      // مهلة — جرّب التالي
+            console.log("decision ",e)
+
     }
   }
 

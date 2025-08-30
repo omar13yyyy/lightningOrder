@@ -95,6 +95,7 @@ delivery_note : delivery_note
     //TODO PaymentService
 
   }
+  console.log("orderId",order)
   let currentOrder :CurrentOrderRepo = {
     order_id:order.id,
     customer_id: customerId,
@@ -119,27 +120,30 @@ delivery_note : delivery_note
   
   ordersService.insertCurrentOrderService(currentOrder)
   console.log("socket store id ",storeId)
-  let storeAccepted =await deliveryServicesClient.orderNotificationToStore(storeId,{ 
-     orderId: order.id,
-    storeId: storeId, 
-    items: totalResolved,
-    total : 0,
-    customer: { name: customer.full_name, phone: customer.phone_number }
-  }as StoreOrderRequest ,{timeoutMs : 100000}as Options )
+  // let storeAccepted =await deliveryServicesClient.orderNotificationToStore(storeId,{ 
+  //    orderId: order.id,
+  //   storeId: storeId, 
+  //   items: totalResolved,
+  //   total : 0,
+  //   customer: { name: customer.full_name, phone: customer.phone_number }
+  // }as StoreOrderRequest ,{timeoutMs : 100000}as Options )
 
-  if( storeAccepted.status != "accepted"){
-    throw "store not accepted"
-  }
+  // if( storeAccepted.status != "accepted"){
+  //   throw "store not accepted"
+  // }
+  console.log(store ,store)
     let driverAccepted =await deliveryServicesClient.orderNotificationToDriver({ 
   driversForOrder: 1,
-  maxDistance: 8,
+  maxDistance:15,
   id :order.id,
-  locationCode : store.location_code,
+  location_code : store.location_code,
   longitude:store.longitude,
-  latitude:store.Latitude,
-
+  latitude:store.latitude,
+  //TODO
+  vehicle :"motorcycle"
      }as GetDriverRequest ,{ 
-  orderResolved : totalResolved,
+      orderId : order.id,
+  totalResolved : totalResolved,
   orderCouponDetails :couponCode,
   storeNameAr: store.store_name_ar,      
   storeNameEn: store.store_name_en,       
@@ -152,12 +156,13 @@ delivery_note : delivery_note
   deliveryDiscount: 0,  
   orderDiscount: 0,     
   totalBill: 0,      
-      }as OrderWithDriver ,{timeoutMs : 1000,maxAttempts : 15}as Options )
-
+      }as OrderWithDriver ,{timeoutMs : 15000,maxAttempts : 1}as Options )
+      console.log("driverAccepted",driverAccepted)
       if(driverAccepted.status!= "accepted"){
         throw "no driver found"
       }
-
+      //todo destenation
+      orderTransactionCase(totalResolved,customerId,storeId,couponCode,driverAccepted.decision.driverId,order.id,0,0,0,0,order.internalId,"cash")
 }
 
 
@@ -188,7 +193,7 @@ export async function orderTransactionCase(
   customerId :number,
   storeId: string,
   couponCode :string,
-  driverId : number,
+  driverId : string,
   orderId :string,
     store_destination: number,
   customer_destination: number,
@@ -199,11 +204,12 @@ order_internal_id :number,
   paymentMethod :'cash'|'online'|'wallet'|'wallet_and_cash'|'wallet_and_online'|'NULL',
   
 ) {
-      let wallet =await customersServicesClient.getCustomerWalletService({customerId :customerId}as CustomerServeceParams)
+  //Todo wallet
+  //     let wallet =await customersServicesClient.getCustomerWalletService({customerId :customerId}as CustomerServeceParams)
 
-    if(wallet > 0 ){
-    await customersServicesClient.insertToCustomerTransactionsService({}as CustomerTransactionService)
-  }
+  //   if(wallet > 0 ){
+  //   await customersServicesClient.insertToCustomerTransactionsService({}as CustomerTransactionService)
+  // }
 
 let store = await storesServicesClient.getstoreDetailsService({storeId : storeId}as StoreIdRepo)
 let storeTransactionService :StoreTransactionService ={
@@ -238,7 +244,7 @@ let currentOrderRepo :CurrentOrderRepo = {
   delivery_fee:totalResolved.deliveryFee,
   coupon_code: couponCode
 }
-ordersService.insertCurrentOrderService(currentOrderRepo)
+//ordersService.insertCurrentOrderService(currentOrderRepo)
 
 ordersService.insertOrderStatusService(orderId,store.internal_id,"accepted")
 let orderFinancialLogService :OrderFinancialLogService = {

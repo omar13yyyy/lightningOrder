@@ -13,6 +13,6 @@ export const lastUpdate = Date.now();
 export const inOrderDrivers = new Set<string>();
 export const driverOrderMap: Map<string, OrderWithDriver> = new Map();
 
-deliveryRouter.route('/login').get(deliveryController.driverLogin)
-deliveryRouter.route('/logout').get(deliveryController.logout)
+deliveryRouter.route('/login').post(deliveryController.driverLogin)
+deliveryRouter.route('/logout').post(deliveryController.logout)
 

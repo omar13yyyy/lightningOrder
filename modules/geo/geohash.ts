@@ -11,45 +11,28 @@ function kmToLng(km, latitude) {
 }
 
 export function encodeToQuadrants(latitude, longitude, precision = 20) {
-  let latMin = -90.0,
-    latMax = 90.0;
-  let lonMin = -180.0,
-    lonMax = 180.0;
-  let quadrantCode = "";
+  // ضبط الحدود والالتفاف في الطول
+  latitude = Math.max(-90, Math.min(90, latitude));
+  longitude = ((longitude + 180) % 360 + 360) % 360 - 180;
+
+  let latMin = -90,  latMax =  90;
+  let lonMin = -180, lonMax = 180;
+  let code = "";
 
   for (let i = 0; i < precision; i++) {
-    const latMid = (latMin + latMax) / 2.0;
-    if (latitude > latMid) {
-      quadrantCode += "1"; // شمال
-      latMin = latMid;
-    } else {
-      quadrantCode += "3"; // جنوب
-      latMax = latMid;
-    }
+    const latMid = (latMin + latMax) / 2;
+    const isNorth = latitude >= latMid;   // التعادل يُدفع للشمال
+    if (isNorth) latMin = latMid; else latMax = latMid;
 
-    const lonMid = (lonMin + lonMax) / 2.0;
-    if (longitude > lonMid) {
-      quadrantCode += "2"; // شرق
-      lonMin = lonMid;
-    } else {
-      quadrantCode += "4"; // غرب
-      lonMax = lonMid;
-    }
+    const lonMid = (lonMin + lonMax) / 2;
+    const isEast = longitude >= lonMid;   // التعادل يُدفع للشرق
+    if (isEast) lonMin = lonMid; else lonMax = lonMid;
+
+    // فهرس رباعي: 0..3 وفق ترتيب NE, NW, SE, SW
+    const idx = (isNorth ? 0 : 2) + (isEast ? 0 : 1);
+    code += "1234"[idx]; // 1=NE, 2=NW, 3=SE, 4=SW
   }
-  let CompressQuadrantCode = "";
-  for (let i = 0; i < quadrantCode.length; i += 2) {
-    if (quadrantCode[i] + quadrantCode[i + 1] == "13") {
-      CompressQuadrantCode += 1;
-    } else if (quadrantCode[i] + quadrantCode[i + 1] == "24") {
-      CompressQuadrantCode += 2;
-    }
-    if (quadrantCode[i] + quadrantCode[i + 1] == "34") {
-      CompressQuadrantCode += 3;
-    } else if (quadrantCode[i] + quadrantCode[i + 1] == "34") {
-      CompressQuadrantCode += 4;
-    }
-  }
-  return quadrantCode;
+  return code;
 }
 /*
 13 → شمال غرب1
@@ -58,239 +41,66 @@ export function encodeToQuadrants(latitude, longitude, precision = 20) {
 24 → جنوب شرق 4
 
 */
-export function generateNeighborsByDistance(
-  latitude,
-  longitude,
-  precision = 20,
-  distanceKm,
-  slice = 24
-) {
-  const neighbors: any = [];
+export function generateNeighbors(code, wrapNS = true) {
+code = code.slice(0, 8);
+  const L = code.length;
+  const { x, y } = decodeToXY(code);
+  const size = 1 << L;
 
-  // إزاحة 0 و +distanceKm و -distanceKm للخط عرض وخط طول
-  const latOffsets = [0, kmToLat(distanceKm), -kmToLat(distanceKm)];
-  const lngOffsets = [
-    0,
-    kmToLng(distanceKm, latitude),
-    -kmToLng(distanceKm, latitude),
+  // deltas بالترتيب: N, NE, E, SE, S, SW, W, NW
+  const deltas = [
+    [ 0,  1],
+    [ 1,  1],
+    [ 1,  0],
+    [ 1, -1],
+    [ 0, -1],
+    [-1, -1],
+    [-1,  0],
+    [-1,  1],
   ];
 
-  for (const dLat of latOffsets) {
-    for (const dLng of lngOffsets) {
-      const newLat = latitude + dLat;
-      const newLng = longitude + dLng;
-      neighbors.push(encodeToQuadrants(newLat, newLng, precision).slice(slice));
+  const res = [code]; // ابدأ بالنص الأصلي
+  for (const [dx, dy] of deltas) {
+    const nx = (x + dx + size) % size; // التفاف شرق/غرب دائمًا
+    let ny = y + dy;
+
+    if (wrapNS) {
+      ny = (ny % size + size) % size;   // التفاف شمال/جنوب إن طُلِب
+      res.push(encodeXY(nx, ny, L));
+    } else {
+      if (ny < 0 || ny >= size) continue; // تجاهل الجار خارج النطاق
+      res.push(encodeXY(nx, ny, L));
     }
   }
-
-  return neighbors;
+  return res;
 }
-export function generateNeighbors(location_code) {
-  let neighbors: string[] = [];
 
-  location_code = location_code.slice(0, -24);
-  //neighbors.push(location_code)
-  console.log("location_code +", location_code);
-  let firstFromLeft = location_code.slice(-1);
-  let lastTwoFromLeft = location_code.slice(-2);
-  let secondFromLeft = lastTwoFromLeft.slice(0, -1);
-  location_code = location_code.slice(0, -2);
-  neighbors.push(location_code + lastTwoFromLeft);
-
-  console.log("location_code +", location_code);
-  console.log("firstFromLeft +", firstFromLeft);
-  console.log("secondFromLeft +", secondFromLeft);
-  if (secondFromLeft == 1 && firstFromLeft == 1) {
-    neighbors.push(location_code + "12");
-    neighbors.push(location_code + "13");
-    neighbors.push(location_code + "14");
-
-
-
-    neighbors.push(location_code + "22");
-    neighbors.push(location_code + "24");
-    neighbors.push(location_code + "33");
-    neighbors.push(location_code + "34");
-    neighbors.push(location_code + "44");
-
-  } else if (secondFromLeft == 1 && firstFromLeft == 2) {
-    neighbors.push(location_code + "11");
-    neighbors.push(location_code + "13");
-    neighbors.push(location_code + "14");
-
-
-    neighbors.push(location_code + "21");
-    neighbors.push(location_code + "23");
-    neighbors.push(location_code + "33");
-    neighbors.push(location_code + "34");
-    neighbors.push(location_code + "43");
-
-  } else if (secondFromLeft == 1 && firstFromLeft == 3) {
-    neighbors.push(location_code + "11");
-    neighbors.push(location_code + "12");
-    neighbors.push(location_code + "14");
-
-    neighbors.push(location_code + "22");
-    neighbors.push(location_code + "24");
-    neighbors.push(location_code + "42");
-    neighbors.push(location_code + "31");
-    neighbors.push(location_code + "32");
-
-
-  } else if (secondFromLeft == 1 && firstFromLeft == 4) {
-    neighbors.push(location_code + "11");
-    neighbors.push(location_code + "12");
-    neighbors.push(location_code + "13");
-
-    neighbors.push(location_code + "21");
-    neighbors.push(location_code + "23");
-    neighbors.push(location_code + "41");
-    neighbors.push(location_code + "31");
-    neighbors.push(location_code + "32");
-
-
-
-  } else if (secondFromLeft == 2 && firstFromLeft == 1) {
-    neighbors.push(location_code + "22");
-    neighbors.push(location_code + "23");
-    neighbors.push(location_code + "24");
-
-
-    neighbors.push(location_code + "12");
-    neighbors.push(location_code + "14");
-    neighbors.push(location_code + "43");
-    neighbors.push(location_code + "44");
-    neighbors.push(location_code + "34");
-
-  } else if (secondFromLeft == 2 && firstFromLeft == 2) {
-    neighbors.push(location_code + "21");
-    neighbors.push(location_code + "23");
-    neighbors.push(location_code + "24");
-
-
-    neighbors.push(location_code + "33");
-    neighbors.push(location_code + "43");
-    neighbors.push(location_code + "44");
-    neighbors.push(location_code + "11");
-    neighbors.push(location_code + "13");
-
-  } else if (secondFromLeft == 2 && firstFromLeft == 3) {
-    neighbors.push(location_code + "21");
-    neighbors.push(location_code + "22");
-    neighbors.push(location_code + "24");
-
-    neighbors.push(location_code + "12");
-    neighbors.push(location_code + "14");
-    neighbors.push(location_code + "41");
-    neighbors.push(location_code + "42");
-    neighbors.push(location_code + "32");
-
-  } else if (secondFromLeft == 2 && firstFromLeft == 4) {
-    neighbors.push(location_code + "21");
-    neighbors.push(location_code + "22");
-    neighbors.push(location_code + "23");
-
-
-    neighbors.push(location_code + "41");
-    neighbors.push(location_code + "42");
-    neighbors.push(location_code + "11");
-    neighbors.push(location_code + "13");
-    neighbors.push(location_code + "31");
-  } else if (secondFromLeft == 3 && firstFromLeft == 1) {
-    neighbors.push(location_code + "32");
-    neighbors.push(location_code + "33");
-    neighbors.push(location_code + "34");
-
-
-    neighbors.push(location_code + "13");
-    neighbors.push(location_code + "14");
-    neighbors.push(location_code + "24");
-    neighbors.push(location_code + "42");
-    neighbors.push(location_code + "44");
-  } else if (secondFromLeft == 3 && firstFromLeft == 2) {
-    neighbors.push(location_code + "31");
-    neighbors.push(location_code + "33");
-    neighbors.push(location_code + "34");
-
-
-        neighbors.push(location_code + "13");
-    neighbors.push(location_code + "14");
-    neighbors.push(location_code + "23");
-    neighbors.push(location_code + "41");
-    neighbors.push(location_code + "43");
-    
-  } else if (secondFromLeft == 3 && firstFromLeft == 3) {
-    neighbors.push(location_code + "31");
-    neighbors.push(location_code + "32");
-    neighbors.push(location_code + "34");
-
-
-
-        neighbors.push(location_code + "22");
-    neighbors.push(location_code + "12");
-    neighbors.push(location_code + "22");
-    neighbors.push(location_code + "42");
-    neighbors.push(location_code + "44");
-  } else if (secondFromLeft == 3 && firstFromLeft == 4) {
-    neighbors.push(location_code + "31");
-    neighbors.push(location_code + "32");
-    neighbors.push(location_code + "33");
-
-
-
-    neighbors.push(location_code + "41");
-    neighbors.push(location_code + "43");
-    neighbors.push(location_code + "21");
-    neighbors.push(location_code + "12");
-    neighbors.push(location_code + "21");
-  } else if (secondFromLeft == 4 && firstFromLeft == 1) {
-    neighbors.push(location_code + "42");
-    neighbors.push(location_code + "43");
-    neighbors.push(location_code + "44");
-
-        
-    neighbors.push(location_code + "23");
-    neighbors.push(location_code + "24");
-    neighbors.push(location_code + "14");
-    neighbors.push(location_code + "32");
-    neighbors.push(location_code + "34");
-
-  } else if (secondFromLeft == 4 && firstFromLeft == 2) {
-    neighbors.push(location_code + "41");
-    neighbors.push(location_code + "43");
-    neighbors.push(location_code + "44");
-
-
-        neighbors.push(location_code + "23");
-    neighbors.push(location_code + "24");
-    neighbors.push(location_code + "13");
-    neighbors.push(location_code + "31");
-    neighbors.push(location_code + "33");
-  } else if (secondFromLeft == 4 && firstFromLeft == 3) {
-    neighbors.push(location_code + "41");
-    neighbors.push(location_code + "42");
-    neighbors.push(location_code + "44");
-
-
-        neighbors.push(location_code + "34");
-    neighbors.push(location_code + "32");
-    neighbors.push(location_code + "22");
-    neighbors.push(location_code + "21");
-    neighbors.push(location_code + "12");
-  } else if (secondFromLeft == 4 && firstFromLeft == 4) {
-    neighbors.push(location_code + "41");
-    neighbors.push(location_code + "42");
-    neighbors.push(location_code + "43");
-
-
-    neighbors.push(location_code + "31");
-    neighbors.push(location_code + "33");
-    neighbors.push(location_code + "11");
-    neighbors.push(location_code + "21");
-    neighbors.push(location_code + "22");
+// --------- أدوات ترميز/فك ترميز (1=NE, 2=NW, 3=SE, 4=SW) ---------
+function decodeToXY(s) {
+  let x = 0, y = 0;
+  for (const ch of s) {
+    x <<= 1; y <<= 1;
+    if (ch === "1") { y |= 1; x |= 1; }      // NE
+    else if (ch === "2") { y |= 1; }         // NW
+    else if (ch === "3") { x |= 1; }         // SE
+    // "4" => SW: لا شيء
   }
-  return neighbors;
+  return { x, y };
 }
+
+function encodeXY(x, y, L) {
+  let out = "";
+  for (let i = L - 1; i >= 0; i--) {
+    const yb = (y >> i) & 1;
+    const xb = (x >> i) & 1;
+    if (yb && xb) out += "1";       // NE
+    else if (yb && !xb) out += "2"; // NW
+    else if (!yb && xb) out += "3"; // SE
+    else out += "4";                // SW
+  }
+  return out;
+}
+
 export function decodeFromQuadrants(quadrantCode) {
   let latMin = -90.0,
     latMax = 90.0;

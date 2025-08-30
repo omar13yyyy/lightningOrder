@@ -9,7 +9,7 @@ DROP TABLE IF EXISTS driver_transactions,driver_points,driver_wallets_previous_d
 
 
 CREATE TABLE effective_tokens_delivery (
-    user_id bigint ,
+    user_id text ,
     token text,
     UNIQUE("user_id")
 );

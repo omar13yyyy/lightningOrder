@@ -34,15 +34,15 @@ logout : async (driverId) => {
 
 fetchDriverTokenById : async (userId)=>{
     //todo if not exist in redis search in database dont forget logout
-   const {rows} =(await query('select token from effective_tokens_delivery where user_id = $1 LIMIT 1',[userId]))[0].token
-
+   const {rows} =await query('select token from effective_tokens_delivery where user_id = $1 LIMIT 1',[userId])
+    console.log(rows)
     return rows[0].token
 
 },
 //-----------------------------------------------------------------------------------------------------------
 
 fetchDriverIdPasswordByUserName : async (userName)=>{
-   const {rows} = await query('select driver_id,encrypted_password from drivers where user_name = $1 LIMIT 1',[userName])
+   const {rows} = await query('select driver_id,encrypted_password ,vehicle_type as vehicle from drivers where user_name = $1 LIMIT 1',[userName])
     return  rows[0]
 
 
@@ -52,8 +52,12 @@ fetchDriverIdPasswordByUserName : async (userName)=>{
 updateEffectiveToken : async (token ,driverId) =>{
     //TODO after login or first reques save token in redis
     
-     await query('UPDATE effective_tokens_delivery SET token =$1 where user_id =$2 ',[token,driverId])
-
+    await query(`INSERT INTO effective_tokens_delivery (user_id, token)
+VALUES ($1, $2)
+ON CONFLICT (user_id) DO UPDATE SET token = EXCLUDED.token`, [
+      driverId,
+      token,
+    ]);
 },
 driverAchievements : async (driverId) =>{
     //TODO after login or first reques save token in redis
