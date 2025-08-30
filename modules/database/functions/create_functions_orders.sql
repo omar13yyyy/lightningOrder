@@ -1,5 +1,5 @@
 BEGIN;
-CREATE OR REPLACE FUNCTION move_order_to_past(driver_id bigint)
+CREATE OR REPLACE FUNCTION move_order_to_past(driver_id text)
 RETURNS void
 LANGUAGE plpgsql
 AS $$

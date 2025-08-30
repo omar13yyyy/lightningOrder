@@ -1,6 +1,7 @@
 import bcrypt from "bcryptjs";
 import { imageService } from "../../../../../image-service/src/image.service";
 import { dataEntryService } from "./dashBoard.dataEntry.service";
+import { imagesIdGenerator } from "../../../../../../modules/btuid/imagesBtuid";
 
 //------------------------------------------------------------------------------------------
 
@@ -761,16 +762,20 @@ addStoreBranch: async (req, res) => {
     // ---------------------------------------------
     // صور معلّقة (Placeholders) مؤقتاً للتجربة
     // ملاحظة: لما تفعّل الرفع فعلياً، بدّل هالقيم بمسارات الملفات القادمة من multer
-    const logo_image_url = '/uploads/_mock/logo-placeholder.png';
-    const cover_image_url = '/uploads/_mock/cover-placeholder.png';
+
+
 
     // إذا بدك تعتمد multer لاحقاً:
-    // const files = req.files as Record<string, Express.Multer.File[] | undefined>;
-    // const logoFile = files?.logo?.[0];
-    // const coverFile = files?.cover?.[0];
-    // const logo_image_url = logoFile ? `/uploads/stores/${logoFile.filename}` : null;
-    // const cover_image_url = coverFile ? `/uploads/stores/${coverFile.filename}` : null;
+    const files = req.files 
+    const logoFile = files?.logo?.[0];
+    const coverFile = files?.cover?.[0];
+    const logo_image_url = `${imagesIdGenerator.getExtraBtuid()}${logoFile.filename}.jpg`
+    const cover_image_url = `${imagesIdGenerator.getExtraBtuid()}${coverFile.filename}.jpg`
     // ---------------------------------------------
+    
+    imageService.processAndUploadImage(logo_image_url,req.files?.logo?.[0].buffer)
+        imageService.processAndUploadImage(cover_image_url,req.files?.logo?.[0].buffer)
+
 
     await dataEntryService.addStoreBranch({
       store_namear,
@@ -791,7 +796,6 @@ addStoreBranch: async (req, res) => {
       category_name_id,
       managerUserName,
       password,
-      images: images || [],
       tag_name_id: Array.isArray(tag_name_id) ? tag_name_id : [],
       partnerId: partnerId ?? null
     });

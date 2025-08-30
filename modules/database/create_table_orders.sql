@@ -68,7 +68,7 @@ ALTER SEQUENCE orders_internal_id_seq RESTART WITH 10000;
 
 CREATE TABLE order_financial_logs (
     log_id text,
-    driver_id bigint,
+    driver_id text,
     order_id text,
     --todo  add order_internal_id
     order_internal_id bigint,

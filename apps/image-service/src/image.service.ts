@@ -22,10 +22,12 @@ export const imageService = {
 
   return outputBuffer;
 },
-processAndUploadImage : async (imageBuffer) => {
+processAndUploadImage : async (imageName , imageBuffer) => {
   const processedImage = await imageService.compressToTargetSize(imageBuffer,1024)
   console.log("processedImage ",processedImage)
-  const fileName = `image-${imagesIdGenerator.getExtraBtuid()}.jpg`;
+ // const fileName = `image-${imagesIdGenerator.getExtraBtuid()}.jpg`;
+   const fileName = imageName;
+
     console.log("fileName ",fileName)
   await minioService.uploadImage(fileName, processedImage);
 
@@ -55,6 +57,7 @@ getImageUrl : async (fileName) => {
     const host = `http://${endPoint}:${port}`; 
 
     const url = `${host}/${bucketName}/${fileName}`;
+    console.log(url)
   return url;
 },
 

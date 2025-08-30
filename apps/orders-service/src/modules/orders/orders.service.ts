@@ -169,7 +169,7 @@ export const ordersService = {
   ): Promise<{
     order_details_text: string;
   }> => {
-    return await ordersRepository.getBillPastOrders(orderId);
+    return await ordersRepository.getBillCurrentOrders(orderId);
   },
   //------------------------------------------------------------------------------------------
 

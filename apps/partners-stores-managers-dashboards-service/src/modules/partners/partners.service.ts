@@ -1,6 +1,8 @@
 import { partnersRepository } from "./partners.repository";
 import bcryptjs from "bcryptjs";
 import jwt from "jsonwebtoken";
+import { serverHost, storeImagePath } from "../../../../../modules/config/urlConfig";
+import { imageService } from "../../../../image-service/src/image.service";
 //------------------------------------------------------------------------------------------
 
 export const partnersService = {
@@ -198,7 +200,12 @@ console.log(partner_id+'paaaaaaaaaaaarrrrrrrrtnerid')
     tag_name_ar: string;
     tag_name_en: string;
   }> => {
-    return await partnersRepository.getStoreProfile(storeId, partnerId);
+    let data =await partnersRepository.getStoreProfile(storeId, partnerId);
+    data.logo_image_url=await imageService.getImageUrl(data.logo_image_url)
+        data.cover_image_url=await imageService.getImageUrl(data.cover_image_url)
+
+
+    return  data
   },
   //--------------------------------------------------------------------------------------
   getSpecialCustomers: async (

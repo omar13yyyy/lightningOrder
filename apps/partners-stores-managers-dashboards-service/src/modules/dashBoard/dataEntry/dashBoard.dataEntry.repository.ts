@@ -951,7 +951,7 @@ addStoreBranch: async ({
   store_namear, store_nameen, orders_type, preparation_time, user_name,
   phone_number, email, full_address, min_order_price, Latitude, longitude,
   logo_image_url, cover_image_url, store_description, platform_commission,
-  category_name_id, managerUserName, password, images, tag_name_id, partnerId
+  category_name_id, managerUserName, password, tag_name_id, partnerId,locationCode
 }: {
   store_namear: string,
   store_nameen: string,
@@ -971,9 +971,9 @@ addStoreBranch: async ({
   category_name_id: string,
   managerUserName: string,
   password: string,
-  images: string[],
   tag_name_id: string[],
-  partnerId: string | null
+  partnerId: string | null,
+  locationCode:string
 }): Promise<{ internal_id: number; store_id: string }> => {
 
   const storeId = storesGenerator.getExtraBtuid();
@@ -1001,7 +1001,7 @@ addStoreBranch: async ({
         logo_image_url, cover_image_url,
         store_description, platform_commission,
         orders_type, preparation_time,
-        user_name, encrypted_password
+        user_name, encrypted_password ,location_code
       )
       VALUES (
         $2, $3,
@@ -1011,7 +1011,7 @@ addStoreBranch: async ({
         $12, $13,
         $14, $15,
         $16, $17,
-        $18, $19
+        $18, $19,$21
       )
       RETURNING internal_id, store_id
     ),
@@ -1063,7 +1063,8 @@ addStoreBranch: async ({
     /* $17 */ preparation_time,
     /* $18 */ user_name,
     /* $19 */ hashed,
-    /* $20 */ tag_name_id ?? []
+    /* $20 */ tag_name_id ?? [],
+              locationCode
   ];
 
   const res = await dashboardQuery(query, values);

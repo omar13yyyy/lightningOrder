@@ -5,12 +5,8 @@ import { resolveStoreDecision } from "../socket/awaitables";
 
 export function registerStoreHandlers(io: Server, socket: Socket) {
   socket.on(STORES_EVENTS.STORE_ORDER_RESPONSE, (decision: StoreOrderDecision) => {
+    console.log("decision : ",decision)
     resolveStoreDecision(decision); // للسيرفس
-    // (اختياري) إشعار السائق
-    if (decision.driverId) {
-      io.to(`driver_${decision.driverId}`).emit(
-        DRIVERS_EVENTS.DRIVER_STORE_DECISION, decision
-      );
-    }
+
   });
 }
